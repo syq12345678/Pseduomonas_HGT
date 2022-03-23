@@ -13,7 +13,7 @@ homologous superfamily:
 | family | count | description | database | 显示family relationship |
 | :--- | :--- |  :--- | :--- | :--- |
 | IPR014311 | Guanine deaminase | Overlapping homologous superfamilies | panther tigerfam | 无 |
-| IPR001404 | Heat shock protein Hsp90 family | Overlapping homologous superfamilies | pfam panther pirsf hampap | 无 |
+| IPR001404 | Heat shock protein Hsp90 family | Overlapping homologous superfamilies | pfam panther pirsf hamap | 无 |
 | IPR004685 | Branched-chain amino acid transport system II carrier protein | none | pathern pfam tigerfam | 无|
 | IPR004361 | Glyoxalase I | Overlapping homologous superfamilies | tigrfam | 无 | 
 |           |              |             |
@@ -24,7 +24,7 @@ homologous superfamily:
 | IPR024088 | Tyrosine-tRNA ligase, bacterial-type | Overlapping homologous superfamilies | pathern | 有 |
 | IPR003672 | CobN/magnesium chelatase | none |  pfam cdd pathern | 有 |
 |           |            |              |
-| IPR037532 | Peptidoglycan D,D-transpeptidase FtsI | Overlapping homologous superfamilies | hampvp |  |
+| IPR037532 | Peptidoglycan D,D-transpeptidase FtsI | Overlapping homologous superfamilies | hamap| |
 | IPR024922 | Rubredoxin | none | pirsf |   |
 | IPR000813 | 7Fe ferredoxin | none | prints |   |
 | IPR007416 | YggL 50S ribosome-binding protein | none | pfam |  |
@@ -137,6 +137,12 @@ cat Guanine/Guanine_no_8-o_summary.tsv |
 tsv-summarize -g 5,2 --count |
 keep-header -- tsv-sort -k3,3n >Guanine/Guanine_no_8-o_copy.tsv
 
+
+#统计拷贝数的分布
+tsv-summarize -g 3,2 --count Guanine_copy.tsv >Guanine_copy_GCF_num.tsv
+sed -i '1icopy\tgenus\tGCF' Guanine_copy_GCF_num.tsv
+
+
 ```
 
 ## 2.2 IPR001404  Heat shock protein Hsp90 family热休克蛋白Hsp90家族
@@ -233,6 +239,11 @@ tsv-select -f 1,5,3,2,4 >heat_shock/heat_shock_summary.tsv
 cat heat_shock/heat_shock_summary.tsv | 
 tsv-summarize -g 5,2 --count |
 keep-header -- tsv-sort -k3,3n >heat_shock/heat_shock_copy.tsv
+
+#统计拷贝数的分布
+tsv-summarize -g 3,2 --count heat_shock_copy.tsv >heat_shock_copy_GCF_num.tsv
+sed -i '1icopy\tgenus\tGCF' heat_shock_copy_GCF_num.tsv
+
 ```
 
 ## 2.3 IPR004685 Branched-chain amino acid 支链氨基酸转运蛋白
@@ -334,6 +345,10 @@ cat branched-chain/branched_summary.tsv |
 tsv-summarize -g 5,2 --count |
 keep-header -- tsv-sort -k3,3n >branched-chain/branched_copy.tsv
 
+#统计拷贝数的分布
+tsv-summarize -g 3,2 --count branched_copy.tsv >branched_copy_GCF_num.tsv
+sed -i '1icopy\tgenus\tGCF' branched_copy_GCF_num.tsv
+
 ```
 
 ## 2.4.IPR004361  乙二醛酶 Glyoxalase I
@@ -412,6 +427,9 @@ cat Glyoxalase/Glyoxalase_glyoxalase_summary.tsv |
 tsv-summarize -g 5,2 --count |
 keep-header -- tsv-sort -k3,3n >Glyoxalase/Glyoxalase_glyoxalase_copy.tsv
 
+#统计拷贝数的分布
+tsv-summarize -g 3,2 --count Glyoxalase_lactoylglutathione.copy.tsv >Glyoxalase_lactoylglutathione_copy_GCF_num.tsv
+sed -i '1icopy\tgenus\tGCF' Glyoxalase_lactoylglutathione_copy_GCF_num.tsv
 
 ```
 
@@ -516,6 +534,12 @@ tsv-select -f 1,5,3,2,4 >Glycerol/Glycerol_summary.tsv
 cat Glycerol/Glycerol_summary.tsv | 
 tsv-summarize -g 5,2 --count |
 keep-header -- tsv-sort -k3,3n >Glycerol/Glycerol_copy.tsv
+
+#统计拷贝数的分布
+tsv-summarize -g 3,2 --count Glycerol_copy.tsv >Glycerol_copy_GCF_num.tsv
+sed -i '1icopy\tgenus\tGCF' Glycerol_copy_GCF_num.tsv
+
+
 ```
 
 ##2.6 IPR001353蛋白酶体Proteasome, subunit alpha/beta
@@ -600,6 +624,13 @@ tsv-select -f 1,5,3,2,4 >Proteasome/Proteasome_summary.tsv
 cat Proteasome/Proteasome_summary.tsv | 
 tsv-summarize -g 5,2 --count |
 keep-header -- tsv-sort -k3,3n >Proteasome/Proteasome_copy.tsv
+
+
+#统计拷贝数的分布
+tsv-summarize -g 3,2 --count  Proteasome_copy.tsv > Proteasome_copy_GCF_num.tsv
+sed -i '1icopy\tgenus\tGCF'  Proteasome_copy_GCF_num.tsv
+
+
 ```
 
 
@@ -685,6 +716,12 @@ tsv-select -f 1,5,3,2,4 >MltB/MltB_have_B_no_membrane_summary.tsv
 cat MltB/MltB_have_B_no_membrane_summary.tsv | 
 tsv-summarize -g 5,2 --count |
 keep-header -- tsv-sort -k3,3n >MltB/MltB_have_B_no_membrane_copy.tsv
+
+#统计拷贝数的分布
+tsv-summarize -g 3,2 --count  MltB_no_B_copy.tsv > MltB_no_B_copy_GCF_num.tsv
+sed -i '1icopy\tgenus\tGCF'  MltB_no_B_copy_GCF_num.tsv
+
+
 ```
 
 
@@ -763,6 +800,12 @@ tsv-select -f 1,5,3,2,4 >Tyrosine/Tyrosine_summary.tsv
 cat Tyrosine/Tyrosine_summary.tsv | 
 tsv-summarize -g 5,2 --count |
 keep-header -- tsv-sort -k3,3n >Tyrosine/Tyrosine_copy.tsv
+
+#统计拷贝数的分布
+tsv-summarize -g 3,2 --count  Tyrosine_copy.tsv > Tyrosine_copy_GCF_num.tsv
+sed -i '1icopy\tgenus\tGCF'  Tyrosine_copy_GCF_num.tsv
+
+
 ```
 
 ## 2.9 IPR024088  细菌中的络氨酸TRNA连接酶Tyrosine-tRNA ligase, bacterial-type
@@ -838,6 +881,11 @@ tsv-select -f 1,5,3,2,4 >bac_Tyrosine/bac_Tyrosine_summary.tsv
 cat bac_Tyrosine/bac_Tyrosine_summary.tsv | 
 tsv-summarize -g 5,2 --count |
 keep-header -- tsv-sort -k3,3n >bac_Tyrosine/bac_Tyrosine_copy.tsv
+
+#统计拷贝数的分布
+tsv-summarize -g 3,2 --count  bac_Tyrosine_copy.tsv > bac_Tyrosine_copy_GCF_num.tsv
+sed -i '1icopy\tgenus\tGCF'  bac_Tyrosine_copy_GCF_num.tsv
+
 ```
 
 ## 2.10  IPR003672 镁螯合酶 CobN/magnesium chelatase
@@ -915,4 +963,241 @@ tsv-select -f 1,5,3,2,4 >cobn/cobn_summary.tsv
 cat cobn/cobn_summary.tsv | 
 tsv-summarize -g 5,2 --count |
 keep-header -- tsv-sort -k3,3n >cobn/cobn_copy.tsv
+
+#统计拷贝数的分布
+tsv-summarize -g 3,2 --count  cobn_copy.tsv > cobn_copy_GCF_num.tsv
+sed -i '1icopy\tgenus\tGCF'  cobn_copy_GCF_num.tsv
+
 ```
+
+#3.使用hmmscan搜索结构域
+##3.1使用pfam数据库
+```
+#下载pfam数据库
+mkdir -p ~/data/HMM/PFAM
+cd  ~/data/HMM/PFAM
+for basename in Pfam-A.hmm Pfam-A.hmm.dat active_site.dat; do
+    wget -N --content-disposition ftp://ftp.ebi.ac.uk/pub/databases/Pfam/releases/Pfam32.0/${basename}.gz
+    wget -N --content-disposition ftp://ftp.ebi.ac.uk/pub/databases/Pfam/releases/Pfam32.0/${basename}.gz
+    wget -N --content-disposition ftp://ftp.ebi.ac.uk/pub/databases/Pfam/releases/Pfam32.0/${basename}.gz
+done
+
+for basename in Pfam-A.hmm Pfam-A.hmm.dat active_site.dat; do
+    echo "==> ${basename}"
+    gzip -dcf ${basename}.gz > ${basename}
+done
+
+#格式化pfam数据库
+cd ~/data/Pseudomonas
+hmmpress ~/data/HMM/PFAM/Pfam-A.hmm
+
+# 将heat_shock提取的蛋白序列与pfam数据库比对
+faops some PROTEINS/all.replace.fa <(tsv-select -f 2 heat_shock/heat_shock_pfam.replace.tsv)  heat_shock/heat_shock.fa
+
+E_value=1e-10
+NAME=heat_shock
+hmmscan --cpu 4 -E ${E_VALUE} --domE ${E_VALUE} --noali --tblout ${NAME}/${NAME}.tbl  \
+   ~/data/HMM/PFAM/Pfam-A.hmm  heat_shock/heat_shock.fa
+
+perl abstract.pl heat_shock/heat_shock.tbl >heat_shock/heat_shock.abstract.tsv
+#查看heat_shock同家族蛋白以及涉及到的数据库登录号
+cat  heat_shock/heat_shock.abstract.tsv | tsv-summarize -g 2,6  --count
+PF00183.18      Hsp90_protein   1504
+PF02518.26      Histidine_kinase-,_DNA_gyrase_B-,_and_HSP90-like_ATPase 1503
+PF13589.6       Histidine_kinase-,_DNA_gyrase_B-,_and_HSP90-like_ATPase 1368
+#查看domain以及domain的描述
+cat  heat_shock/heat_shock.abstract.tsv | tsv-summarize -g 1,6 --count
+HSP90   Hsp90_protein   1504
+HATPase_c       Histidine_kinase-,_DNA_gyrase_B-,_and_HSP90-like_ATPase 1503
+HATPase_c_3     Histidine_kinase-,_DNA_gyrase_B-,_and_HSP90-like_ATPase 1368
+
+#同一蛋白序列可以匹配到多条model序列,只保留e值最小的且description符合该famliy的菌株蛋白序列名
+perl compare.pl heat_shock/heat_shock.abstract.tsv >heat_shock/heat_shock_minevalue.tsv
+tsv-summarize -g -g 3 --count heat_shock/heat_shock_minevalue.tsv
+#Hsp90_protein   1504
+#拼接属名等信息并统计拷贝数
+cat heat_shock/heat_shock_minevalue.tsv | tsv-select -f 1,3 |
+tsv-filter --str-in-fld 2:"Hsp90_protein" |
+tsv-join -d 1 \
+-f PROTEINS/strain.tsv -k 2 \
+--append-fields 3 |
+tsv-join -d 3 \
+-f strains.taxon.tsv -k 1 \
+--append-fields 4 | 
+tsv-summarize -g 3,4 --count |
+keep-header -- tsv-sort -k3,3n >heat_shock/heat_shock_hmmscan_copy.tsv
+
+
+```
+
+##3.2使用tigrfams数据库
+```
+#下载tigerfam数据库
+mkdir -p ~/data/HMM/TIGERFAM
+cd ~/data/HMM/TIGERFAM
+wget -N --content-disposition https://ftp.ncbi.nlm.nih.gov/hmm/current/hmm_PGAP.HMM.tgz
+tar -xzvf hmm_PGAP.HMM.tgz
+cat *.HMM >tigrfams.hmm
+
+#格式化tigerfam数据库
+cd ~/data/Pseudomonas
+hmmpress ~/data/HMM/TIGERFAM/tigerfam.hmm
+
+# 将Glycerol提取的蛋白序列与tigerfam数据库比对
+faops some PROTEINS/all.replace.fa <(tsv-select -f 2 Glycerol/Glycerol_tigrfam.replace.tsv)  Glycerol/Glycerol.fa
+
+E_VALUE=1e-10
+NAME=Glycerol
+hmmscan --cpu 4 -E ${E_VALUE} --domE ${E_VALUE} --noali \
+-o ${NAME}/${NAME}_progress.txt --tblout ${NAME}/${NAME}.tbl  \
+   ~/data/HMM/TIGERFAM/tigrfams.hmm  ${NAME}/${NAME}.fa
+
+perl abstract.pl Glycerol/Glycerol.tbl >Glycerol/Glycerol.abstract.tsv
+
+#查看Glycerol同家族蛋白以及涉及到的数据库登录号
+cat  Glycerol/Glycerol.abstract.tsv | tsv-summarize -g 2,6  --count
+TIGR01311       glycerol_kin:_glycerol_kinase   3695
+TIGR01312       XylB:_xylulokinase      3695
+TIGR01314       gntK_FGGY:_gluconate_kinase     3695
+TIGR02628       fuculo_kin_coli:_L-fuculokinase 3680
+TIGR01315       5C_CHO_kinase:_FGGY-family_pentulose_kinase     3282
+TIGR02627       rhamnulo_kin:_rhamnulokinase    2694
+TIGR01234       L-ribulokinase:_ribulokinase    3218
+
+#同一蛋白序列可以匹配到多条model序列,只保留e值最小的且description符合该famliy的菌株蛋白序列名
+perl compare.pl Glycerol/Glycerol.abstract.tsv Glycerol/Glycerol_minevalue.tsv
+tsv-summarize  -g 3 --count Glycerol/Glycerol_minevalue.tsv
+#
+glycerol_kin:_glycerol_kinase   2318
+XylB:_xylulokinase      1356
+L-ribulokinase:_ribulokinase    1
+gntK_FGGY:_gluconate_kinase     3
+fuculo_kin_coli:_L-fuculokinase 4
+5C_CHO_kinase:_FGGY-family_pentulose_kinase     13
+#拼接属名等信息并统计拷贝数
+cat Glycerol/Glycerol_minevalue.tsv | tsv-select -f 1,3 |
+tsv-filter --str-in-fld 2:"glycerol_kin:_glycerol_kinase" |
+tsv-join -d 1 \
+-f PROTEINS/strain.tsv -k 2 \
+--append-fields 3 |
+tsv-join -d 3 \
+-f strains.taxon.tsv -k 1 \
+--append-fields 4 | 
+tsv-summarize -g 3,4 --count |
+keep-header -- tsv-sort -k3,3n >Glycerol/Glycerol_hmmscan_copy.tsv
+
+
+# 将Glycerol提取的蛋白序列与tigerfam数据库比对
+faops some PROTEINS/all.replace.fa <(tsv-select -f 2 Glycerol/Glycerol_tigrfam.replace.tsv)  Glycerol/Glycerol.fa
+
+E_VALUE=1e-10
+NAME=Glycerol
+hmmscan --cpu 4 -E ${E_VALUE} --domE ${E_VALUE} --noali \
+-o ${NAME}/${NAME}_progress.txt --tblout ${NAME}/${NAME}.tbl  \
+   ~/data/HMM/TIGERFAM/tigrfams.hmm  ${NAME}/${NAME}.fa
+
+perl abstract.pl Glycerol/Glycerol.tbl >Glycerol/Glycerol.abstract.tsv
+
+#查看Glycerol同家族蛋白以及涉及到的数据库登录号
+cat  Glycerol/Glycerol.abstract.tsv | tsv-summarize -g 2,6  --count
+TIGR01311       glycerol_kin:_glycerol_kinase   3695
+TIGR01312       XylB:_xylulokinase      3695
+TIGR01314       gntK_FGGY:_gluconate_kinase     3695
+TIGR02628       fuculo_kin_coli:_L-fuculokinase 3680
+TIGR01315       5C_CHO_kinase:_FGGY-family_pentulose_kinase     3282
+TIGR02627       rhamnulo_kin:_rhamnulokinase    2694
+TIGR01234       L-ribulokinase:_ribulokinase    3218
+
+#同一蛋白序列可以匹配到多条model序列,只保留e值最小的且description符合该famliy的菌株蛋白序列名
+perl compare.pl Glycerol/Glycerol.abstract.tsv Glycerol/Glycerol_minevalue.tsv
+tsv-summarize  -g 3 --count Glycerol/Glycerol_minevalue.tsv
+#
+glycerol_kin:_glycerol_kinase   2318
+XylB:_xylulokinase      1356
+L-ribulokinase:_ribulokinase    1
+gntK_FGGY:_gluconate_kinase     3
+fuculo_kin_coli:_L-fuculokinase 4
+5C_CHO_kinase:_FGGY-family_pentulose_kinase     13
+#拼接属名等信息并统计拷贝数
+cat Glycerol/Glycerol_minevalue.tsv | tsv-select -f 1,3 |
+tsv-filter --str-in-fld 2:"glycerol_kin:_glycerol_kinase" |
+tsv-join -d 1 \
+-f PROTEINS/strain.tsv -k 2 \
+--append-fields 3 |
+tsv-join -d 3 \
+-f strains.taxon.tsv -k 1 \
+--append-fields 4 | 
+tsv-summarize -g 3,4 --count |
+keep-header -- tsv-sort -k3,3n >Glycerol/Glycerol_hmmscan_copy.tsv
+
+
+
+# 将Glyoxalase提取的蛋白序列与tigerfam数据库比对
+faops some PROTEINS/all.replace.fa <(tsv-select -f 2 Glyoxalase/Glyoxalase.replace.tsv)  Glyoxalase/Glyoxalase.fa
+
+E_VALUE=1e-10
+NAME=Glyoxalase
+hmmscan --cpu 4 -E ${E_VALUE} --domE ${E_VALUE} --noali \
+-o ${NAME}/${NAME}_progress.txt --tblout ${NAME}/${NAME}.tbl  \
+   ~/data/HMM/TIGERFAM/tigrfams.hmm  ${NAME}/${NAME}.fa
+
+perl abstract.pl Glyoxalase/Glyoxalase.tbl >Glyoxalase/Glyoxalase.abstract.tsv
+
+#查看Glyoxalase同家族蛋白以及涉及到的数据库登录号
+cat  Glyoxalase/Glyoxalase.abstract.tsv | tsv-summarize -g 2,6  --count
+TIGR00068       glyox_I:_lactoylglutathione_lyase       2386
+TIGR02295       HpaD:_3,4-dihydroxyphenylacetate_2,3-dioxygenase        10
+TIGR03361       VI_Rhs_Vgr:_type_VI_secretion_system_Vgr_family_protein 1
+TIGR01646       vgr_GE:_Rhs_element_Vgr_protein 1
+TIGR03081       metmalonyl_epim:_methylmalonyl-CoA_epimerase    7
+
+#同一蛋白序列可以匹配到多条model序列,只保留e值最小的且description符合该famliy的菌株蛋白序列名
+perl compare.pl Glyoxalase/Glyoxalase.abstract.tsv >Glyoxalase/Glyoxalase_minevalue.tsv
+tsv-summarize  -g 3 --count Glyoxalase/Glyoxalase_minevalue.tsv
+#
+glyox_I:_lactoylglutathione_lyase       2385
+VI_Rhs_Vgr:_type_VI_secretion_system_Vgr_family_protein 1
+#拼接属名等信息并统计拷贝数
+cat Glyoxalase/Glyoxalase_minevalue.tsv | tsv-select -f 1,3 |
+tsv-filter --str-in-fld 2:"glyox_I:_lactoylglutathione_lyase" |
+tsv-join -d 1 \
+-f PROTEINS/strain.tsv -k 2 \
+--append-fields 3 |
+tsv-join -d 3 \
+-f strains.taxon.tsv -k 1 \
+--append-fields 4 | 
+tsv-summarize -g 3,4 --count |
+keep-header -- tsv-sort -k3,3n >Glyoxalase/Glyoxalase_hmmscan_copy.tsv
+
+```
+
+##.3使用panther数据库
+```
+#下载panther数据库
+mkdir -p ~/data/HMM/PANTHER
+cd ~/data/HMM/PANTHER
+
+wget -N ftp://ftp.ebi.ac.uk/pub/software/unix/iprscan/5/data/panther-data-12.0.tar.gz
+# wget ftp://ftp.ebi.ac.uk/pub/software/unix/iprscan/5/data/panther-data-12.0.tar.gz.md5
+# md5sum -c panther-data-12.0.tar.gz.md5
+tar -xzvf panther-data-12.0.tar.gz
+###注意：
+1.panther.hmm文件中没有descrpiton，descptiron在names.tab文件中，并且与PTHR号一一对应
+2.panther数据库已经提前格式化好了,不需要使用hmmpres
+cd ~/data/Pseudomonas
+
+# 将bac_Tyrosine提取的蛋白序列与pfam数据库比对
+faops some PROTEINS/all.replace.fa <(tsv-select -f 2  bac_Tyrosine/bac_Tyrosine.replace.tsv) bac_Tyrosine/bac_Tyrosine.fa
+
+E_VALUE=1e-10
+NAME=bac_Tyrosine
+hmmscan --cpu 4 -E ${E_VALUE} --domE ${E_VALUE} --noali \
+-o ${NAME}/${NAME}_progress.txt --tblout ${NAME}/${NAME}.tbl  \
+   ~/data/HMM/panther/panther.hmm  ${NAME}/${NAME}.fa
+
+```
+
+
+
+
+
