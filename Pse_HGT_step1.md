@@ -542,7 +542,7 @@ sed -i '1icopy\tgenus\tGCF' Glycerol_copy_GCF_num.tsv
 
 ```
 
-##2.6 IPR001353蛋白酶体Proteasome, subunit alpha/beta
+##  2.6 IPR001353蛋白酶体Proteasome, subunit alpha/beta
 
 ```
 
@@ -634,7 +634,7 @@ sed -i '1icopy\tgenus\tGCF'  Proteasome_copy_GCF_num.tsv
 ```
 
 
-##2.7 IPR011757 Lytic transglycosylase MltB
+##  2.7 IPR011757 Lytic transglycosylase MltB
 
 ```
 cd ~/data/Pseudomonas
@@ -1353,7 +1353,7 @@ sed -i '1icopy\tgenus\tGCF'  Tyrosine/Tyrosine_hmmscan_GCF_copy.tsv
 
 ```
 
-##3使用panther数据库
+## 3.3使用panther数据库
 ```
 #下载panther数据库
 mkdir -p ~/data/HMM/PANTHER
