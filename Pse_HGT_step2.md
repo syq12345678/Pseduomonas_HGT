@@ -1,10 +1,6 @@
 
 [TOC]
 
-#上一步主要将提取出来的蛋白序列作为query，使用hmmscan在pfam,tigrfam，panther数据库里搜索相应的domian及domian descpriton
-#结果文件会生成一条query序列对应几个domian，首先保留每条query的e-value最小，score分数最高的domian，其次在domian中筛选我们需要的diomian
-#可能由于我们挑选的基因是Overlapping homologous superfamilies，通过上述筛选，部分基因比如Guanine和glycero最终结果并不符合预期
-#通过与其他基因tyrosine mltB branched的结果文件比对，初步认为sequence和domian的E值需要小于1E-90，score需要大于300
 
 # 1.使用hmmscan搜索蛋白序列相应的domian
 ## 1.1使用tigrfams数据库
