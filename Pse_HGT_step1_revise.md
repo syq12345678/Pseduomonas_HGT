@@ -1,8 +1,6 @@
 1.由于外类群不够，新添了一些基因组文件，由1514增加至1953个基因组文件，由此需要重新操作  
-2.hmmsearch搜索结构域，hmmscan过滤,diamond重复计算拷贝数，绘制拷贝数的表格，绘制Reference Genome的树和Representative Genome与  
-Reference Genome的树  
-3.目前以branched为例,branched在pfam panthern和tigrfam中均存在  
-
+2.hmmsearch搜索结构域，hmmscan过滤,diamond重复计算拷贝数，绘制拷贝数的表格，绘制Reference Genome的树和Representative Genome与Reference Genome的树  
+3.目前以branched为例,branched在pfam panthern和tigrfam中均存在    
 # 1.codes from Professor Wang
 ## 1.外类群：使用一些模型生物作为外类群，具体信息在reference.tsv中，共有15种
 | #tax\_id | organism\_name | phylum |
@@ -23,7 +21,7 @@ Reference Genome的树
 | 169963 | Listeria monocytogenes EGD-e | Firmicutes |
 | 83332 | Mycobacterium tuberculosis H37Rv | Actinobacteria |
 
-## 1.2菌株基因组蛋白信息文件
+## 1.2菌株基因组蛋白信息文件  
 ```
 #包含NCBI的样本信息且去除了错误的菌株基因组文件信息，共1953个  
 ASSEMBLY/Pseudomonas.assembly.pass.csv  
@@ -47,9 +45,9 @@ PROTEINS/all.info.tsv
 #使用fasops concat将bac120相同菌株基因组名字的蛋白序列合并，然后去除低质量的序列，最后剩1952条基因组序列    
 PROTEINS/bac120.trim.fa  
 bac120.reroot.newick  
-```
 
-# 统计branched-chain在菌株中拷贝分布
+```
+# 2.统计branched-chain在菌株中拷贝分布
 ## 2.1使用hmmsearch抓取相同domain的基因或者基因家族
 ```
 #查看branched-chain的hmm文件所在数据库
@@ -103,7 +101,6 @@ wc -l branched-chain/*.tsv
        4280 branched-chain/branched.pfam.replace.tsv
        4280 branched-chain/branched.tigerfam.replace.tsv
 ```
-
 ## 2.2将branched-chain提取的蛋白序列与tigerfam数据库比对
 ```
 #下载tigerfam数据库
@@ -215,8 +212,8 @@ sed -i '1icopy\tgenus\tGCF'  branched-chain/branched-chain_hmmscan_GCF_copy.pfam
 
 
 # 3.两种树
+## 3.1模式细菌的bac120蛋白树
 ```
-#模式细菌的bac120蛋白树
 cat strains.taxon.tsv |
     grep -v "GCF" | 
     cut -f 1 > model.lst 
@@ -228,9 +225,10 @@ FastTree PROTEINS/bac120.model.aln.fa > PROTEINS/bac120.model.aln.newick
 nw_reroot  PROTEINS/bac120.model.aln.newick $(nw_labels PROTEINS/bac120.model.aln.newick | grep -E "Bac_subti|Sta_aure" ) |
     nw_order -c n - \
     > PROTEINS/bac120.model.reroot.newick
- 
+ ```
 
-#模式生物的branched蛋白树
+## 3.2模式生物的branched蛋白树
+```
 cat branched-chain/branched-chain_minevalue.tsv | grep -f model.lst | grep -v 'GCF' | cut -f 1 >branched-chain/branched-chain.model.tsv
 #提取序列
 faops some PROTEINS/all.replace.fa branched-chain/branched-chain.model.tsv  branched-chain/branched-chain.model.fa
@@ -240,9 +238,27 @@ FastTree branched-chain/branched-chain.model.aln.fa > branched-chain/branched-ch
 nw_reroot branched-chain/branched-chain.model.aln.newick $(nw_labels branched-chain/branched-chain.model.aln.newick | grep -E "POA1") |
     nw_order -c n - \
     > branched-chain/branched-chain.model.reroot.newick
+#模式生物的bac120蛋白树和模式生物的branched蛋白树
+setwd("D:/")
+library(dplyr)
+library(ggtree)
+library(ape)
+tree1=read.tree("bac120.model.reroot.newick")
+tree2=read.tree("branched-chain.model.reroot.newick")
+p1 <- ggtree(tree1)
+p2 <- ggtree(tree2)
+d1 <- p1$data
+d2 <- p2$data
+d2$x <- max(d2$x) - d2$x + max(d1$x)+1 #翻转第二棵树
+d2$y <- d2$y+1 #将第二棵树向上移动对齐
+p3 <- ggtree::rotate(p1,29) #旋转node，使两棵树拓扑结构一致
+p1+geom_tiplab(offset=0.05,size=3)+geom_text2(aes(subset=!isTip, label=node), hjust=-.3) #注释每个节点的编号
+p3 + geom_tiplab(offset=0.05,size=3) + geom_treescale()+ geom_highlight(node=25,fill="red")+ geom_tree(data=d2) + geom_tiplab(data = d2, hjust=1, offset =-0.05,size=3)
 
+```
 
-#参考菌株的branced蛋白树
+## 3.3参考菌株的branced蛋白树
+```
 #共有533个代表菌株，15个模式菌株
 cut -d , -f 18 ASSEMBLY/Pseudomonas.assembly.pass.csv | tsv-summarize -g 1 --count
 RefSeq_category 1
@@ -261,23 +277,6 @@ FastTree branched-chain/branched-chain_repre.aln.fa > branched-chain/branched-ch
 nw_reroot branched-chain/branched-chain_repre.aln.newick $(nw_labels branched-chain/branched-chain_repre.aln.newick | grep -E "POA1") |
     nw_order -c n - \
     > branched-chain/branched-chain_repre.reroot.newick
-
-#模式生物的bac120蛋白树和模式生物的branched蛋白树
-setwd("D:/")
-library(dplyr)
-library(ggtree)
-library(ape)
-tree1=read.tree("bac120.model.reroot.newick")
-tree2=read.tree("branched-chain.model.reroot.newick")
-p1 <- ggtree(tree1)
-p2 <- ggtree(tree2)
-d1 <- p1$data
-d2 <- p2$data
-d2$x <- max(d2$x) - d2$x + max(d1$x)+1 #翻转第二棵树
-d2$y <- d2$y+1 #将第二棵树向上移动对齐
-p3 <- ggtree::rotate(p1,29) #旋转node，使两棵树拓扑结构一致
-p1+geom_tiplab(offset=0.05,size=3)+geom_text2(aes(subset=!isTip, label=node), hjust=-.3) #注释每个节点的编号
-p3 + geom_tiplab(offset=0.05,size=3) + geom_treescale()+ geom_highlight(node=25,fill="red")+ geom_tree(data=d2) + geom_tiplab(data = d2, hjust=1, offset =-0.05,size=3)
 
 #参考菌株的branched蛋白树
 setwd("D:/")
@@ -328,10 +327,155 @@ Ka<<Ks或者Ka/Ks << 1，基因受纯化选择(purify selection)
 (Sd+Nd=m)
 步骤二:校正多个替换后,(Nd/N)和(Sd/S)分别代表ka和ks
 
+## 4.1生成两个copy列表
+```
+#提取假单胞菌的两个拷贝名称
+cd ~/data/Pseudomonas
+cat branched-chain/branched-chain_hmmscan_copy.pfam.tsv | tsv-filter --ge 3:2 |
+tsv-filter --str-in-fld 1:"Pseudom_aeru" | cut -f 1 >branched-chain/branched-chain.Pseudom_aeru.two.copy.tsv
+cat branched-chain/branched-chain_minevalue.tsv | grep -f branched-chain/branched-chain.Pseudom_aeru.two.copy.tsv |
+cut -f 1 >branched-chain/branched-chain.Pseudom_aeru.protein.tsv
+#提取假单胞菌中branced的两个拷贝WP序列
+faops some PROTEINS/all.replace.fa branched-chain/branched-chain.Pseudom_aeru.protein.tsv branched-chain/branched-chain.Pseudom_aeru.protein.fa
 
-  
-  
- 
+
+#查看branched在菌株中的蛋白名称
+cat branched-chain/branched.tigerfam.replace.tsv | grep -f <(cat branched-chain/branched-chain_minevalue.tsv | cut -f 1 ) \
+ >branched-chain/branched.WP.tsv
+#提取branched在菌株中的CDS名称
+faops size CDS/all.cds.fa | grep -f <(cat branched-chain/branched.WP.tsv | cut -f 1 ) >branched-chain/branched-chain.CDS.tsv
+#提取branched的CDS序列
+faops some CDS/all.cds.fa <(cut -f 1 branched-chain/branched-chain.CDS.tsv) stdout | sed -f CDS/sed.script >branched-chain/branched-chain.CDS.fa
+#提取假单胞菌中branced的两个拷贝CDS序列名称
+faops size branched-chain/branched-chain.CDS.fa | grep -f <(perl -alne 's/\_([W|N]P)/\_cds\_$1/;print"$_";' branched-chain/branched-chain.Pseudom_aeru.protein.tsv) |
+cut -f 1 >branched-chain/branched-chain.Pseudom_aeru.CDS.tsv
+#提取假单胞菌中branced的两个拷贝CDS
+faops some branched-chain/branched-chain.CDS.fa branched-chain/branched-chain.Pseudom_aeru.CDS.tsv  branched-chain/branched-chain.Pseudom_aeru.CDS.fa
 
 
+###使用cd-hit提取出branched-chain/branched-chain.Pseudom_aeru.protein.fa中差异最大的两条序列最为参考序列
+cd-hit -i branched-chain/branched-chain.Pseudom_aeru.protein.fa -o branched-chain/branched-chain_refer.fa -c 0.8
+#提取参考序列1
+echo "Pseudom_aeru_B136_33_GCF_000359505_1_WP_015503046" >branched-chain/branched-chain_refer1.tsv
+faops some branched-chain/branched-chain.Pseudom_aeru.protein.fa branched-chain/branched-chain_refer1.tsv branched-chain/branched-chain_refer1.fa
+#根据参考序列1提取簇1的序列
+diamond makedb --in branched-chain/branched-chain_refer1.fa -d branched-chain/branched-chain_refer1
+diamond blastp -d branched-chain/branched-chain_refer1.dmnd -q branched-chain/branched-chain.Pseudom_aeru.protein.fa -o branched-chain/branched-chain_refer1_result
+tsv-filter --gt 3:90 branched-chain/branched-chain_refer1_result  | cut -f 1 | sort -n | uniq >branched-chain/branched-chain_cluster1.tsv
+#验证簇1,共382正确
+cat branched-chain/branched-chain_cluster1.tsv | tsv-join -d 1 -f PROTEINS/all.strain.tsv -k 1 --append-fields 2 |
+cut -f 2 | sort -n | uniq | wc -l 
 
+#wp簇1的序列名称
+branched-chain/branched-chain_cluster1.tsv
+#wp簇2的序列名称
+cat branched-chain/branched-chain.Pseudom_aeru.protein.tsv | grep -v -f branched-chain/branched-chain_cluster1.tsv \
+>branched-chain/branched-chain_cluster2.tsv
+#wp合并簇一和簇二
+cat branched-chain/branched-chain_cluster1.tsv | tsv-join -d 1 -f PROTEINS/all.strain.tsv -k 1 --append-fields 2 \
+>branched-chain/branched-chain_cluster1_del.tsv
+cat branched-chain/branched-chain_cluster2.tsv | tsv-join -d 1 -f PROTEINS/all.strain.tsv -k 1 --append-fields 2 \
+>branched-chain/branched-chain_cluster2.del.tsv
+cat branched-chain/branched-chain_cluster1_del.tsv | tsv-join -d 2 -f branched-chain/branched-chain_cluster2.del.tsv -k 2 \
+--append-fields 1 | cut -f 1,3 >branched-chain/branched-chain_cluster.tsv
+
+
+#cds簇1的序列名称
+cat branched-chain/branched-chain.Pseudom_aeru.CDS.tsv | grep -f <(perl -alne 's/\_([W|N]P)/\_cds\_$1/;print"$_";' branched-chain/branched-chain_cluster1.tsv) \
+>branched-chain/branched-chain_cluster1.cds.tsv
+#cds簇2的序列名称
+cat branched-chain/branched-chain.Pseudom_aeru.CDS.tsv | grep -f <(perl -alne 's/\_([W|N]P)/\_cds\_$1/;print"$_";' branched-chain/branched-chain_cluster2.tsv) \
+>branched-chain/branched-chain_cluster2.cds.tsv
+sed -i 's/Pseudom_aeru_GCF_001516005_1_cds_WP_003114263.1_10//g;'  branched-chain/branched-chain_cluster2.cds.tsv
+sed -i '/^$/d' branched-chain/branched-chain_cluster2.cds.tsv
+#cds合并簇一和簇二
+perl -alne 'm/(.*)\_cds(.*)\.(.*)$/;$cds=$_;$wp=$1.$2; print"$cds\t$wp";' branched-chain/branched-chain_cluster1.cds.tsv |
+tsv-join -d 2 -f PROTEINS/all.strain.tsv -k 1 --append-fields 2 >branched-chain/branched-chain_cluster1_del.cds.tsv
+perl -alne 'm/(.*)\_cds(.*)\.(.*)$/;$cds=$_;$wp=$1.$2; print"$cds\t$wp";' branched-chain/branched-chain_cluster2.cds.tsv |
+tsv-join -d 2 -f PROTEINS/all.strain.tsv -k 1 --append-fields 2 >branched-chain/branched-chain_cluster2_del.cds.tsv
+cat branched-chain/branched-chain_cluster1_del.cds.tsv | tsv-join -d 3 -f branched-chain/branched-chain_cluster2_del.cds.tsv -k 3 \
+--append-fields 1 | cut -f 1,4 >branched-chain/branched-chain_cluster.cds.tsv
+
+
+#准备列表文件
+branched-chain/branched-chain_cluster.tsv
+#准备protein序列
+faops order branched-chain/branched-chain.Pseudom_aeru.protein.fa \
+<(perl -alne 'print"$F[0]\n$F[1]" ' branched-chain/branched-chain_cluster.tsv) branched-chain/branched-chain.Pseudom_aeru.PRO.fa
+#准备cds序列
+faops some branched-chain/branched-chain.Pseudom_aeru.CDS.fa \
+<(cat branched-chain/branched-chain_cluster1_del.tsv  branched-chain/branched-chain_cluster2_del.tsv | cut -f 1) \
+branched-chain/branched-chain.Pseudom_aeru.CDS.delete.fa
+#将cds的名称替换为wp的名称
+cat branched-chain/branched-chain_cluster1_del.tsv  branched-chain/branched-chain_cluster2_del.tsv | tsv-select -f 1,2 |
+    perl -nla -e '
+        print q{s/^>} . quotemeta($F[0]) . q{/>} . quotemeta($F[1]) . q{/g;};
+    ' \
+    > branched-chain/sed.script
+cat branched-chain/branched-chain.Pseudom_aeru.CDS.delete.fa | sed -f branched-chain/sed.script \
+>branched-chain/branched-chain.Pseudom_aeru.CDS.replace.fa
+faops order branched-chain/branched-chain.Pseudom_aeru.CDS.replace.fa \
+<(perl -alne 'print"$F[0]\n$F[1]" ' branched-chain/branched-chain_cluster.tsv) branched-chain/branched-chain.Pseudom_aeru.CDS.WP.fa
+
+```
+```
+#多出了一条序列名称
+wc -l branched-chain/branched-chain.Pseudom_aeru.CDS.tsv
+Pseudom_aeru_GCF_001516005_1_cds_WP_003114263.1_10
+Pseudom_aeru_GCF_001516005_1_cds_WP_003113469.1_5330
+Pseudom_aeru_GCF_001516005_1_cds_WP_003114263.1_5716
+wc -l branched-chain/branched-chain.Pseudom_aeru.protein.tsv 764
+Pseudom_aeru_GCF_001516005_1_WP_003113469
+Pseudom_aeru_GCF_001516005_1_WP_003114263
+#使用mega查看多出来的一条序列名称，发现是Pseudom_aeru_GCF_001516005_1_cds_WP_003114263蛋白出现了重复序列
+echo "Pseudom_aeru_PAO1_cds_NP_250281.1_1591
+Pseudom_aeru_PAO1_cds_NP_250661.1_1974
+Pseudom_aeru_GCF_001516005_1_cds_WP_003114263.1_10
+Pseudom_aeru_GCF_001516005_1_cds_WP_003113469.1_5330
+Pseudom_aeru_GCF_001516005_1_cds_WP_003114263.1_5716" \
+>test.tsv
+faops some branched-chain/branched-chain.CDS.fa test.tsv test.fas
+```
+![pse_aeru](https://github.com/syq12345678/Pseduomonas_HGT/blob/main/branched_three_tree/branech_pse_auer.png)
+
+
+## 4.2使用paraAT2和kakscalculator2计算kaks
+
+```
+#安装paraat2
+cd ~
+wget ftp://download.big.ac.cn/bigd/tools/ParaAT2.0.tar.gz
+tar -xzvf ParaAT2.0.tar.gz
+vim ~/.bashrc
+export PATH="$PATH:/home/syq/ParaAT2.0"
+source ~/.bashrc
+#安装kakscalculator2
+conda install kakscalculator2 
+#使用paraAT2计算kaks
+ParaAT.pl -h branched-chain/branched-chain_cluster.tsv -n branched-chain/branched-chain.Pseudom_aeru.CDS.WP.fa \
+-a branched-chain/branched-chain.Pseudom_aeru.PRO.fa -p proc -m muscle -f axt -k -o branched-chain/branched-chain_para
+
+-h, 同源基因名称文件
+-n, 指定核酸序列文件
+-a, 指定蛋白序列文件
+-p, 指定多线程文件
+-m, 指定比对工具
+-g, 去除比对有gap的密码子
+-k, 用KaKs_Calculator 计算kaks值
+-o, 输出结果的目录
+-f, 输出比对文件的格式
+
+#上述结果可直接得到每一对同源基因的ka，ks值，可通过如下命令将其整合
+cat  branched-chain/branched-chain_para/*.kaks | cut -f 1,3,4,5 |grep -v 'Sequence' | head
+Sequence  Method  Ka  Ks  Ka/Ks  
+Pseudom_aeru_B136_33_GCF_000359505_1_WP_015503046-Pseudom_aeru_B136_33_GCF_000359505_1_WP_003132922     0.352584        3.3809  0.104287
+Pseudom_aeru_C_NN2_GCF_900185255_1_WP_003113469-Pseudom_aeru_C_NN2_GCF_900185255_1_WP_003120443 0.351912        3.36598 0.10455
+Pseudom_aeru_DHS01_GCF_000496455_2_WP_003113469-Pseudom_aeru_DHS01_GCF_000496455_2_WP_023131519 0.349064        3.37571 0.103405
+Pseudom_aeru_DK1_GCF_900069025_1_WP_003113469-Pseudom_aeru_DK1_GCF_900069025_1_WP_003114263     0.351759        3.38774 0.103833
+Pseudom_aeru_DK2_GCF_000271365_1_WP_003117404-Pseudom_aeru_DK2_GCF_000271365_1_WP_003117758     0.348085        3.39406 0.102557
+Pseudom_aeru_DSM_50071_NBRC_12689_GCF_001045685_1_WP_003113469-Pseudom_aeru_DSM_50071_NBRC_12689_GCF_001045685_1_WP_003114263   0.352394        3.37619 0.104376
+Pseudom_aeru_GCF_000763245_3_WP_003113469-Pseudom_aeru_GCF_000763245_3_WP_003120443     0.350763        3.37012 0.10408
+Pseudom_aeru_GCF_000816985_1_WP_003158954-Pseudom_aeru_GCF_000816985_1_WP_003106485     0.351536        3.35977 0.104631
+Pseudom_aeru_GCF_000829255_1_WP_003088499-Pseudom_aeru_GCF_000829255_1_WP_023098686     0.352098        3.36201 0.104728
+Pseudom_aeru_GCF_000829275_1_WP_003088499-Pseudom_aeru_GCF_000829275_1_WP_023098686     0.352098        3.36201 0.104728
+```
