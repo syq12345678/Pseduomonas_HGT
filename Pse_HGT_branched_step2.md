@@ -135,8 +135,26 @@ seqkit duplicate -n 762 branched-chain/branched-chain_cluster1.cds.fa  >branched
 seqkit rename branched-chain/branched-chain_cluster1.seqkit.cds.fa >branched-chain/branched-chain_cluster1.seqkit.rename.cds.fa
 faops order branched-chain/branched-chain_cluster1.seqkit.rename.cds.fa branched-chain/branched-chain_cluster1.arrange.rename.tsv  branched-chain/branched-chain_copy1.cds.fa
 
+```
+
+
+## 1.4 copy2准备列表文件，cds和protein
+```
+#列表文件 branched-chain/branched-chain_cluster1.arrange.tsv 
+perl -alne 'print"$F[0]\n$F[1]" ' branched-chain/branched-chain_cluster2.arrange.tsv | 
+perl -alne 'BEGIN{%seen;$h;} $h=$_;$seen{$h}++;$name=$h."\_".$seen{$h};print"$name";' >branched-chain/branched-chain_cluster2.arrange.rename.tsv
+sed -i 's/_1$//g' branched-chain/branched-chain_cluster2.arrange.rename.tsv
+#protein序列  branched-chain/branched-chain_copy2.protein.fa
+seqkit duplicate -n 762  branched-chain/branched-chain_cluster2.fa >branched-chain/branched-chain_cluster2.seqkit.fa
+seqkit rename branched-chain/branched-chain_cluster1.seqkit.fa >branched-chain/branched-chain_cluster1.seqkit.rename.fa
+faops order branched-chain/branched-chain_cluster2.seqkit.rename.fa branched-chain/branched-chain_cluster2.arrange.rename.tsv  branched-chain/branched-chain_copy2.protein.fa
+#cds序列  branched-chain/branched-chain_copy1.cds.fa
+seqkit duplicate -n 762 branched-chain/branched-chain_cluster2.cds.fa  >branched-chain/branched-chain_cluster2.seqkit.cds.fa
+seqkit rename branched-chain/branched-chain_cluster2.seqkit.cds.fa >branched-chain/branched-chain_cluster2.seqkit.rename.cds.fa
+faops order branched-chain/branched-chain_cluster2.seqkit.rename.cds.fa branched-chain/branched-chain_cluster2.arrange.rename.tsv  branched-chain/branched-chain_copy2.cds.fa
 
 ```
+
 ```
 #多出了一条序列名称
 wc -l branched-chain/branched-chain.Pseudom_aeru.CDS.tsv
@@ -158,7 +176,7 @@ faops some branched-chain/branched-chain.CDS.fa test.tsv test.fas
 ![pse_aeru](https://github.com/syq12345678/Pseduomonas_HGT/blob/main/branched_three_tree/branech_pse_auer.png)
 
 
-## 4.2使用paraAT2和kakscalculator2计算kaks
+## 1.5使用paraAT2和caculator2计算kaks(以copy1为例)
 
 ```
 #安装paraat2
@@ -168,12 +186,10 @@ tar -xzvf ParaAT2.0.tar.gz
 vim ~/.bashrc
 export PATH="$PATH:/home/syq/ParaAT2.0"
 source ~/.bashrc
-#安装kakscalculator2 
-conda install kakscalculator2 
-#使用paraAT2计算kaks proc一定要在文件目录下
+conda install kaks_caculator
+#使用paraAT2计算kaks #proc一定要在文件目录下
 ParaAT.pl -h branched-chain/branched-chain_cluster1.arrange.tsv -n branched-chain/branched-chain_copy1.cds.fa \
--a branched-chain/branched-chain_copy1.protein.fa -p ~/ParaAT2.0/proc -m muscle -f axt -k -o branched-chain/branched-chain_para
-
+-a branched-chain/branched-chain_copy1.protein.fa -p proc -m muscle -f axt  -o branched-chain/branched_copy1
 -h, 同源基因名称文件
 -n, 指定核酸序列文件
 -a, 指定蛋白序列文件
@@ -183,13 +199,66 @@ ParaAT.pl -h branched-chain/branched-chain_cluster1.arrange.tsv -n branched-chai
 -k, 用KaKs_Calculator 计算kaks值
 -o, 输出结果的目录
 -f, 输出比对文件的格式
-
+-t：移除mismatched codons；
+-k：用KaKs_Calculator计算(需要输出axt格式)Ka和Ks，获得axt文件后自动计算kaks值，使用MA模型，比YN模型慢，推荐输出axt后自己用KaKs_Calculator计算并用YN模型
+#比对完后计算kaks
+cd branched-chain/branched_copy1
+for filename in *.axt
+do
+base=$(basename $filename .axt)
+echo $base
+KaKs_Calculator -i ${base}.axt -o ${base}.kaks -m GNG 
+done
+###由于比对完后的kaks文件太多，共291084，无法查看，需要将大文件夹分成多个小文件夹
+python floder_split.py
+#分别合并kaks结果
+for f in img_{1..30}
+do
+echo $f
+cat $f/*.kaks >$f.kaks
+done
 #上述结果可直接得到每一对同源基因的ka，ks值，可通过如下命令将其整合
-cat  branched-chain/branched-chain_para/*.kaks | cut -f 1,3,4,5 |grep -v 'Sequence' | head
-
-#使用paml或者hyphy计算dn/ds
-conda install perl-bio-tools-phylo-paml
-conda install perl-bio-tools-run-remoteblast
+cat *.kaks | cut -f 1,3,4,5 |grep -v 'Sequence' >branched_copy1.kaks
 
 ```
 
+## 1.5使用mega计算dn/ds
+```
+sed -i '1d' mega.copy1.tsv
+perl -ne 'chomp;($id,$name)=(split/\t/,$_,2)[0,1];@data=(split/\t/,$name);$num=join"\n",@data;print"$num\n";' mega.copy1.tsv  |
+sed 's/NA//g' | sed  '/^\s*$/d'   >mega.copy1.dnds.tsv
+perl -alne '$num=$F[0];$name=A;print"$num\t$name";' mega.copy1.dnds.tsv | sed '1idnds\tfrequency' >mega.copy1.dnds.picture.tsv
+
+```
+
+# 2。使用plotr画图
+```
+# Install Perl and R
+ 
+# 安装R包
+parallel -j 1 -k --line-buffer '
+    Rscript -e '\'' if (!requireNamespace("{}", quietly = TRUE)) { install.packages("{}", repos="https://mirrors.tuna.tsinghua.edu.cn/CRAN") } '\''
+    ' ::: \
+        extrafont remotes \
+        VennDiagram ggplot2 scales gridExtra \
+        readr ape survival pROC
+
+# ttf-mscorefonts-installer 提供微软的truetype核心字库的向导，选择OK时使用tab和enter键，鼠标点不动
+sudo apt install ttf-mscorefonts-installer
+sudo fc-cache -f
+
+# System fonts for R
+Rscript -e 'library(remotes); options(repos = c(CRAN = "https://mirrors.tuna.tsinghua.edu.cn/CRAN")); remotes::install_version("Rttf2pt1", version = "1.3.8")'
+Rscript -e 'library(extrafont); font_import(prompt = FALSE); fonts();'
+
+# On errors of missing font
+# rm -fr /usr/local/lib/R/3.6/site-library/extrafont/
+# rm -fr /usr/local/lib/R/3.6/site-library/extrafontdb/
+
+cpanm --installdeps https://github.com/wang-q/App-Plotr/archive/0.0.1.tar.gz
+curl -fsSL https://raw.githubusercontent.com/wang-q/App-Plotr/master/share/check_dep.sh | bash
+cpanm -nq https://github.com/wang-q/App-Plotr.git
+
+#plotr画图注意事项
+plotr hist --xl dN/dS --yl Frequency -g 2 --bins 20 --xmm 0,1 --ymm 0,1 -p mega.merge.dnds.picture.tsv
+```
