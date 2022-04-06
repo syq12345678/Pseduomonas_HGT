@@ -1,6 +1,6 @@
-1.由于外类群不够，新添了一些基因组文件，由1514增加至1953个基因组文件，由此需要重新操作  
-2.hmmsearch搜索结构域，hmmscan过滤,diamond重复计算拷贝数，绘制拷贝数的表格，绘制Reference Genome的树和Representative Genome与Reference Genome的树  
-3.目前以branched为例,branched在pfam panthern和tigrfam中均存在    
+* 1.由于外类群不够，新添了一些基因组文件，由1514增加至1953个基因组文件，由此需要重新操作  
+* 2.hmmsearch搜索结构域，hmmscan过滤,diamond重复计算拷贝数，绘制拷贝数的表格，绘制Reference Genome的树和Representative Genome与Reference Genome的树  
+* 3.目前以branched为例,branched在pfam panthern和tigrfam中均存在    
 # 1.codes from Professor Wang
 ## 1.外类群：使用一些模型生物作为外类群，具体信息在reference.tsv中，共有15种
 | #tax\_id | organism\_name | phylum |
@@ -22,7 +22,7 @@
 | 83332 | Mycobacterium tuberculosis H37Rv | Actinobacteria |
 
 ## 1.2菌株基因组蛋白信息文件  
-```
+```shell
 #包含NCBI的样本信息且去除了错误的菌株基因组文件信息，共1953个  
 ASSEMBLY/Pseudomonas.assembly.pass.csv  
 
@@ -49,7 +49,7 @@ bac120.reroot.newick
 ```
 # 2.统计branched-chain在菌株中拷贝分布
 ## 2.1使用hmmsearch抓取相同domain的基因或者基因家族
-```
+```bash
 #查看branched-chain的hmm文件所在数据库
 cd ~/data/Pseudomonas
 cat STRAINS/Pseudom_aer_PAO1/*.tsv |
@@ -102,7 +102,7 @@ wc -l branched-chain/*.tsv
        4280 branched-chain/branched.tigerfam.replace.tsv
 ```
 ## 2.2将branched-chain提取的蛋白序列与tigerfam数据库比对
-```
+```bash
 #下载tigerfam数据库
 mkdir -p ~/data/HMM/TIGERFAM
 cd ~/data/HMM/TIGERFAM
@@ -150,7 +150,7 @@ sed -i '1icopy\tgenus\tGCF'  branched-chain/branched-chain_hmmscan_GCF_copy.tsv
 
 ```
 ## 2.3将branched-chain提取的蛋白序列与pfam数据库比对
-```
+```bash
 #下载pfam数据库
 mkdir -p ~/data/HMM/PFAM
 cd  ~/data/HMM/PFAM
@@ -204,7 +204,7 @@ tsv-summarize -g 3,2 --count  branched-chain/branched-chain_hmmscan_copy.pfam.ts
 sed -i '1icopy\tgenus\tGCF'  branched-chain/branched-chain_hmmscan_GCF_copy.pfam.tsv
 ```
 ## 2.4 多轮diamond
-```
+```bash
 
 
 
@@ -213,7 +213,7 @@ sed -i '1icopy\tgenus\tGCF'  branched-chain/branched-chain_hmmscan_GCF_copy.pfam
 
 # 3.两种树
 ## 3.1模式细菌的bac120蛋白树
-```
+```bash
 cat strains.taxon.tsv |
     grep -v "GCF" | 
     cut -f 1 > model.lst 
@@ -228,7 +228,7 @@ nw_reroot  PROTEINS/bac120.model.aln.newick $(nw_labels PROTEINS/bac120.model.al
  ```
 
 ## 3.2模式生物的branched蛋白树
-```
+```bash
 cat branched-chain/branched-chain_minevalue.tsv | grep -f model.lst | grep -v 'GCF' | cut -f 1 >branched-chain/branched-chain.model.tsv
 #提取序列
 faops some PROTEINS/all.replace.fa branched-chain/branched-chain.model.tsv  branched-chain/branched-chain.model.fa
@@ -238,6 +238,8 @@ FastTree branched-chain/branched-chain.model.aln.fa > branched-chain/branched-ch
 nw_reroot branched-chain/branched-chain.model.aln.newick $(nw_labels branched-chain/branched-chain.model.aln.newick | grep -E "POA1") |
     nw_order -c n - \
     > branched-chain/branched-chain.model.reroot.newick
+```
+```R
 #模式生物的bac120蛋白树和模式生物的branched蛋白树
 setwd("D:/")
 library(dplyr)
@@ -254,11 +256,10 @@ d2$y <- d2$y+1 #将第二棵树向上移动对齐
 p3 <- ggtree::rotate(p1,29) #旋转node，使两棵树拓扑结构一致
 p1+geom_tiplab(offset=0.05,size=3)+geom_text2(aes(subset=!isTip, label=node), hjust=-.3) #注释每个节点的编号
 p3 + geom_tiplab(offset=0.05,size=3) + geom_treescale()+ geom_highlight(node=25,fill="red")+ geom_tree(data=d2) + geom_tiplab(data = d2, hjust=1, offset =-0.05,size=3)
-
 ```
 
 ## 3.3参考菌株的branced蛋白树
-```
+```bash
 #共有533个代表菌株，15个模式菌株
 cut -d , -f 18 ASSEMBLY/Pseudomonas.assembly.pass.csv | tsv-summarize -g 1 --count
 RefSeq_category 1
@@ -277,7 +278,8 @@ FastTree branched-chain/branched-chain_repre.aln.fa > branched-chain/branched-ch
 nw_reroot branched-chain/branched-chain_repre.aln.newick $(nw_labels branched-chain/branched-chain_repre.aln.newick | grep -E "POA1") |
     nw_order -c n - \
     > branched-chain/branched-chain_repre.reroot.newick
-
+```
+```R
 #参考菌株的branched蛋白树
 setwd("D:/")
 library(dplyr)
@@ -300,7 +302,7 @@ sub_tree<- tree_subset(tree, clade, levels_back = 0)
 #导出树文件
 write.tree(sub_tree,file = "branched_repre_sub.nwk")
 ```
-
+```bash
 # 4.计算ka/ks
 1.在遗传学中，Ka/Ks表示的是两个蛋白编码基因的非同义替换率(Ka)和同义替换率(Ks)之间的比例。这个比例可以判断是否有选择压力作用于这个蛋白编码基因。
 2.如果有两个不同物种的同一个基因的序列，比如人和小鼠的p53基因，然后把这两个基因的序列进行比对，你会发现这两段序列有差异（进化！）。  
@@ -326,14 +328,14 @@ Ka<<Ks或者Ka/Ks << 1，基因受纯化选择(purify selection)
 步骤一：假设比较的两条DNA序列之间的长度数为n,它们之间的替换数为m。计算同义(S)和非同义(N)位点的数量(S+N=n)以及同义(Sd)和非同义替换的数量  
 (Sd+Nd=m)
 步骤二:校正多个替换后,(Nd/N)和(Sd/S)分别代表ka和ks
-
+```
 
 # 以下方法错误!!!
 # 以下方法错误!!!
 # 以下方法错误!!!
 
 ## 4.1生成两个copy列表
-```
+```bash
 #提取假单胞菌的两个拷贝名称
 cd ~/data/Pseudomonas
 cat branched-chain/branched-chain_hmmscan_copy.pfam.tsv | tsv-filter --ge 3:2 |
@@ -446,7 +448,7 @@ faops some branched-chain/branched-chain.CDS.fa test.tsv test.fas
 
 ## 4.2使用paraAT2和kakscalculator2计算kaks
 
-```
+```bash
 #安装paraat2
 cd ~
 wget ftp://download.big.ac.cn/bigd/tools/ParaAT2.0.tar.gz
