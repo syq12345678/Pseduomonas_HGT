@@ -1,10 +1,7 @@
 
-[TOC]
-
-
 # 1.使用hmmscan搜索蛋白序列相应的domian
 ## 1.1使用tigrfams数据库
-```
+```BASH
 #下载tigerfam数据库
 mkdir -p ~/data/HMM/TIGERFAM
 cd ~/data/HMM/TIGERFAM
@@ -19,7 +16,7 @@ hmmpress ~/data/HMM/TIGERFAM/tigerfam.hmm
 ```
 
 ### 1.1.1将Glycerol提取的蛋白序列与tigerfam数据库比对
-```
+```BASH
 # 将Glycerol提取的蛋白序列与tigerfam数据库比对
 faops some PROTEINS/all.replace.fa <(tsv-select -f 2 Glycerol/Glycerol_tigrfam.replace.tsv)  Glycerol/Glycerol.fa
 
@@ -71,7 +68,7 @@ sed -i '1icopy\tgenus\tGCF'  Glycerol/Glycerol_hmmscan_GCF_copy.tsv
 ```
 
 ### 1.1.2将Glyoxalase提取的蛋白序列与tigerfam数据库比对
-```
+```BASH
 # 将Glyoxalase提取的蛋白序列与tigerfam数据库比对
 faops some PROTEINS/all.replace.fa <(tsv-select -f 2 Glyoxalase/Glyoxalase.replace.tsv)  Glyoxalase/Glyoxalase.fa
 
@@ -116,7 +113,7 @@ sed -i '1icopy\tgenus\tGCF'  Glyoxalase/Glyoxalase_hmmscan_GCF_copy.tsv
 ```
 
 ### 1.1.3 将Guanine提取的蛋白序列与tigerfam数据库比对
-```
+```BASH
 # 将Guanine提取的蛋白序列与tigerfam数据库比对
 faops some PROTEINS/all.replace.fa <(tsv-select -f 2 Guanine/Guanine_tigrfam.replace.tsv)  Guanine/Guanine.fa
 
@@ -167,7 +164,7 @@ sed -i '1icopy\tgenus\tGCF'  Guanine/Guanine_hmmscan_GCF_copy.tsv
 
 
 ### 1.1.4 将branched-chain提取的蛋白序列与tigerfam数据库比对
-```
+```BASH
 faops some PROTEINS/all.replace.fa <(tsv-select -f 2 branched-chain/branched.tigerfam.replace.tsv) branched-chain/branched-chain.fa
 
 E_VALUE=1e-10
@@ -206,7 +203,7 @@ sed -i '1icopy\tgenus\tGCF'  branched-chain/branched-chain_hmmscan_GCF_copy.tsv
 ```
 
 ### 1.1.5 将MltB提取的蛋白序列与tigerfam数据库比对
-```
+```BASH
 faops some PROTEINS/all.replace.fa <(tsv-select -f 2 MltB/MltB_tigrfam.replace.tsv) MltB/MltB.fa
 
 E_VALUE=1e-10
@@ -251,7 +248,7 @@ sed -i '1icopy\tgenus\tGCF'  MltB/MltB_hmmscan_GCF_copy.tsv
 
 
 ### 1.1.6 Tyrosine提取的蛋白序列与tigerfam数据库比对
-```
+```BASH
 faops some PROTEINS/all.replace.fa <(tsv-select -f 2 Tyrosine/Tyrosine.replace.tsv) Tyrosine/Tyrosine.fa
 
 E_VALUE=1e-10
@@ -292,7 +289,7 @@ sed -i '1icopy\tgenus\tGCF'  Tyrosine/Tyrosine_hmmscan_GCF_copy.tsv
 ```
 
 ## 1.2使用pfam数据库
-```
+```BASH
 #下载pfam数据库
 mkdir -p ~/data/HMM/PFAM
 cd  ~/data/HMM/PFAM
@@ -318,7 +315,7 @@ hmmpress ~/data/HMM/PFAM/Pfam-A.hmm
 
 
 ### 1.2.1 将heat_shock提取的蛋白序列与pfam数据库比对
-```
+```BASH
 # 将heat_shock提取的蛋白序列与pfam数据库比对
 faops some PROTEINS/all.replace.fa <(tsv-select -f 2 heat_shock/heat_shock_pfam.replace.tsv)  heat_shock/heat_shock.fa
 
@@ -357,7 +354,7 @@ sed -i '1icopy\tgenus\tGCF'  heat_shock/heat_shock_hmmscan_GCF_copy.tsv
 ```
 
 ### 1.2.2 将Proteasome提取的蛋白序列与pfam数据库比对
-```
+```BASH
 # 将proteasome提取的蛋白序列与pfam数据库比对
 faops some PROTEINS/all.replace.fa <(tsv-select -f 2 Proteasome/Proteasome_pfam.replace.tsv)  Proteasome/Proteasome.fa
 
@@ -398,7 +395,7 @@ sed -i '1icopy\tgenus\tGCF'  Proteasome/Proteasome_hmmscan_GCF_copy.tsv
 
 ```
 ### 1.2.3 将cobn提取的蛋白序列与pfam数据库比对
-```
+```BASH
 # 将proteasome提取的蛋白序列与pfam数据库比对
 faops some PROTEINS/all.replace.fa <(tsv-select -f 2 cobn/cobn.pfam.replace.tsv)  cobn/cobn.fa
 
@@ -438,7 +435,7 @@ sed -i '1icopy\tgenus\tGCF'  cobn/cobn_hmmscan_GCF_copy.tsv
 ```
 
 ## 1.3使用panther数据库
-```
+```BASH
 #下载panther数据库
 mkdir -p ~/data/HMM/PANTHER
 cd ~/data/HMM/PANTHER
@@ -455,7 +452,7 @@ cd ~/data/Pseudomonas
 ```
 
 ### 1.3.1 将bac_Tyrosine提取的蛋白序列与pfam数据库比对
-```
+```BASH
 faops some PROTEINS/all.replace.fa <(tsv-select -f 2  bac_Tyrosine/bac_Tyrosine.replace.tsv) bac_Tyrosine/bac_Tyrosine.fa
 #panther数据库太大，需要放在超算上跑
 bsub -q mpi -n 24 -J "BAC" hmmscan -cpu 20 -E 1e-10 --domE 1e-10 \
