@@ -1,35 +1,35 @@
-1.上一步主要是统计branched在不同菌株基因组中的拷贝数，可知铜绿假单胞菌等中具有两个拷贝    
-2.分别统计铜绿假单胞菌等中的两个拷贝的ka/ks
+* 1.上一步主要是统计branched在不同菌株基因组中的拷贝数，可知铜绿假单胞菌等中具有两个拷贝    
+* 2.分别统计铜绿假单胞菌等中的两个拷贝的ka/ks
 
 
 # 1.计算ka/ks
-1.在遗传学中，Ka/Ks表示的是两个蛋白编码基因的非同义替换率(Ka)和同义替换率(Ks)之间的比例。这个比例可以判断是否有选择压力作用于这个蛋白编码基因。
-2.如果有两个不同物种的同一个基因的序列，比如人和小鼠的p53基因，然后把这两个基因的序列进行比对，你会发现这两段序列有差异（进化！）。  
+* 1.在遗传学中，Ka/Ks表示的是两个蛋白编码基因的非同义替换率(Ka)和同义替换率(Ks)之间的比例。这个比例可以判断是否有选择压力作用于这个蛋白编码基因。
+* 2.如果有两个不同物种的同一个基因的序列，比如人和小鼠的p53基因，然后把这两个基因的序列进行比对，你会发现这两段序列有差异（进化！）。  
 再仔细观察，你会发现有些碱基的变化导致了编码氨基酸的变化（非同义替换），有些没有导致编码氨基酸的变化（同义替换）。  
 这是由密码子的简并性造成的，因为3个碱基决定1个氨基酸，所以64种碱基组合决定20种氨基酸，会有冗余出现。  
-3.一般情况下，第三个碱基变化会造成同义替换，而第一二个碱基的变化会造成非同义替换。  
-4.Ka和Ks的计算公式：  
+* 3.一般情况下，第三个碱基变化会造成同义替换，而第一二个碱基的变化会造成非同义替换。  
+* 4.Ka和Ks的计算公式：  
 Ka=发生非同义替换的SNP数/非同义替换位点数  
 Ks=发生同义替换的SNP数/同义替换位点数
 其中非同义替换位点数就是会造成氨基酸变化的位点数的总和，比如编码丝氨酸（ser）的第一二位碱基。  
 而同义替换位点数就是不会造成氨基酸变化的位点数的总和，比如编码丝氨酸的第三位碱基。  
-5.计算Ka/Ks时，不考虑start codon和stop codon  
-6.转换（transition，嘌呤变嘌呤，嘧啶变嘧啶）发生的概率要高于颠换（transversion，嘌呤变嘧啶，嘧啶变嘌呤）发生的概率  
-7.ka/ks与进化的关系：如果一个基因没有受到自然选择的压力，那么非同义替换率和同义替换率是相同的。而一般情况下，非同义替换会造成氨基酸变化  
+* 5.计算Ka/Ks时，不考虑start codon和stop codon  
+* 6.转换（transition，嘌呤变嘌呤，嘧啶变嘧啶）发生的概率要高于颠换（transversion，嘌呤变嘧啶，嘧啶变嘌呤）发生的概率  
+* 7.ka/ks与进化的关系：如果一个基因没有受到自然选择的压力，那么非同义替换率和同义替换率是相同的。而一般情况下，非同义替换会造成氨基酸变化  
 改变蛋白质的构象和功能因此造成适应性的变化，从而带来自然选择的优势和劣势。而同义替换没有改变蛋白质的组成，不受自然选择的影响，因此ks反映  
 过程中的背景碱基替换率。ka/ks的比值说明了这个基因受到了何种选择
-8.Ka>>Ks或者Ka/Ks >> 1，基因受正选择(positive selection)  
+* 8.Ka>>Ks或者Ka/Ks >> 1，基因受正选择(positive selection)  
 Ka＝Ks或者Ka/Ks=1，基因中性进化(neutral evolution)  
-Ka<<Ks或者Ka/Ks << 1，基因受纯化选择(purify selection)  
-9.实际情况下Ka/Ks << 1，因为一般非同义替换带来的都是有害的性状，只有极少数情况下会造成进化上的优势  
-10.当Ka/Ks>>1时，基因受到强烈正选择，这样的基因即为近期正在快速进化的基因，对于物种的进化有着非常重要的意义
-11.计算ka和ks的步骤
+Ka << Ks或者Ka/Ks << 1，基因受纯化选择(purify selection)  
+* 9.实际情况下Ka/Ks << 1，因为一般非同义替换带来的都是有害的性状，只有极少数情况下会造成进化上的优势  
+* 10.当Ka/Ks>>1时，基因受到强烈正选择，这样的基因即为近期正在快速进化的基因，对于物种的进化有着非常重要的意义
+* 11.计算ka和ks的步骤
 步骤一：假设比较的两条DNA序列之间的长度数为n,它们之间的替换数为m。计算同义(S)和非同义(N)位点的数量(S+N=n)以及同义(Sd)和非同义替换的数量  
 (Sd+Nd=m)
 步骤二:校正多个替换后,(Nd/N)和(Sd/S)分别代表ka和ks
 
 ## 1.1提取branched在假单胞菌中的两个WP
-```
+```BASH
 #提取假单胞菌的两个拷贝名称
 cd ~/data/Pseudomonas
 cat branched-chain/branched-chain_hmmscan_copy.pfam.tsv | tsv-filter --ge 3:2 |
@@ -75,7 +75,7 @@ rm -rf branched-chain/branched-chain_cluster2.msh branched-chain/branched-chain_
 ```
 
 ## 1.2提取branched在假单胞菌中的两个CDS
-```
+```BASH 
 #查看branched在菌株中的蛋白名称
 cat branched-chain/branched.tigerfam.replace.tsv | grep -f <(cat branched-chain/branched-chain_minevalue.tsv | cut -f 1 ) \
  >branched-chain/branched.WP.tsv
@@ -121,7 +121,7 @@ faops some branched-chain/branched-chain.Pseudom_aeru.CDS.delete.fa  branched-ch
 ```
 
 ## 1.3 copy1准备列表文件，cds和protein
-```
+```BASH
 #列表文件 branched-chain/branched-chain_cluster1.arrange.tsv 
 perl -alne 'print"$F[0]\n$F[1]" ' branched-chain/branched-chain_cluster1.arrange.tsv | 
 perl -alne 'BEGIN{%seen;$h;} $h=$_;$seen{$h}++;$name=$h."\_".$seen{$h};print"$name";' >branched-chain/branched-chain_cluster1.arrange.rename.tsv
@@ -139,7 +139,7 @@ faops order branched-chain/branched-chain_cluster1.seqkit.rename.cds.fa branched
 
 
 ## 1.4 copy2准备列表文件，cds和protein
-```
+```BASH
 #列表文件 branched-chain/branched-chain_cluster1.arrange.tsv 
 perl -alne 'print"$F[0]\n$F[1]" ' branched-chain/branched-chain_cluster2.arrange.tsv | 
 perl -alne 'BEGIN{%seen;$h;} $h=$_;$seen{$h}++;$name=$h."\_".$seen{$h};print"$name";' >branched-chain/branched-chain_cluster2.arrange.rename.tsv
@@ -155,7 +155,7 @@ faops order branched-chain/branched-chain_cluster2.seqkit.rename.cds.fa branched
 
 ```
 
-```
+```BASH
 #多出了一条序列名称
 wc -l branched-chain/branched-chain.Pseudom_aeru.CDS.tsv
 Pseudom_aeru_GCF_001516005_1_cds_WP_003114263.1_10
@@ -178,7 +178,7 @@ faops some branched-chain/branched-chain.CDS.fa test.tsv test.fas
 
 ## 1.5使用paraAT2和caculator2计算kaks(以copy1为例)
 
-```
+```BASH
 #安装paraat2
 cd ~
 wget ftp://download.big.ac.cn/bigd/tools/ParaAT2.0.tar.gz
@@ -219,46 +219,90 @@ cat $f/*.kaks >$f.kaks
 done
 #上述结果可直接得到每一对同源基因的ka，ks值，可通过如下命令将其整合
 cat *.kaks | cut -f 1,3,4,5 |grep -v 'Sequence' >branched_copy1.kaks
+#同上得branched_copy2.kaks
 
+#kaks结果画图
+cat branched_copy1.kaks | tsv-filter --str-ne 4:"-0" | tsv-filter --str-ne 4:"NA" | cut -f 4 >branched_copy1.kaks.tsv
+cat branched_copy2.kaks | tsv-filter --str-ne 4:"-0" | tsv-filter --str-ne 4:"NA" | cut -f 4 >branched_copy2.kaks.tsv
+perl -alne '$num=$F[0];$name=A;print"$num\t$name";' branched_copy1.kaks.tsv | sed '1ikaks\tfrequency' >branched_copy1.kaks.picture.tsv
+perl -alne '$num=$F[0];$name=B;print"$num\t$name";' branched_copy2.kaks.tsv >branched_copy2.kaks.picture.tsv
+cat branched_copy1.kaks.picture.tsv branched_copy2.kaks.picture.tsv >branched.kaks.picture.tsv
+
+plotr hist --xl Ka/Ks --yl Frequency -g 2 --bins 20 --xmm 0,1 --ymm 0,1 -p branched.kaks.picture.tsv
 ```
 
-## 1.5使用mega计算dn/ds
-```
+## 1.6使用mega计算dn/ds
+```BASH
+#dnds结果画图
 sed -i '1d' mega.copy1.tsv
 perl -ne 'chomp;($id,$name)=(split/\t/,$_,2)[0,1];@data=(split/\t/,$name);$num=join"\n",@data;print"$num\n";' mega.copy1.tsv  |
 sed 's/NA//g' | sed  '/^\s*$/d'   >mega.copy1.dnds.tsv
 perl -alne '$num=$F[0];$name=A;print"$num\t$name";' mega.copy1.dnds.tsv | sed '1idnds\tfrequency' >mega.copy1.dnds.picture.tsv
 
-```
-
-# 2。使用plotr画图
-```
-# Install Perl and R
- 
-# 安装R包
-parallel -j 1 -k --line-buffer '
-    Rscript -e '\'' if (!requireNamespace("{}", quietly = TRUE)) { install.packages("{}", repos="https://mirrors.tuna.tsinghua.edu.cn/CRAN") } '\''
-    ' ::: \
-        extrafont remotes \
-        VennDiagram ggplot2 scales gridExtra \
-        readr ape survival pROC
-
-# ttf-mscorefonts-installer 提供微软的truetype核心字库的向导，选择OK时使用tab和enter键，鼠标点不动
-sudo apt install ttf-mscorefonts-installer
-sudo fc-cache -f
-
-# System fonts for R
-Rscript -e 'library(remotes); options(repos = c(CRAN = "https://mirrors.tuna.tsinghua.edu.cn/CRAN")); remotes::install_version("Rttf2pt1", version = "1.3.8")'
-Rscript -e 'library(extrafont); font_import(prompt = FALSE); fonts();'
-
-# On errors of missing font
-# rm -fr /usr/local/lib/R/3.6/site-library/extrafont/
-# rm -fr /usr/local/lib/R/3.6/site-library/extrafontdb/
-
-cpanm --installdeps https://github.com/wang-q/App-Plotr/archive/0.0.1.tar.gz
-curl -fsSL https://raw.githubusercontent.com/wang-q/App-Plotr/master/share/check_dep.sh | bash
-cpanm -nq https://github.com/wang-q/App-Plotr.git
+sed -i '1d' mega.copy2.tsv
+perl -ne 'chomp;($id,$name)=(split/\t/,$_,2)[0,1];@data=(split/\t/,$name);$num=join"\n",@data;print"$num\n";' mega.copy2.tsv  |
+sed 's/NA//g' | sed  '/^\s*$/d'   >mega.copy2.dnds.tsv
+perl -alne '$num=$F[0];$name=B;print"$num\t$name";' mega.copy2.dnds.tsv >mega.copy2.dnds.picture.tsv
+cat mega.copy1.dnds.picture.tsv mega.copy2.dnds.picture.tsv >mega.dnds.picture.tsv
 
 #plotr画图注意事项
-plotr hist --xl dN/dS --yl Frequency -g 2 --bins 20 --xmm 0,1 --ymm 0,1 -p mega.merge.dnds.picture.tsv
+plotr hist --xl dN/dS --yl Frequency -g 2 --bins 20 --xmm 0,1 --ymm 0,1 -p mega.dnds.picture.tsv
 ```
+
+## 1.7使用bp_pairwise_kaks计算kaks(以copy1为例)
+```BASH
+bp_pairwise_kaks -i branched-chain_copy1.cds.fa -o branched_copy1.kaks
+#去除序列的回车符
+cat  branched-chain_cluster1.cds.fa | perl -p -e 's/\r?\n//;s/^>(.+)$/>$1\n/;s/^>/\n>/'
+
+#kaks结果画图
+cat branched_copy1.kaks | tsv-filter --str-ne 4:"-0" | tsv-filter --str-ne 4:"NA" | cut -f 4 >branched_copy1.kaks.tsv
+cat branched_copy2.kaks | tsv-filter --str-ne 4:"-0" | tsv-filter --str-ne 4:"NA" | cut -f 4 >branched_copy2.kaks.tsv
+perl -alne '$num=$F[0];$name=A;print"$num\t$name";' branched_copy1.kaks.tsv | sed '1ikaks\tfrequency' >branched_copy1.kaks.picture.tsv
+perl -alne '$num=$F[0];$name=B;print"$num\t$name";' branched_copy2.kaks.tsv >branched_copy2.kaks.picture.tsv
+cat branched_copy1.kaks.picture.tsv branched_copy2.kaks.picture.tsv >branched.kaks.picture.tsv
+
+plotr hist --xl Ka/Ks --yl Frequency -g 2 --bins 20 --xmm 0,1 --ymm 0,1 -p branched.kaks.picture.tsv
+```
+## 1.8基因共线性
+````BASH
+cat branched-chain/branched-chain_minevalue.tsv | grep -f easyfig/typical.lst  | cut -f 1 >easyfig/branched.typical.pro.tsv
+
+mkdir ~/data/Pseudomonas/easyfig
+cd ~/data/Pseudomonas/easyfig
+
+for S in \
+    Pseudom_aeru_PAO1 \
+    Pseudom_aeru_DK2_GCF_000271365_1\
+    Pseudom_aeru_MTB_1_GCF_000504045_1\
+    Pseudom_aeru_SCV20265_GCF_000510305_1\
+    Pseudom_aeru_UCBPP_PA14_GCF_000014625_1 \
+    ; do
+    echo ${S}
+done \
+    > test.lst
+
+mkdir test
+cat test.lst |
+    parallel --no-run-if-empty --linebuffer -k -j 4 '
+        compgen -G "../ASSEMBLY/{}/*_genomic.gbff.gz"
+    ' |
+    paste - - \
+    > test/genbank.list
+for G in $(cat test/genbank.list);do
+    cp $G test
+done
+gzip -d test/*.gz
+
+
+cat test.lst |
+    parallel --no-run-if-empty --linebuffer -k -j 4 '
+        compgen -G "../ASSEMBLY/{}/*_genomic.fna.gz" |
+        grep -v "from"
+    ' |
+    paste - - \
+    > test/genome.list
+for G in $(cat test/genome.list);do
+    cp $G test
+done
+gzip -d test/*.gz
