@@ -1,14 +1,10 @@
-[TOC]
-
 
 # 1.统计不同菌株中拷贝数的基因家族
-注:
-homologous superfamily:
-1.来自cath-gene3D和superfamily数据库
-2.使用underlying profile hidden Markov models而不是单一的模型来表示不同的结构家族
-3.广泛使用的hmm数据库主要包括pfam pathern tigerfam和cdd
-4.CATH和SCOP是目前最大的人工验证的蛋白质域结构层次分类数据库,这两个数据库都将蛋白质分为同源家族和超家族
-
+注:homologous superfamily:
+* 1.来自cath-gene3D和superfamily数据库
+* 2.使用underlying profile hidden Markov models而不是单一的模型来表示不同的结构家族
+* 3.广泛使用的hmm数据库主要包括pfam pathern tigerfam和cdd
+* 4.CATH和SCOP是目前最大的人工验证的蛋白质域结构层次分类数据库,这两个数据库都将蛋白质分为同源家族和超家族
 
 | family | count | description | database | 显示family relationship |
 | :--- | :--- |  :--- | :--- | :--- |
@@ -30,13 +26,9 @@ homologous superfamily:
 | IPR007416 | YggL 50S ribosome-binding protein | none | pfam |  |
 
 
-
-
 # 2.使用hmmsearch抓取相同domain的基因或者基因家族
-
 ## 2.1 IPR014311 鸟嘌呤脱氨酶 Guanine deaminase
-
-```
+```BASH
 #查看基因的hmm文件所在数据库
 cd ~/data/Pseudomonas
 cat STRAINS/Pseudom_aer_PAO1/*.tsv |
@@ -82,7 +74,6 @@ for domain in Guanine_panther Guanine_tigrfam; do
 done
 
 
-
 #统计不同数据库根据相同domain抓取出的基因或基因家族序列数目
 wc -l Guanine/Guanine_tigrfam.replace.tsv
 3583 Guanine/Guanine_tigrfam.replace.tsv
@@ -115,8 +106,6 @@ TRZ/ATZ family hydrolase        789
 chlorohydrolase/deaminase family protein        1
 N-ethylammeline chlorohydrolase 1
 
-
-
 #拼接结构域等信息
 cat Guanine/Guanine.replace.tsv | tsv-select -f 2,1 |
 tsv-join -d 1 \
@@ -137,17 +126,15 @@ cat Guanine/Guanine_no_8-o_summary.tsv |
 tsv-summarize -g 5,2 --count |
 keep-header -- tsv-sort -k3,3n >Guanine/Guanine_no_8-o_copy.tsv
 
-
 #统计拷贝数的分布
 tsv-summarize -g 3,2 --count Guanine_copy.tsv >Guanine_copy_GCF_num.tsv
 sed -i '1icopy\tgenus\tGCF' Guanine_copy_GCF_num.tsv
-
 
 ```
 
 ## 2.2 IPR001404  Heat shock protein Hsp90 family热休克蛋白Hsp90家族
 
-```
+```BASH
 cd ~/data/Pseudomonas
 cat STRAINS/Pseudom_aer_PAO1/*.tsv |
     grep "IPR001404"
@@ -248,7 +235,7 @@ sed -i '1icopy\tgenus\tGCF' heat_shock_copy_GCF_num.tsv
 
 ## 2.3 IPR004685 Branched-chain amino acid 支链氨基酸转运蛋白
 
-```
+```BASH
 #查看基因的hmm文件所在数据库
 cd ~/data/Pseudomonas
 cat STRAINS/Pseudom_aer_PAO1/*.tsv |
@@ -353,7 +340,7 @@ sed -i '1icopy\tgenus\tGCF' branched_copy_GCF_num.tsv
 
 ## 2.4.IPR004361  乙二醛酶 Glyoxalase I
 
-```
+```BASH
 #在interpro数据库中IPR004361对应的是Glyoxalase I
 cd ~/data/Pseudomonas
 cat STRAINS/Pseudom_aer_PAO1/*.tsv |
@@ -437,7 +424,7 @@ sed -i '1icopy\tgenus\tGCF' Glyoxalase_lactoylglutathione_copy_GCF_num.tsv
 
 ## 2.5.IPR005999  Glycerol kinase甘油激酶
 
-```
+```BASH
 cd ~/data/Pseudomonas
 cat STRAINS/Pseudom_aer_PAO1/*.tsv |
     grep "IPR005999"
@@ -544,7 +531,7 @@ sed -i '1icopy\tgenus\tGCF' Glycerol_copy_GCF_num.tsv
 
 ##  2.6 IPR001353蛋白酶体Proteasome, subunit alpha/beta
 
-```
+```BASH
 
 cd ~/data/Pseudomonas
 cat STRAINS/Pseudom_aer_PAO1/*.tsv |
@@ -636,7 +623,7 @@ sed -i '1icopy\tgenus\tGCF'  Proteasome_copy_GCF_num.tsv
 
 ##  2.7 IPR011757 Lytic transglycosylase MltB
 
-```
+```BASH
 cd ~/data/Pseudomonas
 cat STRAINS/Pseudom_aer_PAO1/*.tsv |
     grep "IPR011757"
@@ -721,13 +708,11 @@ keep-header -- tsv-sort -k3,3n >MltB/MltB_have_B_no_membrane_copy.tsv
 tsv-summarize -g 3,2 --count  MltB_no_B_copy.tsv > MltB_no_B_copy_GCF_num.tsv
 sed -i '1icopy\tgenus\tGCF'  MltB_no_B_copy_GCF_num.tsv
 
-
 ```
-
 
 ## 2.8.IPR002307 络氨酸TRNA连接酶Tyrosine-tRNA ligase
 
-```
+```BASH
 cd ~/data/Pseudomonas
 cat STRAINS/Pseudom_aer_PAO1/*.tsv |
     grep "IPR002307"
@@ -810,7 +795,7 @@ sed -i '1icopy\tgenus\tGCF'  Tyrosine_copy_GCF_num.tsv
 
 ## 2.9 IPR024088  细菌中的络氨酸TRNA连接酶Tyrosine-tRNA ligase, bacterial-type
 
-```
+```BASH
 cd ~/data/Pseudomonas
 cat STRAINS/Pseudom_aer_PAO1/*.tsv |
     grep "IPR024088"
@@ -890,7 +875,7 @@ sed -i '1icopy\tgenus\tGCF'  bac_Tyrosine_copy_GCF_num.tsv
 
 ## 2.10  IPR003672 镁螯合酶 CobN/magnesium chelatase
 
-```
+```BASH
 cd ~/data/Pseudomonas
 cat STRAINS/Pseudom_aer_PAO1/*.tsv |
     grep "IPR003672"
@@ -972,7 +957,7 @@ sed -i '1icopy\tgenus\tGCF'  cobn_copy_GCF_num.tsv
 
 # 3.使用hmmscan搜索结构域
 ## 3.1使用pfam数据库
-```
+```BASH
 #下载pfam数据库
 mkdir -p ~/data/HMM/PFAM
 cd  ~/data/HMM/PFAM
@@ -993,7 +978,7 @@ hmmpress ~/data/HMM/PFAM/Pfam-A.hmm
 
 ```
 ### 3.1.1 将heat_shock提取的蛋白序列与pfam数据库比对
-```
+```BASH
 # 将heat_shock提取的蛋白序列与pfam数据库比对
 faops some PROTEINS/all.replace.fa <(tsv-select -f 2 heat_shock/heat_shock_pfam.replace.tsv)  heat_shock/heat_shock.fa
 
@@ -1039,7 +1024,7 @@ sed -i '1icopy\tgenus\tGCF'  heat_shock_hmmscan_GCF_copy.tsv
 ```
 
 ## 3.2使用tigrfams数据库
-```
+```BASH
 #下载tigerfam数据库
 mkdir -p ~/data/HMM/TIGERFAM
 cd ~/data/HMM/TIGERFAM
@@ -1055,7 +1040,7 @@ hmmpress ~/data/HMM/TIGERFAM/tigerfam.hmm
 ```
 
 ### 3.2.1将Glycerol提取的蛋白序列与tigerfam数据库比对
-```
+```BASH
 # 将Glycerol提取的蛋白序列与tigerfam数据库比对
 faops some PROTEINS/all.replace.fa <(tsv-select -f 2 Glycerol/Glycerol_tigrfam.replace.tsv)  Glycerol/Glycerol.fa
 
@@ -1114,7 +1099,7 @@ sed -i '1icopy\tgenus\tGCF'  Glycerol_hmmscan_GCF_copy.tsv
 ```
 
 ### 3.2.2将Glyoxalase提取的蛋白序列与tigerfam数据库比对
-```
+```BASH
 # 将Glyoxalase提取的蛋白序列与tigerfam数据库比对
 faops some PROTEINS/all.replace.fa <(tsv-select -f 2 Glyoxalase/Glyoxalase.replace.tsv)  Glyoxalase/Glyoxalase.fa
 
@@ -1161,7 +1146,7 @@ sed -i '1icopy\tgenus\tGCF'  Glyoxalase_hmmscan_GCF_copy.tsv
 ```
 
 ### 3.2.3 将Guanine提取的蛋白序列与tigerfam数据库比对
-```
+```BASH
 # 将Guanine提取的蛋白序列与tigerfam数据库比对
 faops some PROTEINS/all.replace.fa <(tsv-select -f 2 Guanine/Guanine_tigrfam.replace.tsv)  Guanine/Guanine.fa
 
@@ -1220,7 +1205,7 @@ sed -i '1icopy\tgenus\tGCF'  Guanine/Guanine_hmmscan_GCF_copy.tsv
 
 
 ### 3.2.3 将branched-chain提取的蛋白序列与tigerfam数据库比对
-```
+```BASH
 faops some PROTEINS/all.replace.fa <(tsv-select -f 2 branched-chain/branched.tigerfam.replace.tsv) branched-chain/branched-chain.fa
 
 E_VALUE=1e-10
@@ -1258,11 +1243,10 @@ sed -i '1icopy\tgenus\tGCF'  branched-chain/branched-chain_hmmscan_GCF_copy.tsv
 
 ###与annotaion过滤的结果差别不大
 
-
 ```
 
 ### 3.2.4 将MltB提取的蛋白序列与tigerfam数据库比对
-```
+```BASH
 faops some PROTEINS/all.replace.fa <(tsv-select -f 2 MltB/MltB_tigrfam.replace.tsv) MltB/MltB.fa
 
 E_VALUE=1e-10
@@ -1309,7 +1293,7 @@ sed -i '1icopy\tgenus\tGCF'  MltB/MltB_hmmscan_GCF_copy.tsv
 
 
 ### 3.2.5 Tyrosine提取的蛋白序列与tigerfam数据库比对
-```
+```BASH
 faops some PROTEINS/all.replace.fa <(tsv-select -f 2 Tyrosine/Tyrosine.replace.tsv) Tyrosine/Tyrosine.fa
 
 E_VALUE=1e-10
@@ -1354,7 +1338,7 @@ sed -i '1icopy\tgenus\tGCF'  Tyrosine/Tyrosine_hmmscan_GCF_copy.tsv
 ```
 
 ## 3.3使用panther数据库
-```
+```BASH
 #下载panther数据库
 mkdir -p ~/data/HMM/PANTHER
 cd ~/data/HMM/PANTHER
@@ -1372,8 +1356,6 @@ cd ~/data/Pseudomonas
 faops some PROTEINS/all.replace.fa <(tsv-select -f 2  bac_Tyrosine/bac_Tyrosine.replace.tsv) bac_Tyrosine/bac_Tyrosine.fa
 
 #panther数据库太大，需要放在超算上跑
-
-
 
 ```
 
