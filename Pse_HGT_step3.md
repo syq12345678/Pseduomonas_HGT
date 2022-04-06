@@ -1,11 +1,9 @@
-[TOC]
-
-1.使用hmmsearch最大范围内统计不同菌株中蛋白的copy数    
-2.使用hmmscan保留最显著的domain为给定famliy的蛋白，并统计不同菌株中蛋白的copy数据,e值为1e-50    
-3.使用blastp将种子序列在所有蛋白里面检索直至没有新的结果出现
+* 1.使用hmmsearch最大范围内统计不同菌株中蛋白的copy数    
+* 2.使用hmmscan保留最显著的domain为给定famliy的蛋白，并统计不同菌株中蛋白的copy数据,e值为1e-50    
+* 3.使用blastp将种子序列在所有蛋白里面检索直至没有新的结果出现
 
 # 1.以MltB基因为例，将hmmer匹配的蛋白作为query序列与所有的蛋白进行比对，再次进行筛选
-```
+```BASH
 #diamond比对结果
 1. qseqid |  query  sequence id 
 2. sseqid |  subject sequence id 
@@ -53,7 +51,7 @@ cut -f 2 MltB/MltB_result2.tsv | sort -n | uniq | wc -l #1047
 两轮结果一致
 ```
 # 2.统计不同species中的copy结果
-```
+```BASH
 #species  | number of assemblies  | numbers of mltB | average per genome 
 
 #统计diamond不同species中MltB个数（percentage=90)
@@ -100,7 +98,7 @@ plotr tsv MltB/MltB_assembly_copy.tsv --header
 
 ```
 # 3.两种树(模式生物的)
-```
+```BASH
 #模式细菌的bac120蛋白树
 cat strains.taxon.tsv |
     grep -v "GCF" | 
@@ -146,7 +144,7 @@ pp <- p3 + geom_tiplab(offset=0.05) + geom_treescale()+ geom_highlight(node=25,f
 ```
 
 # 4.提取所有的DNA序列
-```
+```BASH
 for GENUS in $(cat genus.lst); do
     echo 1>&2 "==> GENUS [${GENUS}]"
 
