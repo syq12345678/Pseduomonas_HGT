@@ -1,3 +1,22 @@
+<!-- TOC -->
+
+- [1.计算ka/ks](#1计算kaks)
+  - [1.1提取branched在假单胞菌中的两个WP](#11提取branched在假单胞菌中的两个wp)
+  - [1.2提取branched在假单胞菌中的两个CDS](#12提取branched在假单胞菌中的两个cds)
+  - [1.3 copy1准备列表文件，cds和protein](#13-copy1准备列表文件cds和protein)
+  - [1.4 copy2准备列表文件，cds和protein](#14-copy2准备列表文件cds和protein)
+  - [1.5使用paraAT2和caculator2计算kaks(以copy1为例)](#15使用paraat2和caculator2计算kaks以copy1为例)
+  - [1.6使用mega计算dn/ds](#16使用mega计算dnds)
+  - [1.7使用bp_pairwise_kaks计算kaks(以copy1为例)](#17使用bp_pairwise_kaks计算kaks以copy1为例)
+- [2.基因共线性](#2基因共线性)
+  - [2.1使用easyfig查看基因共线性](#21使用easyfig查看基因共线性)
+- [2.2使用clinker查看基因共线性](#22使用clinker查看基因共线性)
+- [3.MEME查找motif](#3meme查找motif)
+- [4.islandviewer4查看基因岛](#4islandviewer4查看基因岛)
+- [5.gephi查看pangenome](#5gephi查看pangenome)
+
+<!-- /TOC -->
+
 * 1.上一步主要是统计branched在不同菌株基因组中的拷贝数，可知铜绿假单胞菌等中具有两个拷贝    
 * 2.分别统计铜绿假单胞菌等中的两个拷贝的ka/ks
 
@@ -264,8 +283,10 @@ cat branched_copy1.kaks.picture.tsv branched_copy2.kaks.picture.tsv >branched.ka
 
 plotr hist --xl Ka/Ks --yl Frequency -g 2 --bins 20 --xmm 0,1 --ymm 0,1 -p branched.kaks.picture.tsv
 ```
-## 1.8基因共线性
-````BASH
+# 2.基因共线性
+## 2.1使用easyfig查看基因共线性
+* 选择模式菌株和代表菌株中的铜绿假单胞菌和非铜绿假单胞菌进行查看
+```BASH
 cat branched-chain/branched-chain_minevalue.tsv | grep -f easyfig/typical.lst  | cut -f 1 >easyfig/branched.typical.pro.tsv
 
 mkdir ~/data/Pseudomonas/easyfig
@@ -306,3 +327,13 @@ for G in $(cat test/genome.list);do
     cp $G test
 done
 gzip -d test/*.gz
+```
+# 2.2使用clinker查看基因共线性
+
+# 3.MEME查找motif
+
+# 4.islandviewer4查看基因岛
+
+# 5.gephi查看pangenome
+
+
