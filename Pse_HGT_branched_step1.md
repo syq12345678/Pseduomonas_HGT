@@ -1,8 +1,30 @@
+<!-- TOC -->
+
+- [1.codes from Professor Wang](#1codes-from-professor-wang)
+  - [1.1外类群：使用一些模型生物作为外类群，具体信息在reference.tsv中，共有15种](#11外类群使用一些模型生物作为外类群具体信息在referencetsv中共有15种)
+  - [1.2菌株基因组蛋白信息文件](#12菌株基因组蛋白信息文件)
+- [2.统计branched-chain在菌株中拷贝分布](#2统计branched-chain在菌株中拷贝分布)
+  - [2.1使用hmmsearch抓取相同domain的基因或者基因家族](#21使用hmmsearch抓取相同domain的基因或者基因家族)
+  - [2.2将branched-chain提取的蛋白序列与tigerfam数据库比对](#22将branched-chain提取的蛋白序列与tigerfam数据库比对)
+  - [2.3将branched-chain提取的蛋白序列与pfam数据库比对](#23将branched-chain提取的蛋白序列与pfam数据库比对)
+  - [2.4多轮diamond](#24多轮diamond)
+- [3.两种树](#3两种树)
+  - [3.1模式细菌的bac120蛋白树](#31模式细菌的bac120蛋白树)
+  - [3.2模式生物的branched蛋白树](#32模式生物的branched蛋白树)
+  - [3.3参考菌株的branced蛋白树](#33参考菌株的branced蛋白树)
+- [4.计算ka/ks](#4计算kaks)
+- [以下方法错误!!!](#以下方法错误)
+- [以下方法错误!!!](#以下方法错误-1)
+- [以下方法错误!!!](#以下方法错误-2)
+  - [4.1生成两个copy列表](#41生成两个copy列表)
+  - [4.2使用paraAT2和kakscalculator2计算kaks](#42使用paraat2和kakscalculator2计算kaks)
+
+<!-- /TOC -->
 * 1.由于外类群不够，新添了一些基因组文件，由1514增加至1953个基因组文件，由此需要重新操作  
 * 2.hmmsearch搜索结构域，hmmscan过滤,diamond重复计算拷贝数，绘制拷贝数的表格，绘制Reference Genome的树和Representative Genome与Reference Genome的树  
 * 3.目前以branched为例,branched在pfam panthern和tigrfam中均存在    
 # 1.codes from Professor Wang
-## 1.外类群：使用一些模型生物作为外类群，具体信息在reference.tsv中，共有15种
+## 1.1外类群：使用一些模型生物作为外类群，具体信息在reference.tsv中，共有15种
 | #tax\_id | organism\_name | phylum |
 | :--- | :--- | :--- |
 | 565050 | Caulobacter vibrioides NA1000 | Alphaproteobacteria |
@@ -203,7 +225,7 @@ keep-header -- tsv-sort -k3,3n >branched-chain/branched-chain_hmmscan_copy.pfam.
 tsv-summarize -g 3,2 --count  branched-chain/branched-chain_hmmscan_copy.pfam.tsv > branched-chain/branched-chain_hmmscan_GCF_copy.pfam.tsv
 sed -i '1icopy\tgenus\tGCF'  branched-chain/branched-chain_hmmscan_GCF_copy.pfam.tsv
 ```
-## 2.4 多轮diamond
+## 2.4多轮diamond
 ```bash
 
 
@@ -217,7 +239,7 @@ sed -i '1icopy\tgenus\tGCF'  branched-chain/branched-chain_hmmscan_GCF_copy.pfam
 cat strains.taxon.tsv |
     grep -v "GCF" | 
     cut -f 1 > model.lst 
-提取序列
+#提取序列
 faops some PROTEINS/bac120.trim.fa model.lst  PROTEINS/bac120.model.fa
 muscle -in PROTEINS/bac120.model.fa  -out PROTEINS/bac120.model.aln.fa
 #建树
@@ -239,8 +261,9 @@ nw_reroot branched-chain/branched-chain.model.aln.newick $(nw_labels branched-ch
     nw_order -c n - \
     > branched-chain/branched-chain.model.reroot.newick
 ```
+
 ```R
-#模式生物的bac120蛋白树和模式生物的branched蛋白树
+## 模式生物的bac120蛋白树和模式生物的branched蛋白树
 setwd("D:/")
 library(dplyr)
 library(ggtree)
@@ -302,7 +325,7 @@ sub_tree<- tree_subset(tree, clade, levels_back = 0)
 #导出树文件
 write.tree(sub_tree,file = "branched_repre_sub.nwk")
 ```
-```bash
+
 # 4.计算ka/ks
 1.在遗传学中，Ka/Ks表示的是两个蛋白编码基因的非同义替换率(Ka)和同义替换率(Ks)之间的比例。这个比例可以判断是否有选择压力作用于这个蛋白编码基因。
 2.如果有两个不同物种的同一个基因的序列，比如人和小鼠的p53基因，然后把这两个基因的序列进行比对，你会发现这两段序列有差异（进化！）。  
@@ -321,14 +344,13 @@ Ks=发生同义替换的SNP数/同义替换位点数
 过程中的背景碱基替换率。ka/ks的比值说明了这个基因受到了何种选择
 8.Ka>>Ks或者Ka/Ks >> 1，基因受正选择(positive selection)  
 Ka＝Ks或者Ka/Ks=1，基因中性进化(neutral evolution)  
-Ka<<Ks或者Ka/Ks << 1，基因受纯化选择(purify selection)  
+Ka << Ks或者Ka/Ks << 1，基因受纯化选择(purify selection)  
 9.实际情况下Ka/Ks << 1，因为一般非同义替换带来的都是有害的性状，只有极少数情况下会造成进化上的优势  
 10.当Ka/Ks>>1时，基因受到强烈正选择，这样的基因即为近期正在快速进化的基因，对于物种的进化有着非常重要的意义
 11.计算ka和ks的步骤
 步骤一：假设比较的两条DNA序列之间的长度数为n,它们之间的替换数为m。计算同义(S)和非同义(N)位点的数量(S+N=n)以及同义(Sd)和非同义替换的数量  
 (Sd+Nd=m)
 步骤二:校正多个替换后,(Nd/N)和(Sd/S)分别代表ka和ks
-```
 
 # 以下方法错误!!!
 # 以下方法错误!!!
@@ -447,7 +469,6 @@ faops some branched-chain/branched-chain.CDS.fa test.tsv test.fas
 
 
 ## 4.2使用paraAT2和kakscalculator2计算kaks
-
 ```bash
 #安装paraat2
 cd ~
