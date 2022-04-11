@@ -1,4 +1,30 @@
+<!-- TOC -->
 
+- [1.统计不同菌株中拷贝数的基因家族](#1统计不同菌株中拷贝数的基因家族)
+- [2.使用hmmsearch抓取相同domain的基因或者基因家族](#2使用hmmsearch抓取相同domain的基因或者基因家族)
+  - [2.1 IPR014311 鸟嘌呤脱氨酶 Guanine deaminase](#21-ipr014311-鸟嘌呤脱氨酶-guanine-deaminase)
+  - [2.2 IPR001404  Heat shock protein Hsp90 family热休克蛋白Hsp90家族](#22-ipr001404--heat-shock-protein-hsp90-family热休克蛋白hsp90家族)
+  - [2.3 IPR004685 Branched-chain amino acid 支链氨基酸转运蛋白](#23-ipr004685-branched-chain-amino-acid-支链氨基酸转运蛋白)
+  - [2.4.IPR004361  乙二醛酶 Glyoxalase I](#24ipr004361--乙二醛酶-glyoxalase-i)
+  - [2.5.IPR005999  Glycerol kinase甘油激酶](#25ipr005999--glycerol-kinase甘油激酶)
+  - [2.6 IPR001353蛋白酶体Proteasome, subunit alpha/beta](#26-ipr001353蛋白酶体proteasome-subunit-alphabeta)
+  - [2.7 IPR011757 Lytic transglycosylase MltB](#27-ipr011757-lytic-transglycosylase-mltb)
+  - [2.8.IPR002307 络氨酸TRNA连接酶Tyrosine-tRNA ligase](#28ipr002307-络氨酸trna连接酶tyrosine-trna-ligase)
+  - [2.9 IPR024088  细菌中的络氨酸TRNA连接酶Tyrosine-tRNA ligase, bacterial-type](#29-ipr024088--细菌中的络氨酸trna连接酶tyrosine-trna-ligase-bacterial-type)
+  - [2.10  IPR003672 镁螯合酶 CobN/magnesium chelatase](#210--ipr003672-镁螯合酶-cobnmagnesium-chelatase)
+- [3.使用hmmscan搜索结构域](#3使用hmmscan搜索结构域)
+  - [3.1使用pfam数据库](#31使用pfam数据库)
+    - [3.1.1 将heat_shock提取的蛋白序列与pfam数据库比对](#311-将heat_shock提取的蛋白序列与pfam数据库比对)
+  - [3.2使用tigrfams数据库](#32使用tigrfams数据库)
+    - [3.2.1将Glycerol提取的蛋白序列与tigerfam数据库比对](#321将glycerol提取的蛋白序列与tigerfam数据库比对)
+    - [3.2.2将Glyoxalase提取的蛋白序列与tigerfam数据库比对](#322将glyoxalase提取的蛋白序列与tigerfam数据库比对)
+    - [3.2.3 将Guanine提取的蛋白序列与tigerfam数据库比对](#323-将guanine提取的蛋白序列与tigerfam数据库比对)
+    - [3.2.3 将branched-chain提取的蛋白序列与tigerfam数据库比对](#323-将branched-chain提取的蛋白序列与tigerfam数据库比对)
+    - [3.2.4 将MltB提取的蛋白序列与tigerfam数据库比对](#324-将mltb提取的蛋白序列与tigerfam数据库比对)
+    - [3.2.5 Tyrosine提取的蛋白序列与tigerfam数据库比对](#325-tyrosine提取的蛋白序列与tigerfam数据库比对)
+  - [3.3使用panther数据库](#33使用panther数据库)
+
+<!-- /TOC -->
 # 1.统计不同菌株中拷贝数的基因家族
 注:homologous superfamily:
 * 1.来自cath-gene3D和superfamily数据库
