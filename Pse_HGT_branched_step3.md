@@ -99,51 +99,77 @@ done
 cat *.tsv >braz_nr_whole.tsv
 #分开比对的braz_nr_whole.tsv与未分开比对的braz_nr_reverse.result.tsv结果一致
 
-#提取序列
+#提取抓取出来的序列（37986）
 faops some nr.fa <(cut -f 1 braz_nr_reverse.result.tsv) braz_nr_reverse.fa 
-#筛选e值显著的序列（7050）
-tsv-filter --lt 11:1.0e-100 braz_nr_reverse.result.tsv >braz_nr_evalue.tsv
-faops some braz_nr_reverse.fa <(cut -f 1 braz_nr_evalue.tsv) braz_nr_evalue.fa
-#筛选e值显著的序列对应的菌株蛋白名
-cat nr_protein_name.tsv | grep -Ff <(cut -f 1 braz_nr_evalue.tsv) >braz_nr_strain_protein.tsv
+##提取抓取的序列对应的菌株蛋白名(37986)
+cat nr_protein_name.tsv | grep -Ff <(cut -f 1 braz_nr_reverse.result.tsv | sed  's/^/>&/g') >braz_nr_strain_protein.tsv
 #替换菌株名和蛋白名
 perl -alne '/\>(.*?)\s.*(\[.*\])/;$name=$1;$strain=$2;$strain=~s/\[//g;$strain=~s/\]//g;$strain=~s/\s/\_/g;$id=$strain."\_".$name;print"$name\t$id";' braz_nr_strain_protein.tsv >braz_nr_strain_protein.replace.tsv
 sed -i 's/(//g' braz_nr_strain_protein.replace.tsv
 sed -i 's/)//g' braz_nr_strain_protein.replace.tsv
 #替换序列蛋白名为菌株_蛋白名
-faops replace braz_nr_evalue.fa  braz_nr_strain_protein.replace.tsv  braz_nr_strain_protein.replace.fa
-
+faops replace braz_nr_reverse.fa  braz_nr_strain_protein.replace.tsv  braz_nr_strain_protein.replace.fa
 ```
 
 # 3.使用cd-hit对抓取出来的序列进行聚类分簇，然后将分簇的序列建树
 ```bash
-#cd-hit聚类共469个簇(设置簇内相似性为90%)
-mkdir -p cd_hit
+#cd-hit使用
+-i：输入文件，蛋白序列，fasta格式
+-o：输出文件，有两个，一个代表性序列文件，一个聚类文件
+-c：聚类阈值，1.0代表100%一致性，0.9代表90%一致性，以此类推。比对中相同氨基酸的数量除以较短序列的全长
+-n：两两序列进行序列比对时选择的 word size，具体选值参考下面
+-d：0表示使用 fasta 标题中第一个空格前的字段作为序列名字
+-M：设置内存，16000，16G
+-t：设置线程数
+#cd-hit聚类共5876个簇(设置簇内相似性为90%)
 cd cd_hit
-cd-hit -i braz_nr_strain_protein.replace.fa -o braz_nr_cdhit_identity90.fa -c 0.9
+cd-hit -i braz_nr_strain_protein.replace.fa -c 0.9 -n 5  -d 0 -M 16000 -T 8  -o braz_nr_cdhit_identity90.fa
 cat braz_nr_cdhit_identity90.fa PAO1.fa >braz_nr_PAO1_cdhit_identity90.fa
 #建立树
-muscle -in braz_nr_PAO1_cdhit_identity90.fa -out braz_nr_PAO1_cdhit_identity90_aln.fa
-FastTree braz_nr_PAO1_cdhit_identity90_aln.fa >braz_nr_PAO1_cdhit_identity90_aln.newick
+bsub -q mpi -n 24 -J "mus" mafft --retree 1 --maxiterate 0 braz_nr_PAO1_cdhit_identity90.fa >braz_nr_PAO1_cdhit_identity90_mafft.fa
+sed -i 's/://g' braz_nr_PAO1_cdhit_identity90_mafft.fa
+FastTree braz_nr_PAO1_cdhit_identity90_mafft.fa >braz_nr_PAO1_cdhit_identity90_aln.newick
 
-#cd-hit聚类共91个簇(设置簇内相似性为90%)
+#cd-hit聚类共2224个簇(设置簇内相似性为70%)
 cd cd_hit
-cd-hit -i braz_nr_strain_protein.replace.fa -o braz_nr_cdhit_identity70.fa -c 0.7
+cd-hit -i braz_nr_strain_protein.replace.fa -c 0.7 -n 5  -d 0 -M 16000 -T 8 -o braz_nr_cdhit_identity70.fa 
 cat braz_nr_cdhit_identity70.fa PAO1.fa >braz_nr_PAO1_cdhit_identity70.fa
 #建立树
-muscle -in braz_nr_PAO1_cdhit_identity70.fa -out braz_nr_PAO1_cdhit_identity70_aln.fa
-FastTree braz_nr_PAO1_cdhit_identity70_aln.fa >braz_nr_PAO1_cdhit_identity70_aln.newick
+bsub -q mpi -n 24 -J "mus" mafft --retree 1 --maxiterate 0 braz_nr_PAO1_cdhit_identity70.fa >braz_nr_PAO1_cdhit_identity70_mafft.fa
+sed -i 's/://g' braz_nr_PAO1_cdhit_identity70_mafft.fa
+FastTree braz_nr_PAO1_cdhit_identity70_mafft.fa >braz_nr_PAO1_cdhit_identity70_aln.newick
 
-```
-
-
-
-
-
-
-
-
-
+#在树上标出PAO1中braz和braB的位置
+NP_250661 braz 蓝色
+NP_250281 braB 红色
+#画图
+setwd("D:/")
+library(dplyr)
+library(ggtree)
+library(ape)
+library(tidytree)
+library(treeio)
+tree<-read.newick("braz_nr_PAO1_cdhit_identity90_aln.newick")
+data<-fortify(tree)
+node1<-grep("NP_250281",tree$tip.label)
+node1 #3709
+node2 <- grep("NP_250661", tree$tip.label)
+node2 #3778
+node3<-grep("GFR65790",tree$tip.label)
+node3 #4114
+#对类群进行高亮显示
+tree<-groupOTU(tree, c(node1,node3))
+ggtree(tree, aes(colour = group)) + 
+  scale_color_manual(values=c( "black","red")) +
+  theme(legend.position = "none")
+# 最近的父节点
+nodes<-c(node1,node3)
+clade <- MRCA(tree, nodes) 
+sub_tree<- tree_subset(tree, clade, levels_back = 0)
+grep("NP_250281", sub_tree$tip.label) #25,68
+ggtree(sub_tree) + geom_tiplab() + xlim(0, 5)
+#输出树文件
+write.tree(sub_tree,file = "sub_tree.nwk")
 
 ```
 
