@@ -109,6 +109,13 @@ sed -i 's/(//g' braz_nr_strain_protein.replace.tsv
 sed -i 's/)//g' braz_nr_strain_protein.replace.tsv
 #替换序列蛋白名为菌株_蛋白名
 faops replace braz_nr_reverse.fa  braz_nr_strain_protein.replace.tsv  braz_nr_strain_protein.replace.fa
+
+#不聚类
+cat braz_nr_strain_protein.replace.fa PAO1.fa >braz_nr_PAO1_whole.fa
+#建立树
+bsub -q mpi -n 24 -J "mus" mafft --retree 1 --maxiterate 0 braz_nr_PAO1_whole.fa >braz_nr_PAO1_whole_mafft.fa
+sed -i 's/://g' braz_nr_PAO1_whole_mafft.fa
+FastTree braz_nr_PAO1_whole_mafft.fa >braz_nr_PAO1_whole_mafft.newick
 ```
 
 # 3.使用cd-hit对抓取出来的序列进行聚类分簇，然后将分簇的序列建树
