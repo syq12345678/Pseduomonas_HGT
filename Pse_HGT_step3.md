@@ -177,7 +177,3 @@ cat DNA/all.DNA.fa |
     ' \
     > DNA/all.uniq.DNA.fa
 ```
-
-
-
-
