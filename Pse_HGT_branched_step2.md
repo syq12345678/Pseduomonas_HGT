@@ -10,7 +10,7 @@
   - [1.7使用bp_pairwise_kaks计算kaks(以copy1为例)](#17使用bp_pairwise_kaks计算kaks以copy1为例)
 - [2.基因共线性](#2基因共线性)
   - [2.1使用easyfig查看基因共线性](#21使用easyfig查看基因共线性)
-- [2.2使用clinker查看基因共线性](#22使用clinker查看基因共线性)
+  - [2.2使用clinker查看基因共线性](#22使用clinker查看基因共线性)
 - [3.MEME查找motif](#3meme查找motif)
 - [4.islandviewer4查看基因岛](#4islandviewer4查看基因岛)
 - [5.gephi查看pangenome](#5gephi查看pangenome)
@@ -328,7 +328,13 @@ for G in $(cat test/genome.list);do
 done
 gzip -d test/*.gz
 ```
-# 2.2使用clinker查看基因共线性
+## 2.2使用clinker查看基因共线性
+```bash
+目前查阅文献可得方法
+1.使用seqkit或者bedtools或者faops size 截取braZ的上下游各1000bp
+2.然后使用prokka注释braz及其上下游序列(prokka使用的是hmmscan和blast)
+3.使用clinker查看基因共线性
+```
 
 # 3.MEME查找motif
 
