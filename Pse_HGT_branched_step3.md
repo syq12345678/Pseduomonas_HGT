@@ -70,7 +70,7 @@ cd data/blast/fasta
 gunzip nr.gz
 mv nr nr.fa
 bsub -q mpi -n 24 -J "DIA" ./diamond makedb --in nr.fa -d nr --threads 20
-bsub -q mpi -n 24-J "DIA" ./diamond blastp -d nr.dmnd -q branched-chain_PAO1_braz.fa -o braZ_nr_result.tsv --id 50 --threads 20 -e 1e-5 --more-sensitive
+bsub -q mpi -n 24-J "DIA" ./diamond blastp -d nr.dmnd -q branched-chain_PAO1_braz.fa -o braZ_nr_result.tsv --id 30 --threads 20 -e 1e-5 --more-sensitive
 #结果只有25行,可能建库时对序列id有要求
 
 #本地建立braz数据库并比对
@@ -121,7 +121,38 @@ cat braz_nr_strain_protein.replace.fa PAO1.fa >braz_nr_PAO1_whole.fa
 #建立树
 bsub -q mpi -n 24 -J "mus" mafft --retree 1 --maxiterate 0 braz_nr_PAO1_whole.fa >braz_nr_PAO1_whole_mafft.fa
 sed -i 's/://g' braz_nr_PAO1_whole_mafft.fa
+sed -i 's/,//g' braz_nr_PAO1_whole_mafft.fa
 FastTree braz_nr_PAO1_whole_mafft.fa >braz_nr_PAO1_whole_mafft.newick
+
+#在树上标出PAO1中braz和braB的位置
+NP_250661 braz 蓝色
+NP_250281 braB 红色
+#画图
+setwd("D:/")
+library(dplyr)
+library(ggtree)
+library(ape)
+library(tidytree)
+library(treeio)
+tree<-read.newick("braz_nr_PAO1_whole_mafft.newick")
+data<-fortify(tree)
+#分别给braz和braB所在簇共同上色
+node1<-grep("NP_250281",tree$tip.label)
+node1 #35103
+node2 <- grep("NP_250661", tree$tip.label)
+node2 #36933
+#对类群进行高亮显示
+tree<-groupOTU(tree, c(node1,node2))
+ggtree(tree, aes(colour = group)) + 
+  scale_color_manual(values=c( "black","red")) +
+  theme(legend.position = "none")
+# 最近的父节点
+nodes<-c(node1,node2)
+clade <- MRCA(tree, nodes) 
+sub_tree<- tree_subset(tree, clade, levels_back = 0)
+ggtree(sub_tree) 
+#输出树文件
+write.tree(sub_tree,file = "sub_tree.nwk")
 ```
 
 # 3.使用cd-hit对抓取出来的序列进行聚类分簇，然后将分簇的序列建树
@@ -182,9 +213,12 @@ sub_tree<- tree_subset(tree, clade, levels_back = 0)
 grep("NP_250281", sub_tree$tip.label) #25,68
 ggtree(sub_tree) + geom_tiplab() + xlim(0, 5)
 #输出树文件
-write.tree(sub_tree,file = "sub_tree.nwk")
+write.tree(sub_tree,file = "identity90_sub_tree.nwk")
+#提取树文件中的gene_id
+perl nwk_geneid.pl -i identity90_sub_tree.nwk  -o identity90_sub_tree_geneid.tsv
 
 ```
+
 
 
 
