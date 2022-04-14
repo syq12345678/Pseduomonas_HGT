@@ -330,10 +330,32 @@ gzip -d test/*.gz
 ```
 ## 2.2使用clinker查看基因共线性
 ```bash
-目前查阅文献可得方法
-1.使用seqkit或者bedtools或者faops size 截取braZ的上下游各1000bp
-2.然后使用prokka注释braz及其上下游序列(prokka使用的是hmmscan和blast)
-3.使用clinker查看基因共线性
+#######!!!!!! 该方法目前行不通
+#目前查阅文献可得方法
+#1.使用seqkit或者bedtools或者faops size 截取braZ的上下游各1000bp
+#2.然后使用prokka注释braz及其上下游序列(prokka使用的是hmmscan和blast)
+#3.使用clinker查看基因共线性
+perl -alne 'next until(/gene/);$_=~s/\(//g;$_=~s/\)//g;print"$_";' Pseudom_aeru_PAO1.gbff | uniq >PAO1.gbff
+#查看PAO1的braz 
+grep -B 1 braZ 1.gbff | perl -alne '/(\d*)\.\.(\d*)/;$sta=$1;$end=$2;print"$sta:$end";' | uniq 
+#结果
+2151755:2153068
+#提取PAO1的braz
+seqkit subseq  Pseudom_aeru_PAO1.fna -r 2141755:2163068 >PAO1_braz.fa
+#使用prokka或者dfast注释的结果与gbff文件中的注释结果不符合,舍弃
+```
+```bash
+#目前查阅文献可得方法
+#1.直接提取目标基因上下游各10000bp的gbk文件
+#2.使用clinker查看基因共线性
+python  fetch_gbk.py -i Pseudom_aeru_PAO1.gbff -e 10000 -l braB -o PAO1_braB
+python  fetch_gbk.py -i Pseudom_aeru_PAO1.gbff -e 10000 -l braZ -o PAO1_braZ
+python  fetch_gbk.py -i Pseudom_aeru_MTB_1_GCF_000504045.gbff -e 10000 -l brnQ -o MTB_brnQ
+python  fetch_gbk.py -i Pseudom_fluo_SBW25_GCF_000009225_2.gbff -e 10000 -l brnQ -o fluo_brnQ
+python  fetch_gbk.py -i Pseudom_psychrop_GCF_011040435_1.gbff -e 10000 -l brnQ -o psychrop_brnQ
+#将截取的gbk文件一起画图
+clinker *.gbk -p 
+#在clinker链接的网页上将group名调整为对应的基因
 ```
 
 # 3.MEME查找motif
