@@ -177,3 +177,11 @@ cat DNA/all.DNA.fa |
     ' \
     > DNA/all.uniq.DNA.fa
 ```
+
+```perl
+perl -alne 'next until(/gene/);$_=~s/\(//g;$_=~s/\)//g;print"$_";' Pseudom_aeru_PAO1.gbff | uniq >1.gbff
+grep -B 1 braZ 1.gbff | perl -alne '/(\d*)\.\.(\d*)/;$sta=$1;$end=$2;print"$sta\t$end";' | uniq 
+
+```
+
+
