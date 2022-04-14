@@ -7,7 +7,9 @@
   - [2.1使用hmmsearch抓取相同domain的基因或者基因家族](#21使用hmmsearch抓取相同domain的基因或者基因家族)
   - [2.2将branched-chain提取的蛋白序列与tigerfam数据库比对](#22将branched-chain提取的蛋白序列与tigerfam数据库比对)
   - [2.3将branched-chain提取的蛋白序列与pfam数据库比对](#23将branched-chain提取的蛋白序列与pfam数据库比对)
-  - [2.4多轮diamond](#24多轮diamond)
+  - [2.4多轮diamond（将hmmer匹配的蛋白作为query序列与所有蛋白进行比对，再次进行筛选）！！！！！all.replace.fa中有两条序列存在大量空字符(null)导致无法建库，需要删除](#24多轮diamond将hmmer匹配的蛋白作为query序列与所有蛋白进行比对再次进行筛选allreplacefa中有两条序列存在大量空字符null导致无法建库需要删除)
+  - [2.5统计diamond比对和hmmer比对时不同species中braB个数](#25统计diamond比对和hmmer比对时不同species中brab个数)
+  - [2.5绘制统计不同物种中braB和braz拷贝数的表格](#25绘制统计不同物种中brab和braz拷贝数的表格)
 - [3.两种树](#3两种树)
   - [3.1模式细菌的bac120蛋白树](#31模式细菌的bac120蛋白树)
   - [3.2模式生物的branched蛋白树](#32模式生物的branched蛋白树)
@@ -45,25 +47,26 @@
 
 ## 1.2菌株基因组蛋白信息文件  
 ```shell
-#包含NCBI的样本信息且去除了错误的菌株基因组文件信息，共1953个  
+#包含NCBI的样本信息且去除了错误的菌株基因组文件信息，共1952个  
 ASSEMBLY/Pseudomonas.assembly.pass.csv  
+#assembly level:Complete Genome(1810)或Chromosome(142)
+#共有15个Reference Genome参考菌株，分别属于变形菌纲，厚壁菌纲，放线菌纲和衣原体
+#共有533个Representative Genome代表菌株都属于Gamma变形菌纲
+cat ASSEMBLY/Pseudomonas.assembly.pass.csv | grep "Representative Genome" | cut -d , -f 1 | tsv-join -d 1 -f strains.taxon.tsv -k 1  --append-fields 4 |  
+tsv-select -f 2,1 | nwr append stdin -r class -r order -r family -r genus >representative_add_rank.tsv
 
 #包含菌株基因组名(group1)，属名(group4),共1952个  
 strains.taxon.tsv  
-
 #包含菌株名，共1952个  
 strains.lst  
 order.lst
 
 #菌株基因组蛋白名(group1),菌株基因组名(group2)  
 PROTEINS/all.strain.tsv  
-
 #菌株基因组蛋白名和响应的蛋白序列  
 PROTEINS/all.replace.fa  
-
 #菌株基因组蛋白名，菌株基因组名，蛋白序列长度，蛋白注释  
 PROTEINS/all.info.tsv  
-
 #使用fasops concat将bac120相同菌株基因组名字的蛋白序列合并，然后去除低质量的序列，最后剩1952条基因组序列    
 PROTEINS/bac120.trim.fa  
 bac120.reroot.newick  
@@ -225,10 +228,113 @@ keep-header -- tsv-sort -k3,3n >branched-chain/branched-chain_hmmscan_copy.pfam.
 tsv-summarize -g 3,2 --count  branched-chain/branched-chain_hmmscan_copy.pfam.tsv > branched-chain/branched-chain_hmmscan_GCF_copy.pfam.tsv
 sed -i '1icopy\tgenus\tGCF'  branched-chain/branched-chain_hmmscan_GCF_copy.pfam.tsv
 ```
-## 2.4多轮diamond
+## 2.4多轮diamond（将hmmer匹配的蛋白作为query序列与所有蛋白进行比对，再次进行筛选）！！！！！all.replace.fa中有两条序列存在大量空字符(null)导致无法建库，需要删除
 ```bash
+cd ~/data/Pseudomonas
+mkdir -p branched-chain/diamond
+#删除all.replacd.fa的空字符
+sed -i 's/\x0//g' PROTEINS/all.replace.fa
+#提取hmmsearch和hmmscan结果
+cat branched-chain/branched-chain_minevalue.pfam.tsv | tsv-select -f 1,3 |
+tsv-filter --str-in-fld 2:"branched-chain" | cut -f 1 >branched-chain/diamond/branched-chain_diamond1.tsv
+#第一轮diamond(任取一条菌株里的braB序列进行blast)
+faops some PROTEINS/all.replace.fa  branched-chain/diamond/branched-chain_diamond1.tsv branched-chain/diamond/branched-chain_diamond1.fa
+diamond makedb --in branched-chain/diamond/branched-chain_diamond1.fa --db branched-chain/diamond/branched-chain_diamond1
+diamond blastp --db branched-chain/diamond/branched-chain_diamond1.dmnd --query  PROTEINS/all.replace.fa -e 1e-5 --outfmt 6 --threads 4 --out branched-chain/diamond/branched-chain_result1.tsv --more-sensitive
+
+#第二轮diamond(将第一轮从蛋白数据库中抓取出的序列进行blast)
+faops some PROTEINS/all.replace.fa <(cat branched-chain/diamond/branched-chain_result1.tsv | cut -f 2 | sort -n | uniq)   branched-chain/diamond/branched-chain_diamond2.fa 
+diamond makedb --in branched-chain/diamond/branched-chain_diamond2.fa --db branched-chain/diamond/branched-chain_diamond2
+diamond blastp --db branched-chain/diamond/branched-chain_diamond2.dmnd --query  PROTEINS/all.replace.fa -e 1e-5 --outfmt 6 --threads 4 --out branched-chain/diamond/branched-chain_result2.tsv  --more-sensitive 
+
+#第三轮diamond
+faops some PROTEINS/all.replace.fa <(cat branched-chain/diamond/branched-chain_result2.tsv | cut -f 2 | sort -n | uniq)   branched-chain/diamond/branched-chain_diamond3.fa 
+diamond makedb --in branched-chain/diamond/branched-chain_diamond3.fa --db branched-chain/diamond/branched-chain_diamond3
+diamond blastp --db branched-chain/diamond/branched-chain_diamond3.dmnd --query  PROTEINS/all.replace.fa -e 1e-5 --outfmt 6 --threads 4 --out branched-chain/diamond/branched-chain_result3.tsv  --more-sensitive 
 
 
+
+#hmmer结果
+cat branched-chain/diamond/branched-chain_diamond1.tsv | wc -l  #2140
+#第一轮diamond的query
+cut -f 1 branched-chain/diamond/branched-chain_result1.tsv | sort -n | uniq | wc -l #2144
+#第一轮diamond的target
+cut -f 2 branched-chain/diamond/branched-chain_result1.tsv | sort -n | uniq | wc -l #1492
+
+#第二轮diamond的query
+cut -f 1 branched-chain/diamond/branched-chain_result2.tsv | sort -n | uniq | wc -l #2144
+#第二轮diamond的target
+cut -f 2 branched-chain/diamond/branched-chain_result2.tsv | sort -n | uniq | wc -l #1492
+
+#第三轮diamond的query
+cut -f 1 branched-chain/diamond/branched-chain_result3.tsv | sort -n | uniq | wc -l #2144
+#第三轮diamond的target
+cut -f 2 branched-chain/diamond/branched-chain_result3.tsv | sort -n | uniq | wc -l #1492
+
+#三轮diamond结果一致
+```
+
+
+## 2.5统计diamond比对和hmmer比对时不同species中braB个数
+```bash
+#统计diamond抓取的braB个数
+cat branched-chain/diamond/branched-chain_result3.tsv | tsv-filter --eq 3:100 |cut -f 1 | sort -n | uniq |
+tsv-join -d 1 \
+-f PROTEINS/all.strain.tsv -k 1 \
+--append-fields 2 |
+tsv-join -d 2 \
+-f strains.taxon.tsv -k 1 \
+--append-fields 4 |
+tsv-summarize -g 3 --count |
+keep-header -- tsv-sort -k2,2n >branched-chain/diamond/branched_chain_diamond_genus_num.tsv
+
+#统计hmmer抓取的braB个数
+cat branched-chain/branched-chain_minevalue.pfam.tsv | tsv-select -f 1,3 | 
+tsv-filter --str-in-fld 2:"branched-chain" | cut -f 1 | 
+tsv-join -d 1 \
+-f PROTEINS/all.strain.tsv -k 1 \
+--append-fields 2 |
+tsv-join -d 2 \
+-f strains.taxon.tsv -k 1 \
+--append-fields 4 |
+tsv-summarize -g 3 --count |
+keep-header -- tsv-sort -k2,2n >branched-chain/diamond/branched_chain_hmmer_genus_num.tsv
+```
+
+## 2.5绘制统计不同物种中braB和braz拷贝数的表格
+```bash
+#最终的表格形式如下
+#species  | number of assemblies  | numbers of mltB | average per genome 
+
+#统计assembly总个数
+cat strains.taxon.tsv | cut -f 1 | sort -n | uniq | wc -l #1952 
+#统计不同species的所有assembly
+cat strains.taxon.tsv | tsv-summarize -g 4 --count | keep-header -- tsv-sort -k2,2n >branched-chain/diamond/assembly_genus_num.tsv
+cat branched-chain/diamond/assembly_genus_num.tsv | wc -l  #572
+#统计不同species的含有copy的assembly
+cat branched-chain/diamond/branched_chain_hmmer_genus_num.tsv | wc -l  #386
+##根据不同物种的菌株数量和含有copy的菌株数量差异，发现有的菌株存在基因丢失情况
+##因此基因存在丢失的菌株需要将拷贝记为0
+#差异数目为186
+cat branched-chain/diamond/assembly_genus_num.tsv | grep -v -f <(cut -f 1 branched-chain/diamond/branched_chain_hmmer_genus_num.tsv) | tr "\t" "," | 
+perl -F, -alne '$name=$F[0];$num=0;print"$name\t$num";'  >branched-chain/diamond/branched_chain_hmmer_genus_num_addinformation.tsv
+cat branched-chain/diamond/branched_chain_hmmer_genus_num.tsv  branched-chain/diamond/branched_chain_hmmer_genus_num_addinformation.tsv >branched-chain/diamond/branched_chain_hmmer_species_copy_num.tsv
+
+#两者合并并且相除计算copy per genome
+cat branched-chain/diamond/branched_chain_hmmer_species_copy_num.tsv | 
+tsv-join -d 1 \
+-f branched-chain/diamond/assembly_genus_num.tsv -k 1 \
+--append-fields 2 |
+tsv-select -f 1,3,2  | tr "\t" "," |
+perl -F, -alne '$per=$F[2]/$F[1];$per=sprintf "%.1f",$per;print"$F[0]\t$F[1]\t$F[2]\t$per";' >branched-chain/diamond/branched_chain_genus_assembly_copy.tsv
+
+#添加门信息，科信息
+cat branched-chain/diamond/branched_chain_genus_assembly_copy.tsv | nwr append stdin -r class -r order -r family -r genus  >branched-chain/diamond/branched_chain_class_order_family_genus.tsv
+
+#将不同物种的assembly个数和braz总个数及平均个数进行排序统计
+sed -i '1ispecies\tnumber of assemblies\tnumber of braZ\taverage per genome\tclass\torder\t\tfamily\tgenus' branched-chain/diamond/branched_chain_class_order_family_genus.tsv
+cat branched-chain/diamond/branched_chain_class_order_family_genus.tsv |  keep-header -- tsv-sort -k3,3rn -k4,4rn   >branched-chain/diamond/branched_chain_mean_copy.tsv
+plotr tsv branched-chain/diamond/branched_chain_mean_copy.tsv --header
 
 ```
 
