@@ -1,23 +1,23 @@
 <!-- TOC -->
 
-- [1.codes from Professor Wang](#1codes-from-professor-wang)
-  - [1.1外类群：使用一些模型生物作为外类群，具体信息在reference.tsv中，共有15种.后期会去掉放线菌门，衣原体和厚壁菌门仅进行gamma变形菌纲的分析](#11外类群使用一些模型生物作为外类群具体信息在referencetsv中共有15种后期会去掉放线菌门衣原体和厚壁菌门仅进行gamma变形菌纲的分析)
-  - [1.2species group](#12species-group)
-  - [1.3菌株基因组蛋白信息文件](#13菌株基因组蛋白信息文件)
+- [1. codes from Professor Wang](#1-codes-from-professor-wang)
+  - [1.1 外类群：使用一些模型生物作为外类群，共有15种.后期会去掉放线菌门，衣原体和厚壁菌门仅进行gamma变形菌纲的分析](#11-外类群使用一些模型生物作为外类群共有15种后期会去掉放线菌门衣原体和厚壁菌门仅进行gamma变形菌纲的分析)
+  - [1.2 species group](#12-species-group)
+  - [1.3 菌株基因组蛋白信息文件](#13-菌株基因组蛋白信息文件)
   - [1.4 refer genome和representative genome和假单胞菌属的typical genome](#14-refer-genome和representative-genome和假单胞菌属的typical-genome)
-- [2.统计branched-chain在菌株中拷贝分布](#2统计branched-chain在菌株中拷贝分布)
-  - [2.1使用hmmsearch抓取相同domain的基因或者基因家族](#21使用hmmsearch抓取相同domain的基因或者基因家族)
-  - [2.2将branched-chain提取的蛋白序列与tigerfam数据库比对](#22将branched-chain提取的蛋白序列与tigerfam数据库比对)
-  - [2.3将branched-chain提取的蛋白序列与pfam数据库比对](#23将branched-chain提取的蛋白序列与pfam数据库比对)
-  - [2.4多轮diamond（将hmmer匹配的蛋白作为query序列与所有蛋白进行比对，再次进行筛选）all.replace.fa中有两条序列存在大量空字符(null)导致无法建库，需要删除](#24多轮diamond将hmmer匹配的蛋白作为query序列与所有蛋白进行比对再次进行筛选allreplacefa中有两条序列存在大量空字符null导致无法建库需要删除)
-  - [2.5统计diamond比对和hmmer比对时不同species中BCAA个数](#25统计diamond比对和hmmer比对时不同species中bcaa个数)
-  - [2.6菌株中丢失了BCAA记为0](#26菌株中丢失了bcaa记为0)
-  - [2.7绘制统计不同物种中BCAA平均拷贝数的表格](#27绘制统计不同物种中bcaa平均拷贝数的表格)
-- [3.两种树](#3两种树)
-  - [3.1参考细菌的bac120蛋白树](#31参考细菌的bac120蛋白树)
-  - [3.2参考细菌的branched蛋白树](#32参考细菌的branched蛋白树)
-  - [3.3代表细菌的bac120蛋白树](#33代表细菌的bac120蛋白树)
-  - [3.4代表细菌的branched蛋白树](#34代表细菌的branched蛋白树)
+- [2. 统计branched-chain在菌株中拷贝分布](#2-统计branched-chain在菌株中拷贝分布)
+  - [2.1 使用hmmsearch抓取相同domain的基因或者基因家族](#21-使用hmmsearch抓取相同domain的基因或者基因家族)
+  - [2.2 将branched-chain提取的蛋白序列与tigerfam数据库比对](#22-将branched-chain提取的蛋白序列与tigerfam数据库比对)
+  - [2.3 将branched-chain提取的蛋白序列与pfam数据库比对](#23-将branched-chain提取的蛋白序列与pfam数据库比对)
+  - [2.4 多轮diamond（将hmmer匹配的蛋白作为query序列与所有蛋白进行比对，再次进行筛选）all.replace.fa中有两条序列存在大量空字符(null)导致无法建库，需要删除](#24-多轮diamond将hmmer匹配的蛋白作为query序列与所有蛋白进行比对再次进行筛选allreplacefa中有两条序列存在大量空字符null导致无法建库需要删除)
+  - [2.5 统计diamond比对和hmmer比对时不同species中BCAA个数](#25-统计diamond比对和hmmer比对时不同species中bcaa个数)
+  - [2.6 菌株中丢失了BCAA记为0](#26-菌株中丢失了bcaa记为0)
+  - [2.7 绘制统计不同物种中BCAA平均拷贝数的表格](#27-绘制统计不同物种中bcaa平均拷贝数的表格)
+- [3. 两种树](#3-两种树)
+  - [3.1 参考细菌的bac120蛋白树](#31-参考细菌的bac120蛋白树)
+  - [3.2 参考细菌的branched蛋白树](#32-参考细菌的branched蛋白树)
+  - [3.3 代表细菌的bac120蛋白树](#33-代表细菌的bac120蛋白树)
+  - [3.4 代表细菌的branched蛋白树](#34-代表细菌的branched蛋白树)
 - [以下方法错误!!!](#以下方法错误)
 - [以下方法错误!!!](#以下方法错误-1)
 - [以下方法错误!!!](#以下方法错误-2)
@@ -29,8 +29,8 @@
 * 1.由于外类群不够，新添了一些基因组文件，由1514增加至1953个基因组文件，由此需要重新操作  
 * 2.hmmsearch搜索结构域，hmmscan过滤,diamond重复计算拷贝数，绘制拷贝数的表格，绘制Reference Genome的树和Representative Genome与Reference Genome的树  
 * 3.目前以branched为例,branched在pfam panthern和tigrfam中均存在    
-# 1.codes from Professor Wang
-## 1.1外类群：使用一些模型生物作为外类群，具体信息在reference.tsv中，共有15种.后期会去掉放线菌门，衣原体和厚壁菌门仅进行gamma变形菌纲的分析
+# 1. codes from Professor Wang
+## 1.1 外类群：使用一些模型生物作为外类群，共有15种.后期会去掉放线菌门，衣原体和厚壁菌门仅进行gamma变形菌纲的分析
 | #tax\_id | organism\_name | phylum |
 | :--- | :--- | :--- |
 | 565050 | Caulobacter vibrioides NA1000 | Alphaproteobacteria |
@@ -49,7 +49,7 @@
 | 169963 | Listeria monocytogenes EGD-e | Firmicutes |
 | 83332 | Mycobacterium tuberculosis H37Rv | Actinobacteria |
 
-## 1.2species group
+## 1.2 species group
 ```bash
 mkdir -p ~/data/Pseudomonas
 cd ~/data/Pseudomonas
@@ -82,7 +82,7 @@ nwr member Pseudomonas -r "species group"
 
 ```
 
-## 1.3菌株基因组蛋白信息文件
+## 1.3 菌株基因组蛋白信息文件
 ```shell
 #包含NCBI的样本信息且去除了错误的菌株基因组文件信息，共1952个  
 #assembly level:Complete Genome(1810)或Chromosome(142)
@@ -142,8 +142,8 @@ done \
 ```
 
 
-# 2.统计branched-chain在菌株中拷贝分布
-## 2.1使用hmmsearch抓取相同domain的基因或者基因家族
+# 2. 统计branched-chain在菌株中拷贝分布
+## 2.1 使用hmmsearch抓取相同domain的基因或者基因家族
 ```bash
 #查看branched-chain的hmm文件所在数据库
 cd ~/data/Pseudomonas
@@ -196,7 +196,7 @@ wc -l branched-chain/*.tsv
        4280 branched-chain/branched.pfam.replace.tsv
        4280 branched-chain/branched.tigerfam.replace.tsv
 ```
-## 2.2将branched-chain提取的蛋白序列与tigerfam数据库比对
+## 2.2 将branched-chain提取的蛋白序列与tigerfam数据库比对
 ```bash
 #下载tigerfam数据库
 mkdir -p ~/data/HMM/TIGERFAM
@@ -244,7 +244,7 @@ tsv-summarize -g 3,2 --count  branched-chain/branched-chain_hmmscan_copy.tsv > b
 sed -i '1icopy\tgenus\tGCF'  branched-chain/branched-chain_hmmscan_GCF_copy.tsv
 
 ```
-## 2.3将branched-chain提取的蛋白序列与pfam数据库比对
+## 2.3 将branched-chain提取的蛋白序列与pfam数据库比对
 ```bash
 #下载pfam数据库
 mkdir -p ~/data/HMM/PFAM
@@ -298,7 +298,7 @@ keep-header -- tsv-sort -k3,3n >branched-chain/branched-chain_hmmscan_copy.pfam.
 tsv-summarize -g 3,2 --count  branched-chain/branched-chain_hmmscan_copy.pfam.tsv > branched-chain/branched-chain_hmmscan_GCF_copy.pfam.tsv
 sed -i '1icopy\tgenus\tGCF'  branched-chain/branched-chain_hmmscan_GCF_copy.pfam.tsv
 ```
-## 2.4多轮diamond（将hmmer匹配的蛋白作为query序列与所有蛋白进行比对，再次进行筛选）all.replace.fa中有两条序列存在大量空字符(null)导致无法建库，需要删除
+## 2.4 多轮diamond（将hmmer匹配的蛋白作为query序列与所有蛋白进行比对，再次进行筛选）all.replace.fa中有两条序列存在大量空字符(null)导致无法建库，需要删除
 ```bash
 cd ~/data/Pseudomonas
 mkdir -p branched-chain/diamond
@@ -340,7 +340,7 @@ cut -f 2 branched-chain/diamond/branched-chain_result3.tsv | sort -n | uniq | wc
 #三轮diamond结果一致
 ```
 
-## 2.5统计diamond比对和hmmer比对时不同species中BCAA个数
+## 2.5 统计diamond比对和hmmer比对时不同species中BCAA个数
 ```bash
 #统计diamond抓取的braB个数
 cat branched-chain/diamond/branched-chain_result3.tsv | tsv-filter --eq 3:100 |cut -f 1 | sort -n | uniq |
@@ -366,7 +366,7 @@ tsv-summarize -g 3 --count |
 keep-header -- tsv-sort -k2,2n >branched-chain/diamond/branched_chain_hmmer_species_num.tsv
 ```
 
-## 2.6菌株中丢失了BCAA记为0
+## 2.6 菌株中丢失了BCAA记为0
 ```bash
 #统计assembly总个数
 cat strains.taxon.tsv | cut -f 1 | sort -n | uniq | wc -l #1952 
@@ -383,7 +383,7 @@ perl -F, -alne '$name=$F[0];$num=0;print"$name\t$num";'  >branched-chain/diamond
 cat branched-chain/diamond/branched_chain_hmmer_species_num.tsv  branched-chain/diamond/branched_chain_hmmer_species_num_addinformation.tsv >branched-chain/diamond/branched_chain_hmmer_species_copy_num.tsv
 ```
 
-## 2.7绘制统计不同物种中BCAA平均拷贝数的表格
+## 2.7 绘制统计不同物种中BCAA平均拷贝数的表格
 * 表格内容
 ```bash
 #species  | number of assemblies  | numbers of BCAA | average per genome 
@@ -422,7 +422,7 @@ mlr --itsv --ocsv cat branched-chain/diamond/branched_chain_copy_whole.tsv >bran
   
 
 
-# 3.两种树
+# 3. 两种树
 * [系统发育和系统发育生态学标记PhyEco marker](https://journals.plos.org/plosone/article?id=10.1371/journal.pone.0077033)
 * [系统识别细菌和古细菌不同分类水平的系统发育标记](https://figshare.com/articles/dataset/Systematically_identify_phylogenetic_markers_at_different_taxonomic_levels_for_bacteria_and_archaea/722713/1)
 * 在不同分类水平上自动识别系统发育标记的协议，该协议使用快速搜索和聚类算法为选择的基因组生成蛋白质家族,然后建立系统发育树，并自动对来自树的进化枝进行采样和评估，以评估使它们对系统发育分析(例如感兴趣的基因组的普遍性）和生态学研究（例如复制均匀性），然后使用多重比较和系统发育分析进一步评估潜在的标记家族.使用该种方法，作者已经为所有细菌确定了114个系统发育标记,其中包括40个同时涵盖细菌和古细菌的标记
@@ -431,7 +431,7 @@ mlr --itsv --ocsv cat branched-chain/diamond/branched_chain_copy_whole.tsv >bran
 * 基因树构建:使用来自Tigrfams的HMM模型和IMG基因组下载的基因组中鉴定RpoB或EF-tu基因序列，使用muscle比对，使用FastTree构建系统发育树
 
 
-## 3.1参考细菌的bac120蛋白树
+## 3.1 参考细菌的bac120蛋白树
 ```bash
 cd ~/data/Pseudomonas/
 mkdir -p ~/data/Pseudomonas/branched-chain/tree
@@ -447,7 +447,7 @@ nw_reroot  PROTEINS/bac120.refer.aln.newick $(nw_labels PROTEINS/bac120.refer.al
     > PROTEINS/bac120.refer.reroot.newick
  ```
 
-## 3.2参考细菌的branched蛋白树
+## 3.2 参考细菌的branched蛋白树
 ```bash
 #提取参考菌株的braz名字(去除非gamma变形菌纲的)
 cat branched-chain/branched-chain_minevalue.tsv | grep -f reference.tsv | grep -v 'GCF' | cut -f 1 >branched-chain/tree/branched-chain_refer.tsv
@@ -478,7 +478,7 @@ p1+geom_tiplab(offset=0.05,size=3)+geom_text2(aes(subset=!isTip, label=node), hj
 p3 + geom_tiplab(offset=0.05,size=3) + geom_treescale()+ geom_highlight(node=25,fill="red")+ geom_tree(data=d2) + geom_tiplab(data = d2, hjust=1, offset =-0.05,size=3)
 ```
 
-## 3.3代表细菌的bac120蛋白树
+## 3.3 代表细菌的bac120蛋白树
 ```bash
 cd ~/data/Pseudomonas
 #提取参考菌株的bac120名字(去除非gamma变形菌纲的)
@@ -492,7 +492,7 @@ nw_reroot  PROTEINS/bac120.refer.representative.newick $(nw_labels PROTEINS/bac1
 nw_order -c n -  > PROTEINS/bac120.representative.reroot.newick
 ```
 
-## 3.4代表细菌的branched蛋白树
+## 3.4 代表细菌的branched蛋白树
 ```bash
 cd ~/data/Pseudomonas
 #提取参考菌株的braz名字(去除非gamma变形菌纲的)
