@@ -20,6 +20,8 @@
   - [3.4gamma变形菌纲内(模式菌株15+代表菌株533+典型菌株12 共有560)建立基因树](#34gamma变形菌纲内模式菌株15代表菌株533典型菌株12-共有560建立基因树)
   - [3.5gamma变形菌纲(模式菌株15+代表菌株533+典型菌株12 共有560)建立物种树，alpha变形菌纲作为外类群，厚壁菌门作为外类群(金黄色葡萄球菌和枯草芽孢杆菌)](#35gamma变形菌纲模式菌株15代表菌株533典型菌株12-共有560建立物种树alpha变形菌纲作为外类群厚壁菌门作为外类群金黄色葡萄球菌和枯草芽孢杆菌)
 - [4.生物环境](#4生物环境)
+  - [4.1铜绿样本生物环境注释信息](#41铜绿样本生物环境注释信息)
+  - [4.2注释信息自动生成配色](#42注释信息自动生成配色)
 
 <!-- /TOC -->
 * 1.由于外类群不够，新添了一些基因组文件，由1514增加至1953个基因组文件，由此需要重新操作  
@@ -521,9 +523,9 @@ cat branched-chain/tree/branched-chain.Gammaproteobacteria.outline.species.tsv |
 
 #提取上述菌株名相应的bac120序列 #376
 faops some PROTEINS/bac120.trim.fa branched-chain/tree/branched-chain.Gammaproteobacteria.bac120.species.tsv branched-chain/tree/branched-chain.Gammaproteobacteria.bac120.species.fa
-muscle -in branched-chain/tree/branched-chain.Gammaproteobacteria.bac120.species.fa  -out branched-chain/tree/branched-chain.Gammaproteobacteria.bac120.aln.fa
+mafft --retree 1 --maxiterate 0 branched-chain/tree/branched-chain.Gammaproteobacteria.bac120.species.fa >branched-chain/tree/branched-chain.Gammaproteobacteria.bac120.mafft.aln.fa
 #建树
-FastTree branched-chain/tree/branched-chain.Gammaproteobacteria.bac120.aln.fa >branched-chain/tree/branched-chain.Gammaproteobacteria.bac120.aln.newick
+FastTree branched-chain/tree/branched-chain.Gammaproteobacteria.bac120.mafft.aln.fa >branched-chain/tree/branched-chain.Gammaproteobacteria.bac120.aln.newick
 #定义外类群
 nw_reroot branched-chain/tree/branched-chain.Gammaproteobacteria.bac120.aln.newick $(nw_labels branched-chain/tree/branched-chain.Gammaproteobacteria.bac120.aln.newick | grep -E "Bac_subti|Sta_aure") |nw_order -c n - >branched-chain/tree/branched-chain.Gammaproteobacteria.bac120.reroot.newick
 ```
@@ -573,6 +575,7 @@ write.tree(sub_tree,file = "branched_representative_sub.nwk")
 ```
 
 # 4.生物环境
+## 4.1铜绿样本生物环境注释信息
 ```BASH
 #共有391个铜绿组装体(有390个有样本信息)(有347个有生境信息)
 for filename in *.txt
@@ -590,12 +593,65 @@ sample=$(cat $base.json | cut -d "\"" -f 2)
 echo -e "$base\t$sample"
 done >env_sample.tsv
 
-#选择样本信息和菌株信息
+#选择样本信息和菌株信息391
  cat Pseudomonas.assembly.pass.csv| grep "Pseudom_aeru"| cut -d "," -f 1,2,6 | tr "," "\t" >biosample_strain.tsv
-
- #拼接样本环境信息和菌株信息
+#拼接样本环境信息和菌株信息 347
 cat env_sample.tsv | tsv-join -d 1 -f biosample_strain.tsv -k 3 --append-fields 1 | tsv-select -f 1,3,2 >biosample_strain_env.tsv
-mlr --itsv --ocsv cat biosample_strain_env.tsv >biosample_strain_env.csv
-
 #去除不可利用和缺失的共269个
-cat biosample_strain_env.csv| grep -v "not applicable" | grep -v "missing" | grep -v -E "SAMN13612472|SAMN13612474|SAMN13612476" >biosample_strain_environment.csv
+cat biosample_strain_env.tsv| grep -v "not applicable" | grep -v "missing" | grep -v -E "SAMN13612472|SAMN13612474|SAMN13612476" >biosample_strain_environment.tsv
+#共有122个的信息缺失
+cat biosample_strain.tsv | grep -v -f <(cat biosample_strain_environment.tsv | cut -f 2) 
+```
+## 4.2注释信息自动生成配色
+* table2itol是在GitHup上公开的R语言包，其作用是专门为iTOL生成所需的注释文件，只需准备表格形式的数据，包含配色方案的注释文件就会自动生成，极大提高了准备注释文件的效率。
+* [table2itol地址](https://github.com/mgoeker/table2itol)
+```r
+#linux安装
+wget https://github.com/mgoeker/table2itol/archive/master.zip 
+unzip master.zip 
+mv table2itol-master table2itol
+## 测试 
+chmod +x table2itol/table2itol.R  
+Rscript ./table2itol/table2itol.R 
+#optparse--强大的命令行参数处理包 
+#optparse使得我们很方便地给R脚本设置命令行参数，从而使得R脚本的复用和流程化使用
+install.packages("optparse")
+library("optparse")
+Rscript ./table2itol/table2itol.R  -D plan1 -i tip  -b class  -w 0.5   2.tsv 4.tsv
+-D 输出目录
+-b设置背景色
+--na-strings X 颜色圈放在名称外面
+ -w 指定颜色带和宽度区域
+ -a 找不到输入列将终止运行（默认不执行）
+ -c 将整数列转换为factor或具有小数点的数字，
+ -t 偏离提示标签时转换ID列，
+ -w 颜色带，区域宽度等， 
+ -D输出目录，
+ -i OTU列名，
+ -l OTU显示名称如种/属/科名，
+#第一个文件第一行是表头，第一列是进化树中的叶标签tip，第二列为分类信息class1
+#第二个文件第一行是表头，第一列是进化树中的叶标签tip，第二列为分类信息class2
+
+
+#window安装
+setwd("D:/braB_Z_HGT/biosample")
+#table2itol使用需要依赖很多包
+site="https://mirrors.tuna.tsinghua.edu.cn/CRAN" 
+# 依赖包列表：参数解析、数据变换、绘图和开发包安装、安装依赖、ggplot主题 
+package_list = c("grid","ggplot2","gridExtra","vegan","reshape2","readODS") 
+# 判断R包加载是否成功来决定是否安装后再加载 
+for(p in package_list){  
+    if(!suppressWarnings(suppressMessages(require(p, character.only = TRUE, quietly = TRUE, warn.conflicts = FALSE)))){   
+        install.packages(p, repos=site)   
+        suppressWarnings(suppressMessages(library(p, character.only = TRUE, quietly = TRUE, warn.conflicts = FALSE)))   
+    } 
+}  
+#### 安装缺少的R包 
+source("http://bioconductor.org/biocLite.R") 
+biocLite(c("optparse", "plotrix", "readODS", "readxl", "yaml"))
+#输入文件准备
+
+source("table2itol.R") 
+create_itol_files(infiles ="2.tsv",
+   identifier = "tip", label = "class", na.strings = "X")
+```
