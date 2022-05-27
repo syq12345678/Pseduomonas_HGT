@@ -14,12 +14,12 @@
   - [2.6 菌株中丢失了BCAA记为0](#26-菌株中丢失了bcaa记为0)
   - [2.7 绘制统计不同物种中BCAA平均拷贝数的表格](#27-绘制统计不同物种中bcaa平均拷贝数的表格)
 - [3. 两种树](#3-两种树)
-  - [3.1铜绿假单胞菌物种内所有的braB和braZ序列建立基因树](#31铜绿假单胞菌物种内所有的brab和braz序列建立基因树)
-  - [3.2铜绿假单胞菌物种内所有的braB和braZ序列建立物种树](#32铜绿假单胞菌物种内所有的brab和braz序列建立物种树)
-  - [3.3假单胞菌属内(模式菌株15+代表菌株533+典型菌株12 共有560)建立基因树](#33假单胞菌属内模式菌株15代表菌株533典型菌株12-共有560建立基因树)
-  - [3.4假单胞菌属内(模式菌株15+代表菌株533+典型菌株12 共有560)建立物种树](#34假单胞菌属内模式菌株15代表菌株533典型菌株12-共有560建立物种树)
-  - [3.5gamma变形菌纲内(模式菌株15+代表菌株533+典型菌株12 共有560)建立基因树](#35gamma变形菌纲内模式菌株15代表菌株533典型菌株12-共有560建立基因树)
-  - [3.6gamma变形菌纲(模式菌株15+代表菌株533+典型菌株12 共有560)建立物种树，alpha变形菌纲作为外类群，厚壁菌门作为外类群(金黄色葡萄球菌和枯草芽孢杆菌)](#36gamma变形菌纲模式菌株15代表菌株533典型菌株12-共有560建立物种树alpha变形菌纲作为外类群厚壁菌门作为外类群金黄色葡萄球菌和枯草芽孢杆菌)
+  - [3.1铜绿假单胞菌物种内所有的braB和braZ序列建立基因树（不需要外类群,因为蛋白序列有一半是braB,有一半是braZ,无法区分)](#31铜绿假单胞菌物种内所有的brab和braz序列建立基因树不需要外类群因为蛋白序列有一半是brab有一半是braz无法区分)
+  - [3.2铜绿假单胞菌物种内所有的braB和braZ序列建立物种树（需要外类群)](#32铜绿假单胞菌物种内所有的brab和braz序列建立物种树需要外类群)
+  - [3.3假单胞菌属内(模式菌株15+代表菌株533 共有548)建立基因树(需要外类群)](#33假单胞菌属内模式菌株15代表菌株533-共有548建立基因树需要外类群)
+  - [3.4假单胞菌属内(模式菌株15+代表菌株533 共有548)建立物种树](#34假单胞菌属内模式菌株15代表菌株533-共有548建立物种树)
+  - [3.5gamma变形菌纲内(模式菌株15+代表菌株533 共有548)建立基因树 (需要外类群)](#35gamma变形菌纲内模式菌株15代表菌株533-共有548建立基因树-需要外类群)
+  - [3.6gamma变形菌纲(模式菌株15+代表菌株533 共有548)建立物种树，alpha变形菌纲作为外类群，厚壁菌门作为外类群(金黄色葡萄球菌和枯草芽孢杆菌)](#36gamma变形菌纲模式菌株15代表菌株533-共有548建立物种树alpha变形菌纲作为外类群厚壁菌门作为外类群金黄色葡萄球菌和枯草芽孢杆菌)
 - [4.生物环境](#4生物环境)
   - [4.1铜绿样本生物环境注释信息](#41铜绿样本生物环境注释信息)
   - [4.2注释信息自动生成配色](#42注释信息自动生成配色)
@@ -434,24 +434,20 @@ mlr --itsv --ocsv cat branched-chain/diamond/branched_chain_copy_whole.tsv >bran
 * 比对后处理:PhyDE 序列编辑软件，可以多开，方便多个比对结果之间进行比较。FastGap 可以对比对后的序列的gap进行重编码，提高序列信息使用效率。Gblocks 在线工具，选择序列保守区，使得后续系统发育分析免受变异过大的比对区域的不良影响。DAMBE 一个低调但全能的系统发育软件，定位与Mega类似，包括饱和度检测功能点。DNAsp 序列分析软件，计算各种序列多样性数据，如核苷酸多样性、序列信息位点含量、单倍型等
 * 目前常用的构建系统发育树的方法有：邻位归并法(Neighbor joining, NJ)、最大似然法(Maximum likelihood method, ML) 以及贝叶斯法（BI）。综合速度和准确度，ML用得较多。ML对替代模型非常敏感，因此利用ML法构建系统发育树之前，选择合适的替代模型是必不可少的过程。(如果序列的相似度较高，每种方法和模型构建的系统发育树差别不大)
 
-## 3.1铜绿假单胞菌物种内所有的braB和braZ序列建立基因树
+## 3.1铜绿假单胞菌物种内所有的braB和braZ序列建立基因树（不需要外类群,因为蛋白序列有一半是braB,有一半是braZ,无法区分)
 ```bash
 cd ~/data/Pseudomonas
 #提取所有的铜绿假单胞菌的单双拷贝蛋白序列(773)
 mkdir -p ~/data/Pseudomonas/branched-chain/tree
 faops some PROTEINS/all.replace.fa <(cat branched-chain/branched-chain_minevalue.tsv |grep -f <(cat branched-chain/branched-chain_hmmscan_copy.pfam.tsv | grep "Pseudom_aeru" | cut -f 1) | cut -f 1 ) branched-chain/tree/branched-chain.Pseudom_aeru.protein.fa
-#加上外类群
-echo -e "Pseudom_puti_GCF_000691565_1\nPseudom_syr_GCF_004323795_1\nPseudom_fluo_GCF_000730425_1" >branched-chain/tree/branched-chain.Pseudom_aeru.bac120.outgroup.tsv
-faops some PROTEINS/all.replace.fa <(cat branched-chain/branched-chain_minevalue.tsv | grep -f branched-chain/tree/branched-chain.Pseudom_aeru.bac120.outgroup.tsv|cut -f 1) branched-chain/tree/branched-chain.Pseudom_aeru.protein.outgroup.fa
-cat  branched-chain/tree/branched-chain.Pseudom_aeru.protein.outgroup.fa >>branched-chain/tree/branched-chain.Pseudom_aeru.protein.fa
-#查看776
- faops size branched-chain/tree/branched-chain.Pseudom_aeru.protein.fa | wc -l
+#查看773
+faops size branched-chain/tree/branched-chain.Pseudom_aeru.protein.fa | wc -l
 #比对
-mafft --retree 1 --maxiterate 0  branched-chain/tree/branched-chain.Pseudom_aeru.protein.fa > branched-chain/tree/branched-chain.Pseudom_aeru.aln.mafft.fa
-#使用iqtree2建树（超算上)776
-bsub -q mpi -n 24 -J "iq" ./iqtree2 -s branched-chain.Pseudom_aeru.aln.mafft.fa  -m MFP  --prefix branched-chain.Pseudom_aeru -T 20 -b 100  -o Pseudom_fluo_GCF_000730425_1_WP_038447089,Pseudom_puti_GCF_000691565_1_WP_038410004,Pseudom_syr_GCF_004323795_1_WP_007244764
+mafft --auto   branched-chain/tree/branched-chain.Pseudom_aeru.protein.fa > branched-chain/tree/branched-chain.Pseudom_aeru.aln.mafft.fa
+#使用iqtree2建树（超算上)773
+bsub -q mpi -n 24 -J "iq" ./iqtree2 -s branched-chain.Pseudom_aeru.aln.mafft.fa  -m MFP  --prefix branched-chain.Pseudom_aeru -T 20 -b 100  
 #改名
-mv branched-chain.Pseudom_aeru.treefile branched-chain.Pseudom_aeru.aln.newick
+mv branched-chain.Pseudom_aeru.treefile branched-chain.Pseudom_aeru.newick
 
 
 #modeltest-ng查看最佳建树模型
@@ -516,111 +512,84 @@ iqtree -s example.phy -m MFP -B 1000 --bnni -T AUTO
 ```
 
 
-## 3.2铜绿假单胞菌物种内所有的braB和braZ序列建立物种树
+## 3.2铜绿假单胞菌物种内所有的braB和braZ序列建立物种树（需要外类群)
 ```bash
 cd ~/data/Pseudomonas
-
 #外类群菌株名(恶臭，丁香，荧光)
-cat branched-chain/branched-chain_minevalue.tsv | cut -f 1 | tsv-join -d 1 -f PROTEINS/all.strain.tsv -k 1 --append-fields 2 | cut -f 2 | sort -n | uniq | grep "Pseudom_puti"            #恶臭Pseudom_puti_GCF_000691565_1  Pseudom_puti_GCF_001515585_1
-cat branched-chain/branched-chain_minevalue.tsv | cut -f 1 | tsv-join -d 1 -f PROTEINS/all.strain.tsv -k 1 --append-fields 2 | cut -f 2 | sort -n | uniq |  grep "Pseudom_syr"            #丁香 Pseudom_syr_GCF_004323795_1  Pseudom_syr_GCF_014524645_1
-cat branched-chain/branched-chain_minevalue.tsv | cut -f 1 | tsv-join -d 1 -f PROTEINS/all.strain.tsv -k 1 --append-fields 2 | cut -f 2 | sort -n | uniq |  grep "Pseudom_flu"            #荧光 Pseudom_fluo_GCF_000730425_1 Pseudom_fluo_GCF_001307155_1
+cat branched-chain/branched-chain_minevalue.tsv | cut -f 1 | tsv-join -d 1 -f PROTEINS/all.strain.tsv -k 1 --append-fields 2 | cut -f 2 | sort -n | uniq | grep "Pseudom_puti"            #恶臭Pseudom_puti_GCF_000691565_1
+cat branched-chain/branched-chain_minevalue.tsv | cut -f 1 | tsv-join -d 1 -f PROTEINS/all.strain.tsv -k 1 --append-fields 2 | cut -f 2 | sort -n | uniq |  grep "Pseudom_syr"            #丁香 Pseudom_syr_GCF_004323795_1  
+cat branched-chain/branched-chain_minevalue.tsv | cut -f 1 | tsv-join -d 1 -f PROTEINS/all.strain.tsv -k 1 --append-fields 2 | cut -f 2 | sort -n | uniq |  grep "Pseudom_flu"            #荧光 Pseudom_fluo_GCF_000730425_1 
 echo -e "Pseudom_puti_GCF_000691565_1\nPseudom_syr_GCF_004323795_1\nPseudom_fluo_GCF_000730425_1" >branched-chain/tree/branched-chain.Pseudom_aeru.bac120.outgroup.tsv
 faops some PROTEINS/bac120.trim.fa branched-chain/tree/branched-chain.Pseudom_aeru.bac120.outgroup.tsv branched-chain/tree/branched-chain.Pseudom_aeru.bac120.outgroup.fa
 #提取铜绿假单胞菌的物种的菌株名字 #391
 cat branched-chain/branched-chain_minevalue.tsv | grep "Pseudom_aeru" | cut -f 1 | tsv-join -d 1 -f PROTEINS/all.strain.tsv -k 1 --append-fields 2 | cut -f 2 | sort -n | uniq >branched-chain/tree/branched-chain.Pseudom_aeru.bac120.species.tsv
 #提取上述菌株名相应的bac120序列 #391
 faops some PROTEINS/bac120.trim.fa branched-chain/tree/branched-chain.Pseudom_aeru.bac120.species.tsv  branched-chain/tree/branched-chain.Pseudom_aeru.bac120.species.fa
-
 #合并铜绿假单胞菌序列和外类群 #394
 cat branched-chain/tree/branched-chain.Pseudom_aeru.bac120.outgroup.fa >>branched-chain/tree/branched-chain.Pseudom_aeru.bac120.species.fa
 #mafft比对 3 个参数都设置为最不消耗时间的类型，适合于 ~10,000 到 ~50,000 条序列的比对。 mafft --retree 1 --maxiterate 0 --nofft
-mafft --retree 1 --maxiterate 0 branched-chain/tree/branched-chain.Pseudom_aeru.bac120.species.fa >branched-chain/tree/branched-chain.Pseudom_aeru.bac120.aln.mafft.fa
+mafft --auto branched-chain/tree/branched-chain.Pseudom_aeru.bac120.species.fa >branched-chain/tree/branched-chain.Pseudom_aeru.bac120.aln.mafft.fa
 #使用iqtree2建树（超算上)#394
-bsub -q mpi -n 24 -J "iq" ./iqtree2 -s branched-chain.Pseudomonas.bac120.aln.mafft.fa -m MFP  --prefix branched-chain.Pseudomonas.bac120.aln -T 20 -B 1000 --bnni  -o  She_balt_OS117_GCF_000215895_1,Thiop_alkalip_GCF_001267175_1,Vi_cho_GCF_008369605_1  
+bsub -q mpi -n 24 -J "iq" ./iqtree2 -s branched-chain.Pseudom_aeru.bac120.aln.mafft.fa  -m MFP  --prefix branched-chain.Pseudom_aeru.120.aln -T 20 -B 1000 --bnni  -o Pseudom_puti_GCF_000691565_1,Pseudom_syr_GCF_004323795_1,Pseudom_fluo_GCF_000730425_1
 #改名
-mv branched-chain.Pseudom_aeru.bac120.treefile branched-chain.Pseudom_aeru.bac120.aln.newick
-
+mv branched-chain.Pseudom_aeru.bac120.aln.treefile branched-chain.Pseudom_aeru.bac120.newick
 ```
 
-## 3.3假单胞菌属内(模式菌株15+代表菌株533+典型菌株12 共有560)建立基因树
+## 3.3假单胞菌属内(模式菌株15+代表菌株533 共有548)建立基因树(需要外类群)
 ```bash
 cd ~/data/Pseudomonas
-#外类群序列名(只选择3个，和braB和braZ的关系都较远)
+#外类群序列名(只选择2个，和braB和braZ的关系都较远)
 Shewanella baltica
 Vibrio cholerae
-Thiopseudomonas alkaliphila
-#提取外类群物种菌株对应的GCF名b并且仅保留三个
-cat  strains.taxon.tsv | grep -f <(echo -e "Shewanella baltica\nVibrio cholerae\nThiopseudomonas alkaliphila") | cut -f 1 
-echo -e 'She_balt_OS117_GCF_000215895_1\nThiop_alkalip_GCF_001267175_1\nVi_cho_GCF_008369605_1' >branched-chain/tree/branched-chain.Pseudomonas.bac120.outgroup.tsv
+#提取外类群物种菌株对应的GCF名并且每个外类群仅保留一个
+cat  strains.taxon.tsv | grep -f <(echo -e "Shewanella baltica\nVibrio cholerae") | cut -f 1 
+echo -e 'She_balt_GCF_003030925_1\nVi_cho_GCF_008369605_1' >branched-chain/tree/branched-chain.Pseudomonas.bac120.outgroup.tsv
 #提取外类群菌株对应的GCF_WP名字
 cat branched-chain/branched-chain_minevalue.tsv | grep -f branched-chain/tree/branched-chain.Pseudomonas.bac120.outgroup.tsv | cut -f 1 >branched-chain/tree/branched-chain.Pseudomonas.protein.outgroup.tsv
+She_balt_GCF_003030925_1_WP_006084009
+Vi_cho_GCF_008369605_1_WP_000815020
 #提取外类群序列
 faops some PROTEINS/all.replace.fa branched-chain/tree/branched-chain.Pseudomonas.protein.outgroup.tsv branched-chain/tree/branched-chain.Pseudomonas.protein.outgroup.fa
 
-#提取假单胞菌属的的（模式菌株+代表菌株+典型菌株)的菌株名字#59
-cat typical.lst  representative.tsv | tsv-join -d 1 -f strains.taxon.tsv -k 1 --append-fields 4 | tsv-select -f 2,1 | nwr append stdin -r genus | tsv-filter --str-in-fld 3:"Pseudomonas" | sort -n | uniq >branched-chain/tree/branched-chain.Pseudomonas.protein.tsv
-#提取上述菌株名相应的braz或braB蛋白(65)
-faops some PROTEINS/all.replace.fa <(cat branched-chain/branched-chain_minevalue.tsv | grep -f <(cut -f 2 branched-chain/tree/branched-chain.Pseudomonas.protein.tsv) | cut -f 1) branched-chain/tree/branched-chain.Pseudomonas.protein.fa
-#验证蛋白对应的菌株数(60)  #多出了一个Pseudom_aeru_PAO1_GCF_013001005_1,没有影响
-cat branched-chain/branched-chain_minevalue.tsv | grep -f <(cut -f 2 branched-chain/tree/branched-chain.Pseudomonas.protein.tsv) | cut -f 1 | tsv-join -d 1 -f PROTEINS/all.strain.tsv -k 1 --append-fields 2 | cut -f 2 | sort -n | uniq 
-#将外类群合并到铜绿序列中(68)
+#提取假单胞菌属的的（模式菌株+代表菌株)的菌株名字#49
+cat  representative.tsv | tsv-join -d 1 -f strains.taxon.tsv -k 1 --append-fields 4 | tsv-select -f 2,1 | nwr append stdin -r genus | tsv-filter --str-in-fld 3:"Pseudomonas" | sort -n | uniq >branched-chain/tree/branched-chain.Pseudomonas.protein.tsv
+#提取上述菌株名相应的braz或braB蛋白(50) #多出一个蛋白是因为PAO1里面有两个拷贝braB和braZ   #多出了一个Pseudom_aeru_PAO1_GCF_013001005_1舍弃
+faops some PROTEINS/all.replace.fa <(cat branched-chain/branched-chain_minevalue.tsv | grep -f <(cut -f 2 branched-chain/tree/branched-chain.Pseudomonas.protein.tsv) | cut -f 1| grep -v "Pseudom_aeru_PAO1_GCF_013001005_1") branched-chain/tree/branched-chain.Pseudomonas.protein.fa
+#验证蛋白对应的菌株数(49)  
+cat branched-chain/branched-chain_minevalue.tsv |  grep -v "Pseudom_aeru_PAO1_GCF_013001005_1" | grep -f <(cut -f 2 branched-chain/tree/branched-chain.Pseudomonas.protein.tsv) | cut -f 1 | tsv-join -d 1 -f PROTEINS/all.strain.tsv -k 1 --append-fields 2 | cut -f 2 | sort -n | uniq | wc -l
+#将外类群合并到铜绿序列中(52)
 cat branched-chain/tree/branched-chain.Pseudomonas.protein.outgroup.fa >>branched-chain/tree/branched-chain.Pseudomonas.protein.fa
 #比对(68)
-mafft --retree 1 --maxiterate 0 branched-chain/tree/branched-chain.Pseudomonas.protein.fa >branched-chain/tree/branched-chain.Pseudomonas.protein.aln.fa
+mafft --auto  branched-chain/tree/branched-chain.Pseudomonas.protein.fa >branched-chain/tree/branched-chain.Pseudomonas.protein.aln.fa
 #建树
-bsub -q mpi -n 24 -J "iq" ./iqtree2 -s branched-chain.Pseudomonas.protein.aln.mafft.fa  -m MFP  --prefix branched-chain.Pseudomonas.protein.aln -T 20 -b 100  -o  She_balt_OS117_GCF_000215895_1_WP_012588467,Thiop_alkalip_GCF_001267175_1_WP_053102642,Vi_cho_GCF_008369605_1_WP_000815020
+bsub -q mpi -n 24 -J "iq" ./iqtree2 -s branched-chain.Pseudomonas.protein.aln.fa -m MFP  --prefix branched-chain.Pseudomonas.protein -T 20 -b 100  -o  She_balt_GCF_003030925_1_WP_006084009,Vi_cho_GCF_008369605_1_WP_000815020
 #改名
-mv  branched-chain.Pseudomonas.protein.aln.treefile   branched-chain.Pseudomonas.protein.aln.newick
-
+mv  branched-chain.Pseudomonas.protein.treefile   branched-chain.Pseudomonas.protein.aln.newick
 ```
 
-## 3.4假单胞菌属内(模式菌株15+代表菌株533+典型菌株12 共有560)建立物种树
+## 3.4假单胞菌属内(模式菌株15+代表菌株533 共有548)建立物种树
 ```bash
 cd ~/data/Pseudomonas
-#提取假单胞菌属的的（模式菌株+代表菌株+典型菌株)的菌株名字 #60
-cat branched-chain/branched-chain_minevalue.tsv | grep -f <(cut -f 2 branched-chain/tree/branched-chain.Pseudomonas.protein.tsv) | cut -f 1 | tsv-join -d 1 -f PROTEINS/all.strain.tsv -k 1 --append-fields 2 | cut -f 2 | sort -n | uniq >branched-chain/tree/branched-chain.Pseudomonas.bac120.species.tsv
-#在假单胞菌属的物种中加上外类群 #63
+#提取假单胞菌属的的（模式菌株+代表菌株)的菌株名字 #49
+cat branched-chain/branched-chain_minevalue.tsv| grep -v "Pseudom_aeru_PAO1_GCF_013001005_1" | grep -f <(cut -f 2 branched-chain/tree/branched-chain.Pseudomonas.protein.tsv) | cut -f 1 | tsv-join -d 1 -f PROTEINS/all.strain.tsv -k 1 --append-fields 2 | cut -f 2 | sort -n | uniq >branched-chain/tree/branched-chain.Pseudomonas.bac120.species.tsv
+#在假单胞菌属的物种中加上外类群 #51
 cat branched-chain/tree/branched-chain.Pseudomonas.bac120.outgroup.tsv >>branched-chain/tree/branched-chain.Pseudomonas.bac120.species.tsv
 #提取上述菌株名相应的bac120序列 #63
 faops some PROTEINS/bac120.trim.fa branched-chain/tree/branched-chain.Pseudomonas.bac120.species.tsv branched-chain/tree/branched-chain.Pseudomonas.bac120.species.fa
 #比对(63)
 mafft --auto  branched-chain/tree/branched-chain.Pseudomonas.bac120.species.fa >branched-chain/tree/branched-chain.Pseudomonas.bac120.aln.mafft.fa
 #建树
-bsub -q mpi -n 24 -J "iq" ./iqtree2 -s branched-chain.Pseudomonas.bac120.aln.mafft.fa -m MFP  --prefix branched-chain.Pseudomonas.bac120.aln -T 20 -B 1000 --bnni  -o  She_balt_OS117_GCF_000215895_1,Thiop_alkalip_GCF_001267175_1,Vi_cho_GCF_008369605_1  
+bsub -q mpi -n 24 -J "iq" ./iqtree2 -s branched-chain.Pseudomonas.bac120.aln.mafft.fa -m MFP  --prefix branched-chain.Pseudomonas.bac120 -T 20 -B 1000 --bnni  -o  She_balt_GCF_003030925_1,Vi_cho_GCF_008369605_1
 #改名
-mv branched-chain.Pseudomonas.bac120.aln.treefile branched-chain.Pseudomonas.bac120.aln.newick
-
+mv branched-chain.Pseudomonas.bac120.treefile branched-chain.Pseudomonas.bac120.newick
 ```
 
 
-## 3.5gamma变形菌纲内(模式菌株15+代表菌株533+典型菌株12 共有560)建立基因树
-```bash
-cd ~/data/Pseudomonas
-
-##添加外类群蛋白蛋白序列2
-cat branched-chain/branched-chain_minevalue.tsv | grep -f <(cat branched-chain/tree/branched-chain.Gammaproteobacteria.outgroup.tsv |  grep -v "Chl_tracho_D_UW_3_CX" ) |cut -f 1 |sort -n | uniq  
-#提取变形菌纲的的（模式菌株+代表菌株+典型菌株)的菌株名字(#551个)
-cat typical.lst  representative.tsv | tsv-join -d 1 -f strains.taxon.tsv -k 1 --append-fields 4 | tsv-select -f 2,1 | nwr append stdin -r class | tsv-filter --str-in-fld 3:"Gammaproteobacteria" | sort -n | uniq >branched-chain/tree/branched-chain.Gammaproteobacteria.strain.tsv
-#提取上述菌株名相应的braz或braB蛋白名字(448)
-cat branched-chain/branched-chain_minevalue.tsv | grep -f <(cut -f 2 branched-chain/tree/branched-chain.Gammaproteobacteria.strain.tsv) | cut -f 1 >branched-chain/tree/branched-chain.Gammaproteobacteria.protein.tsv
-#加上外类群450
-echo -e 'Bac_subti_subtilis_168_NP_390546\nSta_aure_aureus_NCTC_8325_YP_498750' >>branched-chain/tree/branched-chain.Gammaproteobacteria.protein.tsv
-faops some PROTEINS/all.replace.fa <(cat branched-chain/branched-chain_minevalue.tsv | grep -f <(cut -f 2 branched-chain/tree/branched-chain.Gammaproteobacteria.protein.tsv) | cut -f 1) branched-chain/tree/branched-chain.Gammaproteobacteria.protein.fa
-#比对(450)
-mafft --retree 1 --maxiterate 0  branched-chain/tree/branched-chain.Gammaproteobacteria.protein.fa > branched-chain/tree/branched-chain.Gammaproteobacteria.protein.aln.mafft.fa
-#建树
-bsub -q mpi -n 24 -J "iq" ./iqtree2 -s branched-chain.Gammaproteobacteria.protein.aln.mafft.fa -m MFP  --prefix branched-chain.Gammaproteobacteria.protein.aln  -T 20 -b 100 -o Bac_subti_subtilis_168_NP_390546,Sta_aure_aureus_NCTC_8325_YP_498750
-#改名
-mv branched-chain.Gammaproteobacteria.protein.aln.treefile branched-chain.Gammaproteobacteria.protein.aln.newick
-
-```
-
-
-## 3.6gamma变形菌纲(模式菌株15+代表菌株533+典型菌株12 共有560)建立物种树，alpha变形菌纲作为外类群，厚壁菌门作为外类群(金黄色葡萄球菌和枯草芽孢杆菌)
+## 3.5gamma变形菌纲内(模式菌株15+代表菌株533 共有548)建立基因树 (需要外类群)
 ```bash
 cd ~/data/Pseudomonas
 #选择非gamma变形菌纲的作为外类群
-cat  typical.lst  representative.tsv  | tsv-join -d 1 -f strains.taxon.tsv -k 1 --append-fields 4 | tsv-select -f 2,1 | nwr append stdin -r phylum -r class |  grep -v "Gammaproteobacteria"
+cat   representative.tsv  | tsv-join -d 1 -f strains.taxon.tsv -k 1 --append-fields 4 | tsv-select -f 2,1 | nwr append stdin -r phylum -r class |  grep -v "Gammaproteobacteria"
 #结果(去除衣原体门Chlamydiia)(共6个外类群)
 Bacillus subtilis       Bac_subti_subtilis_168  Firmicutes      Bacilli
 Campylobacter jejuni    Cam_jej_jejuni_NCTC_11168_ATCC_700819   Proteobacteria  Epsilonproteobacteria
@@ -629,25 +598,45 @@ Chlamydia trachomatis   Chl_tracho_D_UW_3_CX    Chlamydiae      Chlamydiia
 Listeria monocytogenes  Lis_mono_EGD_e  Firmicutes      Bacilli
 Mycobacterium tuberculosis      My_tube_H37Rv   Actinobacteria  Actinomycetia
 Staphylococcus aureus   Sta_aure_aureus_NCTC_8325       Firmicutes      Bacilli
-#提取外类群的名字
-cat branched-chain/branched-chain_minevalue.tsv | grep -f <(cat  typical.lst  representative.tsv  | tsv-join -d 1 -f strains.taxon.tsv -k 1 --append-fields 4 | tsv-select -f 2,1 | nwr append stdin -r phylum -r class | grep -v "Gammaproteobacteria" | cut -f 2) | cut -f 1 |tsv-join -d 1 -f PROTEINS/all.strain.tsv -k 1 --append-fields 2 | cut -f 2 >branched-chain/tree/branched-chain.Gammaproteobacteria.outgroup.tsv
-#共有6个3种
+#提取外类群菌株的名字
+cat branched-chain/branched-chain_minevalue.tsv | grep -f <(cat   representative.tsv  | tsv-join -d 1 -f strains.taxon.tsv -k 1 --append-fields 4 | tsv-select -f 2,1 | nwr append stdin -r phylum -r class | grep -v "Gammaproteobacteria" | cut -f 2) | cut -f 1 |tsv-join -d 1 -f PROTEINS/all.strain.tsv -k 1 --append-fields 2 | cut -f 2 >branched-chain/tree/branched-chain.Gammaproteobacteria.outgroup.tsv
+#共有6个3种菌株名字,需要去除支原体，最后只剩下两个外类群菌株
 Bac_subti_subtilis_168
-Chl_tracho_D_UW_3_CX
 Sta_aure_aureus_NCTC_8325
-
-#提取变形菌纲的（模式菌株+代表菌株+典型菌株)的菌株名字 #374
-cat branched-chain/branched-chain_minevalue.tsv | grep -f <(cut -f 2 branched-chain/tree/branched-chain.Gammaproteobacteria.strain.tsv) | cut -f 1 | tsv-join -d 1 -f PROTEINS/all.strain.tsv -k 1 --append-fields 2 | cut -f 2 | sort -n | uniq >branched-chain/tree/branched-chain.Gammaproteobacteria.bac120.outgroup.tsv
-#在假单胞菌属的物种中加上外类群 #376（需要去除衣原体)
-cat branched-chain/tree/branched-chain.Gammaproteobacteria.outgroup.tsv | sort -n | uniq | grep -v "Chl_tracho_D_UW_3_CX" >>branched-chain/tree/branched-chain.Gammaproteobacteria.bac120.outgroup.tsv
-
-#提取上述菌株名相应的bac120序列 #376
-faops some PROTEINS/bac120.trim.fa branched-chain/tree/branched-chain.Gammaproteobacteria.bac120.outgroup.tsv branched-chain/tree/branched-chain.Gammaproteobacteria.bac120.outgroup.fa
-mafft --retree 1 --maxiterate 0 branched-chain/tree/branched-chain.Gammaproteobacteria.bac120.outgroup.fa >branched-chain/tree/branched-chain.Gammaproteobacteria.bac120.mafft.aln.fa
+##添加外类群蛋白序列名称
+cat branched-chain/branched-chain_minevalue.tsv | grep -f <(cat branched-chain/tree/branched-chain.Gammaproteobacteria.outgroup.tsv |  grep -v "Chl_tracho_D_UW_3_CX" ) |cut -f 1 |sort -n | uniq  
+Bac_subti_subtilis_168_NP_390546
+Sta_aure_aureus_NCTC_8325_YP_498750
+#提取变形菌纲的的（模式菌株+代表菌株)的菌株名字(#541个)
+cat  representative.tsv | tsv-join -d 1 -f strains.taxon.tsv -k 1 --append-fields 4 | tsv-select -f 2,1 | nwr append stdin -r class | tsv-filter --str-in-fld 3:"Gammaproteobacteria" | sort -n | uniq >branched-chain/tree/branched-chain.Gammaproteobacteria.strain.tsv
+#提取上述菌株名相应的braz或braB蛋白名字(435)
+cat branched-chain/branched-chain_minevalue.tsv | grep -f <(cut -f 2 branched-chain/tree/branched-chain.Gammaproteobacteria.strain.tsv) | cut -f 1 >branched-chain/tree/branched-chain.Gammaproteobacteria.protein.tsv
+#加上外类群437
+echo -e 'Bac_subti_subtilis_168_NP_390546\nSta_aure_aureus_NCTC_8325_YP_498750' >>branched-chain/tree/branched-chain.Gammaproteobacteria.protein.tsv
+faops some PROTEINS/all.replace.fa <(cat branched-chain/branched-chain_minevalue.tsv | grep -f <(cut -f 2 branched-chain/tree/branched-chain.Gammaproteobacteria.protein.tsv) | cut -f 1) branched-chain/tree/branched-chain.Gammaproteobacteria.protein.fa
+#比对(437)
+mafft --auto  branched-chain/tree/branched-chain.Gammaproteobacteria.protein.fa > branched-chain/tree/branched-chain.Gammaproteobacteria.protein.aln.mafft.fa
 #建树
-bsub -q mpi -n 24 -J "iq" ./iqtree2 -s branched-chain.Gammaproteobacteria.bac120.mafft.aln.fa -m MFP  --prefix branched-chain.Gammaproteobacteria.bac120.aln -T 20  -B 1000 --bnni -o  Bac_subti_subtilis_168,Sta_aure_aureus_NCTC_8325
+bsub -q mpi -n 24 -J "iq" ./iqtree2 -s branched-chain.Gammaproteobacteria.protein.aln.mafft.fa -m MFP  --prefix branched-chain.Gammaproteobacteria.protein  -T 20 -b 100 -o Bac_subti_subtilis_168_NP_390546,Sta_aure_aureus_NCTC_8325_YP_498750
 #改名
-mv branched-chain.Gammaproteobacteria.bac120.aln.treefile branched-chain.Gammaproteobacteria.bac120.aln.newick
+mv branched-chain.Gammaproteobacteria.protein.treefile branched-chain.Gammaproteobacteria.protein.newick
+```
+
+
+## 3.6gamma变形菌纲(模式菌株15+代表菌株533 共有548)建立物种树，alpha变形菌纲作为外类群，厚壁菌门作为外类群(金黄色葡萄球菌和枯草芽孢杆菌)
+```bash
+cd ~/data/Pseudomonas
+#含有braB和braZ的变形菌纲的（模式菌株+代表菌株)的菌株名字 #364
+cat branched-chain/branched-chain_minevalue.tsv | grep -f <(cut -f 2 branched-chain/tree/branched-chain.Gammaproteobacteria.strain.tsv) | cut -f 1 | tsv-join -d 1 -f PROTEINS/all.strain.tsv -k 1 --append-fields 2 | cut -f 2 | sort -n | uniq >branched-chain/tree/branched-chain.Gammaproteobacteria.bac120.tsv
+#验证braB和braZ在变形菌纲的数目#364
+cat branched-chain/branched-chain_minevalue.tsv | grep -f representative.tsv | tsv-join -d 1 -f PROTEINS/all.strain.tsv -k 1 --append-fields 2 | cut -f 4 | tsv-join -d 1 -f strains.taxon.tsv -k 1 --append-fields 4 | tsv-select -f 2,1 | nwr append stdin -r class | tsv-filter --str-in-fld 3:"Gammaproteobacteria" | sort -n | uniq | wc -l
+#提取上述菌株名相应的bac120序列 #364
+faops some PROTEINS/bac120.trim.fa branched-chain/tree/branched-chain.Gammaproteobacteria.bac120.tsv branched-chain/tree/branched-chain.Gammaproteobacteria.bac120.fa
+mafft --auto branched-chain/tree/branched-chain.Gammaproteobacteria.bac120.fa >branched-chain/tree/branched-chain.Gammaproteobacteria.bac120.mafft.aln.fa
+#建树
+bsub -q mpi -n 24 -J "iq" ./iqtree2 -s branched-chain.Gammaproteobacteria.bac120.mafft.aln.fa -m MFP  --prefix branched-chain.Gammaproteobacteria.bac120 -T 20  -B 1000 --bnni -o  Bac_subti_subtilis_168,Sta_aure_aureus_NCTC_8325
+#改名
+mv branched-chain.Gammaproteobacteria.bac120.treefile branched-chain.Gammaproteobacteria.bac120.newick
 
 ```
 
