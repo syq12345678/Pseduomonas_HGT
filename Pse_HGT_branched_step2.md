@@ -18,7 +18,6 @@
   - [5.1重新修正铜绿假单胞菌的拷贝蛋白序列](#51重新修正铜绿假单胞菌的拷贝蛋白序列)
   - [5.2重新修正铜绿假单胞菌的拷贝CDS序列](#52重新修正铜绿假单胞菌的拷贝cds序列)
   - [5.3使用mega计算铜绿假单胞菌的braz和braB的dn/ds](#53使用mega计算铜绿假单胞菌的braz和brab的dnds)
-  - [5.4查看9个单拷贝铜绿假单胞菌的共线性](#54查看9个单拷贝铜绿假单胞菌的共线性)
 - [6. 使用paraAT2和caculator2计算其他假单胞菌的kaks(待定)](#6-使用paraat2和caculator2计算其他假单胞菌的kaks待定)
   - [6.1分别提取branched在绿刺假单胞菌中的CDS序列](#61分别提取branched在绿刺假单胞菌中的cds序列)
   - [6.2分别提取branched在丁香假单胞菌中的CDS序列](#62分别提取branched在丁香假单胞菌中的cds序列)
@@ -29,6 +28,8 @@
   - [7.1 准备假单胞菌属的典型菌株的genbank文件，共9种12个](#71-准备假单胞菌属的典型菌株的genbank文件共9种12个)
   - [7.2 查看铜绿假单胞菌物种内的基因共线性](#72-查看铜绿假单胞菌物种内的基因共线性)
   - [7.3 查看假单胞菌属内物种间的基因共线性](#73-查看假单胞菌属内物种间的基因共线性)
+  - [7.4 13个两个braZ拷贝的共线性分析（gbk转gff或者gff转gbk）](#74-13个两个braz拷贝的共线性分析gbk转gff或者gff转gbk)
+  - [7.5 查看9个单拷贝铜绿假单胞菌的共线性](#75-查看9个单拷贝铜绿假单胞菌的共线性)
 
 <!-- /TOC -->
 
@@ -396,7 +397,11 @@ cat branched-chain/blast/cluster2_cluster2.tsv | perl -alne '$identity=(split/\t
 cat branched-chain/blast/cluster1_cluster2.tsv | perl -alne '$identity=(split/\t/,$_)[2];$name="braB_braZ";print"$name\t$identity";' >branched-chain/blast/braB_braZ.tsv
 #合并文件
 cat branched-chain/blast/braB_braB.tsv branched-chain/blast/braB_braZ.tsv   branched-chain/blast/braZ_braZ.tsv >branched-chain/blast/whole.identity.picture.tsv
-
+#绘制相似性的箱线图
+library(ggplot2)
+data<-read.table("whole.identity.picture.tsv",header=T)
+p<-ggplot(data,aes(x=type,y=identity,col=type),show.legend = F)+ geom_violin()+ geom_boxplot()+theme_bw()+theme(panel.border = element_blank(),panel.grid.major = element_blank(),panel.grid.minor = element_blank(),axis.line = element_line(colour = "black"))+theme(text=element_text(size=16,family="Arial",face="bold"))
+ggsave('pse_aeru_identity.png', p,dpi = 480, width=8, height=6)   
 ```
 ## 5.2重新修正铜绿假单胞菌的拷贝CDS序列    
 ```BASH
@@ -476,66 +481,6 @@ std.error(data1) # 0.0004722907
 cat branched-chain/kaks/aeru/mega/mega_braB_dnds.tsv branched-chain/kaks/aeru/mega/mega_braZ_dnds.tsv >branched-chain/kaks/aeru/mega/mega_picture.tsv
 #plotr画图
 plotr hist --xl dN/dS --yl Frequency -g 2 --bins 20 --xmm -0.1,1.0 --ymm 0,1 -p branched-chain/kaks/aeru/mega/mega_picture.tsv
-```
-## 5.4查看9个单拷贝铜绿假单胞菌的共线性
-```bash
-cd ~/data/Pseudomonas
-#提取所有的铜绿假单胞菌的单拷贝蛋白序列(9)
-cat branched-chain/branched-chain_hmmscan_copy.pfam.tsv | tsv-filter --lt 3:2 | grep "Pseudom_aeru" | cut -f 1 >branched-chain/kaks/aeru/branched-chain.Pseudom_aeru.single.copy.tsv
-faops some PROTEINS/all.replace.fa <(cat branched-chain/branched-chain_minevalue.tsv |grep -f branched-chain/kaks/aeru/branched-chain.Pseudom_aeru.single.copy.tsv | cut -f 1 ) branched-chain/kaks/aeru/branched-chain.Pseudom_aeru.single.copy.fa
-#提取上述菌株的gbk文件
-mkdir -p branched-chain/collinearity/genebank/single_pse_aeru
-for name in $(cat branched-chain/kaks/aeru/branched-chain.Pseudom_aeru.single.copy.tsv)
-do
-echo $name
-cp ASSEMBLY/$name/*.gbff.gz ASSEMBLY/$name/$name.gbff.gz
-done
-
-for name in $(cat branched-chain/kaks/aeru/branched-chain.Pseudom_aeru.single.copy.tsv)
-do
-echo $name
-mv ASSEMBLY/$name/$name.gbff.gz branched-chain/collinearity/genebank/single_pse_aeru
-done
-#解压上述文件
-gunzip branched-chain/collinearity/genebank/single_pse_aeru/*.gz
-
-
-#截取上述文件的目标序列上下游各10000bp
-mkdir -p branched-chain/collinearity/genebank/single_pse_aeru/PAO1_single
-for f in $(find branched-chain/collinearity/genebank/single_pse_aeru -maxdepth 2 -type f -name "*.gbff")
-do
-python  fetch_gbk.py -i $f  -e 10000 -l brnQ -o branched-chain/collinearity/genebank/single_pse_aeru/PAO1_single
-done
-
-#删除注释文件中没有CDS的文件
-rm -rf branched-chain/collinearity/genebank/single_pse_aeru/PAO1_single/Pseudom_aeru_GCF_001516205_2_brnQ_1.gbk
-rm -rf branched-chain/collinearity/genebank/single_pse_aeru/PAO1_single/Pseudom_aeru_GCF_002205355_1_brnQ_1_rc.gbk
-rm -rf branched-chain/collinearity/genebank/single_pse_aeru/PAO1_single/Pseudom_aeru_GCF_002205355_1_brnQ_2.gbk
-rm -rf branched-chain/collinearity/genebank/single_pse_aeru/PAO1_single/Pseudom_aeru_PAK_GCF_000568855_2_brnQ_1.gbk
-rm -rf branched-chain/collinearity/genebank/single_pse_aeru/PAO1_single/Pseudom_aeru_PAK_GCF_902172305_2_brnQ_2_rc.gbk
-#复制PAO1的braz和braB的gbk文件
-cp branched-chain/collinearity/pse_auer/PAO1_braB/*.gbk branched-chain/collinearity/genebank/single_pse_aeru/PAO1_single
-cp branched-chain/collinearity/pse_auer/PAO1_braZ/*.gbk branched-chain/collinearity/genebank/single_pse_aeru/PAO1_single
-clinker branched-chain/collinearity/genebank/single_pse_aeru/PAO1_single/*.gbk -p
-
-
-#提取PAO1的braz和braB上下游各10000bp
-perl -alne 'next until(/gene/);$_=~s/\(//g;$_=~s/\)//g;print"$_";' Pseudom_aeru_PAO1.gbff | uniq >PAO1.gbff
-#查看PAO1的braz 
-grep -B 1 braZ PAO1.gbff | perl -alne '/(\d*)\.\.(\d*)/;$sta=$1;$end=$2;print"$sta:$end";' | uniq 
-#结果
-2151755:2153068
-#提取PAO1的braz
-seqkit subseq  Pseudom_aeru_PAO1.fna -r 2141755:2151755 >PAO1_braz_front.fa
-seqkit subseq  Pseudom_aeru_PAO1.fna -r 2153068:2163068 >PAO1_braz_after.fa
-
-#查看PAO1的braB
-grep -B 1 braB PAO1.gbff | perl -alne '/(\d*)\.\.(\d*)/;$sta=$1;$end=$2;print"$sta:$end";' | uniq 
-#结果
-1732545:1733858
-#提取PAO1的braB
-seqkit subseq  Pseudom_aeru_PAO1.fna -r 1722545:1732545 >PAO1_braB_front.fa
-seqkit subseq  Pseudom_aeru_PAO1.fna -r 1733858:1743858 >PAO1_braB_after.fa
 ```
 
 # 6. 使用paraAT2和caculator2计算其他假单胞菌的kaks(待定)
@@ -750,14 +695,6 @@ std.error(data1) #  0.01867506
 plotr hist --xl dN/dS --yl Frequency  --bins 20 --xmm -0.1,1.0 --ymm 0,1 -p branched-chain/kaks/stu/mega_stu_dnds.tsv
 ```
 
-
-
-
-
-
-
-
-
 # 7. 基因共线性
 ## 7.1 准备假单胞菌属的典型菌株的genbank文件，共9种12个
 ```BASH
@@ -869,7 +806,6 @@ clinker -p branched-chain/collinearity/pse_other/braB_brnQ/*.gbk -p
 
 #查看菌株对应菌株名
 cat typical.lst | tsv-join -d 1 -f strains.taxon.tsv -k 1 --append-fields 2
-
 Pseudom_aeru_PAO1       Pseudomonas aeruginosa PAO1
 Pseudom_puti_KT2440_GCF_000007565_2     Pseudomonas putida KT2440
 Pseudom_chl_aureofaciens_GCF_003851365_1        Pseudomonas chlororaphis subsp. aureofaciens
@@ -884,5 +820,111 @@ Pseudom_aeru_PA7_GCF_000017205_1        Pseudomonas aeruginosa PA7
 Pseudom_aeru_LESB58_GCF_000026645_1     Pseudomonas aeruginosa LESB58
 ```
 
+## 7.4 13个两个braZ拷贝的共线性分析（gbk转gff或者gff转gbk）
+```bash
+cd ~/data/Pseudomonas
+#提取所有的含有两个braZ的菌株(13)
+mkdir -p  ~/data/Pseudomonas/branched-chain/collinearity/two_braz
+cat branched-chain/kaks/aeru/branched-chain_cluster2.tsv  | tsv-join -d 1 -f PROTEINS/all.strain.tsv -k 1 --append-fields 2 | tsv-summarize -g 2 --count| tsv-filter --eq 2:2 | cut -f 1  >branched-chain/collinearity/two_braz/pse_auer_two_braz.tsv
+#提取上述菌株的gbk文件
+for name in $(cat branched-chain/collinearity/two_braz/pse_auer_two_braz.tsv)
+do
+echo $name
+cp ASSEMBLY/$name/*.gbff.gz ASSEMBLY/$name/$name.gbff.gz
+done
+
+for name in $(cat branched-chain/collinearity/two_braz/pse_auer_two_braz.tsv)
+do
+echo $name
+mv ASSEMBLY/$name/$name.gbff.gz branched-chain/collinearity/two_braz
+done
+#解压上述文件
+gunzip branched-chain/collinearity/two_braz/*.gz
+#截取目标gbk  
+for name in $(cat branched-chain/collinearity/two_braz/pse_auer_two_braz.tsv)
+do
+echo $name
+python  fetch_gbk.py -i branched-chain/collinearity/two_braz/$name.gbff -e 10000 -l brnQ -o branched-chain/collinearity/two_braz/$name
+done
+
+#有三个特殊菌株的gbk文件无法提取，可以使用gff文件和genomic文件转换为gbk文件再提取
+Pseudom_aeru_GCF_015697465_1
+Pseudom_aeru_GCF_015697605_1
+Pseudom_aeru_GCF_018141645_1
+#注意有个模块需要改biopython的版本
+pip3 unintall biopython
+pip3 install biopython==1.76
+python  gff_to_gbk.py Pseudom_aeru_PA1R_GCF_000496645_1.gff  Pseudom_aeru_PA1R_GCF_000496645_1.fna
+```
+## 7.5 查看9个单拷贝铜绿假单胞菌的共线性
+```bash
+cd ~/data/Pseudomonas
+#提取所有的铜绿假单胞菌的单拷贝蛋白序列(9)
+cat branched-chain/branched-chain_hmmscan_copy.pfam.tsv | tsv-filter --lt 3:2 | grep "Pseudom_aeru" | cut -f 1 >branched-chain/kaks/aeru/branched-chain.Pseudom_aeru.single.copy.tsv
+faops some PROTEINS/all.replace.fa <(cat branched-chain/branched-chain_minevalue.tsv |grep -f branched-chain/kaks/aeru/branched-chain.Pseudom_aeru.single.copy.tsv | cut -f 1 ) branched-chain/kaks/aeru/branched-chain.Pseudom_aeru.single.copy.fa
+#提取上述菌株的gbk文件
+mkdir -p branched-chain/collinearity/single_pse_aeru
+for name in $(cat branched-chain/kaks/aeru/branched-chain.Pseudom_aeru.single.copy.tsv)
+do
+echo $name
+cp ASSEMBLY/$name/*.gbff.gz ASSEMBLY/$name/$name.gbff.gz
+done
+
+for name in $(cat branched-chain/kaks/aeru/branched-chain.Pseudom_aeru.single.copy.tsv)
+do
+echo $name
+mv ASSEMBLY/$name/$name.gbff.gz 、branched-chain/collinearity/single_pse_aeru
+done
+#解压上述文件
+gunzip branched-chain/collinearity/single_pse_aeru/*.gz
+
+#截取上述文件的目标序列上下游各10000bp
+for f in $(find branched-chain/collinearity/single_pse_aeru -maxdepth 2 -type f -name "*.gbff")
+do
+python  fetch_gbk.py -i $f  -e 10000 -l brnQ -o branched-chain/collinearity/single_pse_aeru/brnQ
+done
+
+#删除注释文件中没有氨基酸序列但是有DNA序列的文件
+rm -rf branched-chain/collinearity/single_pse_aeru/PAO1/Pseudom_aeru_GCF_001516205_2_brnQ_1.gbk
+rm -rf branched-chain/collinearity/single_pse_aeru/PAO1/Pseudom_aeru_GCF_002205355_1_brnQ_1_rc.gbk
+rm -rf branched-chain/collinearity/single_pse_aeru/PAO1/Pseudom_aeru_GCF_002205355_1_brnQ_2.gbk
+rm -rf branched-chain/collinearity/single_pse_aeru/PAO1/Pseudom_aeru_PAK_GCF_000568855_2_brnQ_1.gbk
+rm -rf branched-chain/collinearity/single_pse_aeru/PAO1/Pseudom_aeru_PAK_GCF_902172305_2_brnQ_2_rc.gbk
+
+#有一个菌株的gbk文件无法提取，可以使用gff文件和genomic文件转换为gbk文件再提取
+Pseudom_aeru_PA1R_GCF_000496645_1
+#转换gbk
+python  gff_to_gbk.py Pseudom_aeru_PA1R_GCF_000496645_1.gff  Pseudom_aeru_PA1R_GCF_000496645_1.fna
+#提取gbk
+python  fetch_gbk.py -i Pseudom_aeru_PA1R_GCF_000496645_1.gb -e 10000 -l brnQ -o Pseudom_aeru_PA1R_GCF_000496645_1
+```
 
 
+* other
+```bash
+#提取PAO1的braz和braB上下游各10000bp
+perl -alne 'next until(/gene/);$_=~s/\(//g;$_=~s/\)//g;print"$_";' Pseudom_aeru_PAO1.gbff | uniq >PAO1.gbff
+#查看PAO1的braz 
+grep -B 1 braZ PAO1.gbff | perl -alne '/(\d*)\.\.(\d*)/;$sta=$1;$end=$2;print"$sta:$end";' | uniq 
+#结果
+2151755:2153068
+#提取PAO1的braz
+seqkit subseq  Pseudom_aeru_PAO1.fna -r 2141755:2151755 >PAO1_braz_front.fa
+seqkit subseq  Pseudom_aeru_PAO1.fna -r 2153068:2163068 >PAO1_braz_after.fa
+#查看PAO1的braB
+grep -B 1 braB PAO1.gbff | perl -alne '/(\d*)\.\.(\d*)/;$sta=$1;$end=$2;print"$sta:$end";' | uniq 
+#结果
+1732545:1733858
+#提取PAO1的braB
+seqkit subseq  Pseudom_aeru_PAO1.fna -r 1722545:1732545 >PAO1_braB_front.fa
+seqkit subseq  Pseudom_aeru_PAO1.fna -r 1733858:1743858 >PAO1_braB_after.fa
+```
+
+
+
+
+
+
+```r
+ggplot(data,aes(x=type,y=fold,col=type),show.legend = F)+ geom_violin()+ geom_boxplot()+theme_bw()+theme(panel.border = element_blank(),panel.grid.major = element_blank(),panel.grid.minor = element_blank(),axis.line = element_line(colour = "black"))+theme(text=element_text(size=16,family="Arial",face="bold"))
+ggsave('pse_aeru_identity.png', p,dpi = 480, width=8, height=6)  
