@@ -56,6 +56,8 @@
 - [11.绘制40个条件中braB和braZ的基因表达量热图](#11绘制40个条件中brab和braz的基因表达量热图)
   - [11.1绘制40个条件中braB和braZ的平均基因表达量热图，不聚类](#111绘制40个条件中brab和braz的平均基因表达量热图不聚类)
   - [11.2绘制40个条件中braB和braZ和相关基因的平均基因表达量热图，对条件进行聚类，基因不聚类,对基因标准化](#112绘制40个条件中brab和braz和相关基因的平均基因表达量热图对条件进行聚类基因不聚类对基因标准化)
+  - [11.3使两个热图的条件顺序一致](#113使两个热图的条件顺序一致)
+  - [11.3将热图的样本条件改成样本号码](#113将热图的样本条件改成样本号码)
 
 <!-- /TOC -->
 
@@ -1496,52 +1498,60 @@ sd
 #绘制braB的正态密度分布直方图
 cut -f 2 braB_whole_number.tsv >braB_density_ggplot.tsv
 library(ggplot2)
+setwd("D:/WGCNA/rma_WGCNA/condition_three_combine/result")
 ratio<-read.table("braB_density_ggplot.tsv",header=T)
 set.seed(1000)
 df <- data.frame(ratio)
 #geom_density会为数据集提供一条密度曲线，而不是正态分布,而stat_function(fun = dnorm, args = list(mean = mean(df$ratio), sd = sd(df$ratio)))提供正态分布密度曲线
 #geom_histogram  stat="bin"直方图类型  position="stack" 位置  ...其他geom类函数的参数  binwidth #直方图的图距    bins=NULL直方个数
 #...count...参数画计数直方图     ...density...频率分布直方图  alpha=0.9透明度
-mean(df$ratio) #20070.71
+data_mean=mean(df$ratio) #20070.71
 data_sd=sd(df$ratio) #1873.92
 three_sd_plus=mean(df$ratio)+data_sd*3  #25692.47
 three_sd_minus=mean(df$ratio)-data_sd*3 #14448.95
 
-p<-ggplot(df, aes(x = ratio)) +geom_histogram(aes(y =..density..),breaks = seq(min(df$ratio), max(df$ratio), length =339),colour ="white", fill ="cornflowerblue", size = 0.1,alpha=0.8) + #使用density代替y轴
-stat_function(fun = dnorm, args = list(mean = mean(df$ratio), sd = sd(df$ratio)),color ="black", size = 1)+  #直方图上加密度曲线，也可以用geom_density()
-geom_vline(aes(xintercept=mean(df$ratio)), color="red", linetype="dashed", size=1)+ #添加均值线和三个标准差线
+p1<-ggplot(df, aes(x = ratio)) +geom_histogram(aes(y =..density..),breaks = seq(min(df$ratio), max(df$ratio), length =100),colour ="#C6DBEF", fill ="#08519C", size = 0.1,alpha=0.8) + #使用density代替y轴
+stat_function(fun = dnorm, args = list(mean = data_mean, sd = data_sd,color ="black", size = 1))+  #直方图上加密度曲线，也可以用geom_density()
+geom_vline(aes(xintercept=data_mean), color="red", linetype="dashed", size=1)+ #添加均值线和两个标准差线
 geom_vline(aes(xintercept=three_sd_plus), color="red", linetype="dashed", size=1)+
-geom_vline(aes(xintercept=three_sd_minus), color="red", linetype="dashed", size=1)+
-theme_classic()+ #theme_bw()去掉整体灰色的背景
 annotate(geom="text",fontface="bold",color="black",x=three_sd_plus,y=0.00015,label="25692.47",size=5)+   
  #通过annotate函数添加注释，将geom变量设置为"text"和"rect"分别代表文字与矩形，并且可以调整位置，大小颜色
-annotate(geom="text",fontface="bold",color="black",x=40000,y=0.000225,label="μ±3σ=20070.71±5621.76",size=7)+
-labs(x="frequency",y = "density")
-ggsave(file="braB_density_picture.pdf",plot=p,width=10,height=8)
-
+annotate(geom="text",fontface="bold",color="black",x=40000,y=0.000220,label="μ+3σ=20070.71+5621.76",size=7)+
+labs(x="frequency",y = "density")+
+theme_bw()+
+theme(panel.border = element_blank(),panel.grid.major = element_blank(),panel.grid.minor = element_blank(),axis.line = element_line(colour = "black"))+
+theme(text=element_text(size=16,family="Arial",face="bold"))
 
 #绘制braZ的正态密度分布直方图
 cut -f 2 braZ_whole_number.tsv >braZ_density_ggplot.tsv
 library(ggplot2)
-ratio<-read.table("braZ_density_ggplot.tsv",header=T)
+library(showtext)#ggplot作图显示字体错误时需要用showtext包输入需要的字体
+font_add('Arial','/Library/Fonts/Arial.ttf')
+showtext_auto()
+library(patchwork)
+ratio1<-read.table("braZ_density_ggplot.tsv",header=T)
 set.seed(1000)
-df <- data.frame(ratio)
+df1 <- data.frame(ratio1)
 #geom_density会为数据集提供一条密度曲线，而不是正态分布,而stat_function(fun = dnorm, args = list(mean = mean(df$ratio), sd = sd(df$ratio)))提供正态分布密度曲线
 #添加均值线和三个标准差线
-mean(df$ratio) #20432.97
-data_sd=sd(df$ratio) #1821.934
-three_sd_plus=mean(df$ratio)+data_sd*3  # 25898.77
-three_sd_minus=mean(df$ratio)-data_sd*3 #14967.16
+data_mean1=mean(df1$ratio) #20432.97
+data_sd1=sd(df1$ratio) #1821.934
+three_sd_plus1=mean(df1$ratio)+data_sd1*3  # 25898.77
+three_sd_minus1=mean(df1$ratio)-data_sd1*3 #14967.16
 
-p<-ggplot(df, aes(x = ratio)) +geom_histogram(aes(y =..density..),breaks = seq(min(df$ratio), max(df$ratio), length =339),colour ="white", fill ="cornflowerblue", size = 0.1,alpha=0.8) + #使用density代替y轴
-stat_function(fun = dnorm, args = list(mean = mean(df$ratio), sd = sd(df$ratio)),color ="black", size = 1)+  #直方图上加密度曲线，也可以用geom_density()
-geom_vline(aes(xintercept=mean(df$ratio)), color="red", linetype="dashed", size=1)+ #添加均值线和三个标准差线
-geom_vline(aes(xintercept=three_sd_plus), color="red", linetype="dashed", size=1)+
-geom_vline(aes(xintercept=three_sd_minus), color="red", linetype="dashed", size=1)+
-theme_classic()+ #theme_bw()去掉整体灰色的背景
-annotate(geom="text",fontface="bold",color="black",x=three_sd_plus,y=0.00015,label="25898.77",size=5)+    #通过annotate函数添加注释，将geom变量设置为"text"和"rect"分别代表文字与矩形，并且可以调整位置，大小颜色
-annotate(geom="text",fontface="bold",color="black",x=40000,y=0.000225,label="μ±3σ=20432.97±5465.80",size=7)
-ggsave(file="braZ_density_picture.pdf",plot=p,width=10,height=8)
+p2<-ggplot(df1, aes(x = ratio)) +geom_histogram(aes(y =..density..),breaks = seq(min(df1$ratio), max(df1$ratio), length =100),colour ="#C6DBEF", fill ="#08519C", size = 0.1,alpha=0.8) + #使用density代替y轴
+stat_function(fun = dnorm, args = list(mean = data_mean1, sd = data_sd1,color ="black", size = 1))+  #直方图上加密度曲线，也可以用geom_density()
+geom_vline(aes(xintercept=data_mean1), color="red", linetype="dashed", size=1)+ #添加均值线和两个标准差线
+geom_vline(aes(xintercept=three_sd_plus1), color="red", linetype="dashed", size=1)+
+annotate(geom="text",fontface="bold",color="black",x=three_sd_plus,y=0.00015,label="25898.77",size=5)+   
+ #通过annotate函数添加注释，将geom变量设置为"text"和"rect"分别代表文字与矩形，并且可以调整位置，大小颜色
+annotate(geom="text",fontface="bold",color="black",x=40000,y=0.000225,label="μ+3σ=20432.97+5465.803",size=7)+
+labs(x="frequency",y = "density")+
+theme_bw()+
+theme(panel.border = element_blank(),panel.grid.major = element_blank(),panel.grid.minor = element_blank(),axis.line = element_line(colour = "black"))+
+theme(text=element_text(size=16,family="Arial",face="bold"))
+p3<-p1+p2
+ggsave(file="braB_braZ_density_picture.pdf",plot=p3,width=20,height=8)
 ```
 
 # 8.eggnog在线注释
@@ -1566,15 +1576,10 @@ cat  braZ_three_sigma_neighber_high_fre.tsv | grep "PA" | perl -alne '$_=~/PA(.*
 cat  braB_two_sigma_neighber_high_fre.tsv | grep "PA" | perl -alne '$_=~/PA(.*?)\_/;$name=$1;print"PA$name"' >braB_two_Pfam_id.tsv
 cat  braZ_two_sigma_neighber_high_fre.tsv | grep "PA" | perl -alne '$_=~/PA(.*?)\_/;$name=$1;print"PA$name"' >braZ_two_Pfam_id.tsv
 
-#绘制韦恩图
-library(VennDiagram)
-library(RColorBrewer)
-set1<-read.table("braB_three_Pfam_id.tsv",header=F)
-set2<-read.table("braZ_three_Pfam_id.tsv",header=F)
-set3<-read.table("braB_two_Pfam_id.tsv",header=F)
-set4<-read.table("braZ_two_Pfam_id.tsv",header=F)
-venn.diagram(x=list(braB_three=set1$V1,braZ_three=set2$V1),fill=c('red','blue'),filename='./three_sigma.tiff')
-venn.diagram(x=list(braB_two=set3$V1,braZ_two=set4$V1),fill=c('red','blue'),filename='./two.sigma.tiff')
+#绘制3个sigma的braB和braZ的韦恩图
+cd /mnt/d/WGCNA/venn
+plotr venn braB_three_Pfam_id.tsv braZ_three_Pfam_id.tsv
+
 ```
 
 ## 8.2下载注释文件
@@ -1690,21 +1695,50 @@ head(pathway2name)
 #qvalue(p-adjusted): 校正后的p值（qvalue=padj=FDR=Corrected p-Value=p-adjusted），是对p值进行了多重假设检验，能更好地控制假阳性率。校正后的p值不同的几种表现形式，都是基于BH的方法进行多重假设检验得到的。校正后的p值不同的展现形式是因为不同的分析软件产生的。
 
 #读取基因列表，感兴趣的基因存为一列
-gene_ins<-read.table("braZ_two_special_pfam_id.tsv",sep="\t",header=F)
+gene_ins<-read.table("braZ_three_Pfam_id.tsv",sep="\t",header=F)
 gene_list<-gene_ins$V1
 ##对BP MF CC分类
 df<-go2term
-df$term<-go2ont$Ontology
+df$ont<-go2ont$Ontology
+df<-split(df,with(df,ont))
 #在GOterm后添加ont信息
-GO<-enricher(gene=gene_list,pvalueCutoff =0.05,qvalueCutoff=1,pAdjustMethod = "BH",TERM2GENE =term2gene,TERM2NAME=go2term,minGSSize=0,maxGSSize=400)
-dotplot(GO, split="ONTOLOGY")
-
-
-
-df$Ont<-df2$Ontology
-df3<-df%>%select(c("term","Ont","pvalue"))
-
-
+GO_BP<-enricher(gene=gene_list,pvalueCutoff =0.05,qvalueCutoff=1,pAdjustMethod = "none",TERM2GENE =term2gene,TERM2NAME=df$BP,minGSSize=0,maxGSSize=400)
+GO_CC<-enricher(gene=gene_list,pvalueCutoff =0.05,qvalueCutoff=1,pAdjustMethod = "none",TERM2GENE =term2gene,TERM2NAME=df$CC,minGSSize=0,maxGSSize=400)
+GO_MF<-enricher(gene=gene_list,pvalueCutoff =0.05,qvalueCutoff=1,pAdjustMethod = "none",TERM2GENE =term2gene,TERM2NAME=df$MF,minGSSize=0,maxGSSize=400)
+p_BP<-dotplot(GO_BP)
+P_CC<-dotplot(GO_CC)
+p_MF<-dotplot(GO_MF)
+plotc <- p_BP/P_CC/p_MF
+pdf(file = "braB_BP_CC_MF.pdf",width =8,height = 16)
+print(plotc)
+dev.off()
+#使用ggplot来画气泡图
+#我们再用ggplot画气泡图，结果看起来和clusterprofiler画的差不多，不一样的地方在于clusterproliler的x轴默认的gene ratio,而ggplot我们用的是count
+GO<-enricher(gene=gene_list,pvalueCutoff =0.05,qvalueCutoff=1,pAdjustMethod = "none",TERM2GENE =term2gene,TERM2NAME=df,minGSSize=0,maxGSSize=400)
+head(GO@result)
+GO_input<-GO@result[1:20,]
+GO_input<-na.omit(GO_input)
+df1<-go2ont(GO_input$ID)
+GO_input$ont<-df1$Ontology
+#使画出go term的顺序与输入的一致
+GO_input$Description<-factor(GO_input$Description,levels = rev(GO_input$Description))
+#reorder使纵轴按照go term 和count排序
+library(ggplot2)
+ggplot(GO_input,aes(x = Count ,y =reorder(Description,Count),shape=ont))+ 
+  geom_point(aes(size=Count,color=p.adjust))+
+  scale_colour_gradient(low="blue",high="red")+
+  labs(
+       color=expression(p.adjust),
+       size=" Count Number",
+       x="Gene Count"
+      )+
+  theme_bw()+
+  theme(
+    axis.text.y = element_text(size = rel(1.8)),
+    axis.title.x = element_text(size=rel(1.8)),
+    axis.title.y = element_blank()
+  )+ scale_size(range=c(5, 10))
+​
 
 ##画图
 GO_1<-barplot(GO,showCategory=10)
@@ -2047,7 +2081,6 @@ data<-as.data.frame(data)
 #热图对行不进行聚类，对列不进行聚类
 pheatmap(data,display_numbers = TRUE,scale="column",cluster_row = FALSE,cluster_cols = FALSE,border_color = "black",cellwidth = 30,cellheight = 10)
 
-pheatmap(data,display_numbers = df,scale="column",cluster_row = FALSE,cluster_cols = FALSE,border_color = "black",cellwidth = 30,cellheight = 10)
 ```
 
 ## 11.2绘制40个条件中braB和braZ和相关基因的平均基因表达量热图，对条件进行聚类，基因不聚类,对基因标准化
@@ -2080,13 +2113,108 @@ cat braB_braZ_cor_condition_mean_expr.tsv | tsv-join -d 1 -f condition_detail.ts
 setwd("D:/WGCNA/expression/raw_expr_heatmap")
 library(pheatmap)
 library(tidyr) #gather宽转长  spread长转宽
-data<-read.table("braB_braZ_cor_detail_mean_expr.tsv",header=T)
+data1<-read.table("braB_braZ_cor_detail_mean_expr.tsv",header=T)
 #关键的参数是key和value，指定后就可以根据相应的key和value进行长到宽的转换
-df<-spread(data,key="gene",value="expr")
+data1<-spread(data1,key="gene",value="expr")
 #将数据矩阵化，去除sample这个单词
-rownames(df)=df[,1]
-df<-df[,-1]
-df<-as.matrix(df)
-#聚类方法为average
-pheatmap(df,scale="column",cluster_row = TRUE,cluster_cols = FALSE,border_color = "black",cellwidth = 10,cellheight = 10,clustering_method = "average")
+rownames(data1)=data1[,1]
+data1<-data1[,-1]
+data1<-as.matrix(data1)
+#载入分类信息
+class<-read.table("brab_braZ_cor_class.tsv",header=T)
+#type<-class$V2
+#top = HeatmapAnnotation(df=data.frame(type))
+#聚类方法为average,只对基因聚类，分成两个簇,不展示行名,顶部分组信息
+annotation1 = HeatmapAnnotation(df = data.frame(type = c(rep("braB",21), rep("braZ", 29))))
+pheatmap(data1,scale="column",show_rownames = FALSE,cluster_row = FALSE,cluster_cols = TRUE,border_color = "black",cellwidth = 10,cellheight = 10,clustering_method = "average",cutree_cols =2, annotation_col = class)
+```
+
+## 11.3使两个热图的条件顺序一致
+```r
+setwd("D:/WGCNA/expression/raw_expr_heatmap")
+library(pheatmap)
+library(tidyr)
+ library(cowplot)
+data1<-read.table("braB_braZ_cor_detail_mean_expr.tsv",header=T)
+#关键的参数是key和value，指定后就可以根据相应的key和value进行长到宽的转换
+data1<-spread(data1,key="gene",value="expr")
+write.table(data1,file="condition_order.tsv",sep="\t")
+#将数据矩阵化，去除sample这个单词
+rownames(data1)=data1[,1]
+data1<-data1[,-1]
+data1<-as.matrix(data1)
+#载入分类信息
+class<-read.table("brab_braZ_cor_class.tsv",header=T)
+#聚类方法为average,只对基因聚类，分成两个簇,不展示行名,顶部分组信息
+#annotation1 = HeatmapAnnotation(df = data.frame(type = c(rep("braB",21), rep("braZ", 29))))  
+pheatmap(data1,scale="column",show_rownames = T,show_colnames = T,cluster_row = F,cluster_cols = TRUE,border_color = "black",cellwidth = 10,cellheight = 10,clustering_method = "average",cutree_cols =2, annotation_col = class)
+
+#更改braB和braZ条件的顺序
+cat condition_order.tsv | cut -f 2 | grep -v "PA0378_at" | sed 's/"//g' >braB_braZ_condition_order.tsv
+cat braB_braZ_condition_order.tsv | tsv-join -d 1 -f detail_braB_braZ_men_expr.tsv -k 4  --append-fields 2,3 |sed '1icondition\tbraB\tbraZ' >detail_braB_braZ_mean_heatmap.tsv
+#读入文件
+data<-read.table("detail_braB_braZ_mean_heatmap.tsv",header=T,row.names=1, sep="\t", quote="")
+#将数据转换为数据框格式
+data<-as.data.frame(data)
+#pheatmap对数据进行z-score仅用参数scale="row"即对行进行标准化
+#热图对行不进行聚类，对列不进行聚类
+pheatmap(data,display_numbers = TRUE,cluster_row = FALSE,cluster_cols = FALSE,border_color = "black",cellwidth = 30,cellheight = 10)
+```
+
+## 11.3将热图的样本条件改成样本号码
+```r
+#将样本条件改为数据集号braB_braZ_condition_order.tsv
+sed -i '1icondi\tgene\tmean' braB_braZ_cor_condition_mean_expr.tsv
+setwd("D:/WGCNA/expression/raw_expr_heatmap")
+library(pheatmap)
+library(tidyr)
+ library(cowplot)
+data1<-read.table("braB_braZ_cor_condition_mean_expr.tsv",header=T)
+#关键的参数是key和value，指定后就可以根据相应的key和value进行长到宽的转换
+data1<-spread(data1,key="gene",value="mean")
+write.table(data1,file="condition_order.tsv",sep="\t")
+#将数据矩阵化，去除sample这个单词
+rownames(data1)=data1[,1]
+data1<-data1[,-1]
+data1<-as.matrix(data1)
+#载入分类信息
+type<-read.table("brab_braZ_cor_class.tsv",header=T)
+#聚类方法为average,只对基因聚类，分成两个簇,不展示行名,顶部分组信息
+#annotation1 = HeatmapAnnotation(df = data.frame(type = c(rep("braB",21), rep("braZ", 29))))  
+y<-pheatmap(data1,scale="column",show_rownames = T,show_colnames = T,cluster_row = F,cluster_cols = TRUE,border_color = "black",cellwidth = 10,cellheight = 10,clustering_method = "average",cutree_cols =2, annotation_col =type, fontfamily= "Arial",fontface="bold",fontsize=12,color = colorRampPalette(colors = c("#4DAF4A","#FFFFFF","#386CB0"))(100))
+save_pheatmap_pdf <- function(y, filename, width=7, height=7) {
+   stopifnot(!missing(y))
+   stopifnot(!missing(filename))
+   pdf(filename, width=10, height=10)
+   grid::grid.newpage()
+   grid::grid.draw(y$gtable)
+   dev.off()
+}
+save_pheatmap_pdf(y, "braB_braZ_cor_condi.pdf")
+
+
+#更改braB和braZ条件的顺序
+cat condition_order.tsv | cut -f 2 | grep -v "PA0378_at" | sed 's/"//g' >braB_braZ_condition_order.tsv
+cat braB_braZ_condition_order.tsv | tsv-join -d 1 -f detail_braB_braZ_men_expr.tsv  -k 1  --append-fields 2,3 |sed '1icondition\tbraB\tbraZ' >detail_braB_braZ_mean_heatmap.tsv
+#读入文件
+data<-read.table("detail_braB_braZ_mean_heatmap.tsv",header=T,row.names=1, sep="\t", quote="")
+#将数据转换为数据框格式
+data<-as.data.frame(data)
+#pheatmap对数据进行z-score仅用参数scale="row"即对行进行标准化
+#热图对行不进行聚类，对列不进行聚类
+x<-pheatmap(data,display_numbers = TRUE,cluster_row = FALSE,cluster_cols = FALSE,border_color = "black",cellwidth = 30,cellheight = 10, fontfamily= "Arial",fontface="bold",fontsize=12,color = colorRampPalette(colors = c("#FF7F00","#FFFFFF","#F781BF"))(100))
+save_pheatmap_pdf <- function(x, filename, width=7, height=7) {
+   stopifnot(!missing(x))
+   stopifnot(!missing(filename))
+   pdf(filename, width=width, height=height)
+   grid::grid.newpage()
+   grid::grid.draw(x$gtable)
+   dev.off()
+}
+save_pheatmap_pdf(x, "braB_braZ_condi.pdf")
+
+
+
+
+
 ```
