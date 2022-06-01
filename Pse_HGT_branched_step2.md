@@ -30,6 +30,7 @@
   - [7.3 查看假单胞菌属内物种间的基因共线性](#73-查看假单胞菌属内物种间的基因共线性)
   - [7.4 13个两个braZ拷贝的共线性分析（gbk转gff或者gff转gbk）](#74-13个两个braz拷贝的共线性分析gbk转gff或者gff转gbk)
   - [7.5 查看9个单拷贝铜绿假单胞菌的共线性](#75-查看9个单拷贝铜绿假单胞菌的共线性)
+  - [7.6查看假单胞菌属的基因树两个clade的物种分别与braB和braZ的共线性](#76查看假单胞菌属的基因树两个clade的物种分别与brab和braz的共线性)
 
 <!-- /TOC -->
 
@@ -478,9 +479,11 @@ mean(data1)  # 0.05826713
 std.error(data1) # 0.0004722907
 
 #合并braB和braZ
+sed -i 's/B/braZ/g' branched-chain/kaks/aeru/mega/mega_braZ_dnds.tsv
+sed -i 's/A/braB/g' branched-chain/kaks/aeru/mega/mega_braB_dnds.tsv
 cat branched-chain/kaks/aeru/mega/mega_braB_dnds.tsv branched-chain/kaks/aeru/mega/mega_braZ_dnds.tsv >branched-chain/kaks/aeru/mega/mega_picture.tsv
 #plotr画图
-plotr hist --xl dN/dS --yl Frequency -g 2 --bins 20 --xmm -0.1,1.0 --ymm 0,1 -p branched-chain/kaks/aeru/mega/mega_picture.tsv
+plotr hist --xl dN/dS --yl Frequency -g 2 --bins 20 --xmm -0.1,1.0 --ymm 0,0.5 -p branched-chain/kaks/aeru/mega/mega_picture.tsv
 ```
 
 # 6. 使用paraAT2和caculator2计算其他假单胞菌的kaks(待定)
@@ -898,7 +901,119 @@ python  gff_to_gbk.py Pseudom_aeru_PA1R_GCF_000496645_1.gff  Pseudom_aeru_PA1R_G
 #提取gbk
 python  fetch_gbk.py -i Pseudom_aeru_PA1R_GCF_000496645_1.gb -e 10000 -l brnQ -o Pseudom_aeru_PA1R_GCF_000496645_1
 ```
+## 7.6查看假单胞菌属的基因树两个clade的物种分别与braB和braZ的共线性
+```bash
+cd ~/data/Pseudomonas
+mkdir -p branched-chain/collinearity/pseudomons_two_clade
+mkdir -p branched-chain/collinearity/pseudomons_two_clade/clade1
+#提取clade1的菌株蛋白名
+echo -e "Pseudom_oti_GCF_011397855_1_WP_074969323\nPseudom_alcalig_GCF_001597285_1_WP_061904350\nPseudom_men_S5_2_GCF_000733715_2_WP_017360782\nPseudom_stu_GCF_019704535_1_WP_014596526\nPseudom_aeru_PAO1_NP_250281" >branched-chain/collinearity/pseudomons_two_clade/clade1/clade1.tsv
+#提取clade1的菌株名
+cat branched-chain/collinearity/pseudomons_two_clade/clade1/clade1.tsv | tsv-join -d 1 -f PROTEINS/all.strain.tsv -k 1 --append-fields 2 | cut -f 2 >branched-chain/collinearity/pseudomons_two_clade/clade1/clade1_species.tsv
+#提取clade1菌株的gbff文件
+for name in $(cat branched-chain/collinearity/pseudomons_two_clade/clade1/clade1_species.tsv)
+do
+echo $name
+cp ASSEMBLY/$name/*.gbff.gz ASSEMBLY/$name/$name.gbff.gz
+done
 
+for name in $(cat branched-chain/collinearity/pseudomons_two_clade/clade1/clade1_species.tsv)
+do
+echo $name
+mv ASSEMBLY/$name/$name.gbff.gz branched-chain/collinearity/pseudomons_two_clade/clade1
+done
+#解压上述文件
+gunzip branched-chain/collinearity/pseudomons_two_clade/clade1/*.gz
+#截取其他菌株的gbk  
+for name in $(cat branched-chain/collinearity/pseudomons_two_clade/clade1/clade1_species.tsv)
+do
+echo $name
+python  fetch_gbk.py -i branched-chain/collinearity/pseudomons_two_clade/clade1/$name.gbff -e 10000 -l brnQ -o branched-chain/collinearity/pseudomons_two_clade/clade1/$name
+done
+#截取PAO1的gbk
+python  fetch_gbk.py -i branched-chain/collinearity/pseudomons_two_clade/clade1/Pseudom_aeru_PAO1.gbff -e 10000 -l braB -o branched-chain/collinearity/pseudomons_two_clade/clade1/Pseudom_aeru_PAO1
+python  fetch_gbk.py -i branched-chain/collinearity/pseudomons_two_clade/clade1/Pseudom_aeru_PAO1.gbff -e 10000 -l braZ -o branched-chain/collinearity/pseudomons_two_clade/clade1/Pseudom_aeru_PAO1
+###注意clade1中的Pseudom_alcalig_GCF_001597285_1和Pseudom_oti_GCF_011397855_1没有gbff文件
+for name in $(cat branched-chain/collinearity/pseudomons_two_clade/clade1/clade1_species.tsv)
+do
+echo $name
+cp ASSEMBLY/$name/*.gff.gz ASSEMBLY/$name/$name.gff.gz
+done
+
+for name in $(cat branched-chain/collinearity/pseudomons_two_clade/clade1/clade1_species.tsv)
+do
+echo $name
+mv ASSEMBLY/$name/$name.gff.gz branched-chain/collinearity/pseudomons_two_clade/clade1
+done
+
+cp ASSEMBLY/Pseudom_alcalig_GCF_001597285_1/GCF_001597285.1_ASM159728v1_genomic.fna.gz ASSEMBLY/Pseudom_alcalig_GCF_001597285_1/Pseudom_alcalig_GCF_001597285_1.fna.gz
+mv ASSEMBLY/Pseudom_alcalig_GCF_001597285_1/Pseudom_alcalig_GCF_001597285_1.na.gz branched-chain/collinearity/pseudomons_two_clade/clade1
+cp ASSEMBLY/Pseudom_oti_GCF_011397855_1/GCF_011397855.1_ASM1139785v1_genomic.fna.gz ASSEMBLY/Pseudom_oti_GCF_011397855_1/Pseudom_oti_GCF_011397855_1.fna.gz
+mv ASSEMBLY/Pseudom_oti_GCF_011397855_1/Pseudom_oti_GCF_011397855_1.fna.gz branched-chain/collinearity/pseudomons_two_clade/clade1
+gunzip branched-chain/collinearity/pseudomons_two_clade/clade1/*.gz
+pip3 unintall biopython
+pip3 install biopython==1.76
+python  gff_to_gbk.py branched-chain/collinearity/pseudomons_two_clade/clade1/Pseudom_alcalig_GCF_001597285_1.gff  branched-chain/collinearity/pseudomons_two_clade/clade1/Pseudom_alcalig_GCF_001597285_1.fna
+python  gff_to_gbk.py branched-chain/collinearity/pseudomons_two_clade/clade1/Pseudom_oti_GCF_011397855_1.gff  branched-chain/collinearity/pseudomons_two_clade/clade1/Pseudom_oti_GCF_011397855_1.fna
+###Pseudom_alcalig_GCF_001597285_1和Pseudom_oti_GCF_011397855_1的gbk提取
+python  fetch_gbk.py -i branched-chain/collinearity/pseudomons_two_clade/clade1/Pseudom_alcalig_GCF_001597285_1.gb -e 10000 -l brnQ -o branched-chain/collinearity/pseudomons_two_clade/clade1/Pseudom_alcalig_GCF_001597285_1
+python  fetch_gbk.py -i branched-chain/collinearity/pseudomons_two_clade/clade1/Pseudom_oti_GCF_011397855_1.gb -e 10000 -l brnQ -o branched-chain/collinearity/pseudomons_two_clade/clade1/Pseudom_oti_GCF_011397855_1
+
+
+#提取clade2的菌株蛋白名
+mkdir -p branched-chain/collinearity/pseudomons_two_clade/clade2
+echo -e "Pseudom_lal_GCF_008807375_1_WP_151133060\nPseudom_kna_GCF_009911755_1_WP_160286596\nPseudom_citro_GCF_001586155_1_WP_009619386\nPseudom_puti_NBRC_14164_GCF_000412675_1_WP_016498696\nPseudom_syr_GCF_016694755_2_WP_103688145\nPseudom_fluo_GCF_900215245_1_WP_053255234\nPseudom_aeru_PAO1_NP_250281" >branched-chain/collinearity/pseudomons_two_clade/clade2/clade2.tsv
+#提取clade2的菌株名
+cat branched-chain/collinearity/pseudomons_two_clade/clade2/clade2.tsv | tsv-join -d 1 -f PROTEINS/all.strain.tsv -k 1 --append-fields 2 | cut -f 2 >branched-chain/collinearity/pseudomons_two_clade/clade2/clade2_species.tsv
+#提取clade2菌株的gbff文件
+for name in $(cat branched-chain/collinearity/pseudomons_two_clade/clade2/clade2_species.tsv)
+do
+echo $name
+cp ASSEMBLY/$name/*.gbff.gz ASSEMBLY/$name/$name.gbff.gz
+done
+
+for name in $(cat branched-chain/collinearity/pseudomons_two_clade/clade2/clade2_species.tsv)
+do
+echo $name
+mv ASSEMBLY/$name/$name.gbff.gz branched-chain/collinearity/pseudomons_two_clade/clade2
+done
+#解压上述文件
+gunzip branched-chain/collinearity/pseudomons_two_clade/clade2/*.gz
+#截取其他菌株的gbk  
+for name in $(cat branched-chain/collinearity/pseudomons_two_clade/clade2/clade2_species.tsv)
+do
+echo $name
+python  fetch_gbk.py -i branched-chain/collinearity/pseudomons_two_clade/clade2/$name.gbff -e 10000 -l brnQ -o branched-chain/collinearity/pseudomons_two_clade/clade2/$name
+done
+#截取PAO1的gbk
+python  fetch_gbk.py -i branched-chain/collinearity/pseudomons_two_clade/clade2/Pseudom_aeru_PAO1.gbff -e 10000 -l braB -o branched-chain/collinearity/pseudomons_two_clade/clade2/Pseudom_aeru_PAO1
+python  fetch_gbk.py -i branched-chain/collinearity/pseudomons_two_clade/clade2/Pseudom_aeru_PAO1.gbff -e 10000 -l braZ -o branched-chain/collinearity/pseudomons_two_clade/clade2/Pseudom_aeru_PAO1
+
+###注意clade2中的Pseudom_citro_GCF_001586155_1和Pseudom_kna_GCF_009911755_1和Pseudom_lal_GCF_008807375_1没有gbff文件
+cp ASSEMBLY/Pseudom_citro_GCF_001586155_1/GCF_001586155.1_ASM158615v1_genomic.gff.gz ASSEMBLY/Pseudom_citro_GCF_001586155_1/Pseudom_citro_GCF_001586155_1.gff.gz 
+cp ASSEMBLY/Pseudom_citro_GCF_001586155_1/GCF_001586155.1_ASM158615v1_genomic.fna.gz ASSEMBLY/Pseudom_citro_GCF_001586155_1/Pseudom_citro_GCF_001586155_1.fna.gz
+mv ASSEMBLY/Pseudom_citro_GCF_001586155_1/Pseudom_citro_GCF_001586155_1.gff.gz   branched-chain/collinearity/pseudomons_two_clade/clade2
+mv ASSEMBLY/Pseudom_citro_GCF_001586155_1/Pseudom_citro_GCF_001586155_1.fna.gz   branched-chain/collinearity/pseudomons_two_clade/clade2
+
+cp ASSEMBLY/Pseudom_kna_GCF_009911755_1/GCF_009911755.1_ASM991175v1_genomic.gff.gz ASSEMBLY/Pseudom_kna_GCF_009911755_1/Pseudom_kna_GCF_009911755_1.gff.gz
+cp ASSEMBLY/Pseudom_kna_GCF_009911755_1/GCF_009911755.1_ASM991175v1_genomic.fna.gz ASSEMBLY/Pseudom_kna_GCF_009911755_1/Pseudom_kna_GCF_009911755_1.fna.gz 
+mv ASSEMBLY/Pseudom_kna_GCF_009911755_1/Pseudom_kna_GCF_009911755_1.gff.gz   branched-chain/collinearity/pseudomons_two_clade/clade2
+mv ASSEMBLY/Pseudom_kna_GCF_009911755_1/Pseudom_kna_GCF_009911755_1.fna.gz   branched-chain/collinearity/pseudomons_two_clade/clade2
+
+cp ASSEMBLY/Pseudom_lal_GCF_008807375_1/GCF_008807375.1_ASM880737v1_genomic.gff.gz ASSEMBLY/Pseudom_lal_GCF_008807375_1/Pseudom_lal_GCF_008807375_1.gff.gz
+cp ASSEMBLY/Pseudom_lal_GCF_008807375_1/GCF_008807375.1_ASM880737v1_genomic.fna.gz ASSEMBLY/Pseudom_lal_GCF_008807375_1/Pseudom_lal_GCF_008807375_1.fna.gz 
+mv ASSEMBLY/Pseudom_lal_GCF_008807375_1/Pseudom_lal_GCF_008807375_1.gff.gz  branched-chain/collinearity/pseudomons_two_clade/clade2
+mv ASSEMBLY/Pseudom_lal_GCF_008807375_1/Pseudom_lal_GCF_008807375_1.fna.gz   branched-chain/collinearity/pseudomons_two_clade/clade2
+gunzip branched-chain/collinearity/pseudomons_two_clade/clade2/*.gz
+#转换格式
+python  gff_to_gbk.py branched-chain/collinearity/pseudomons_two_clade/clade2/Pseudom_citro_GCF_001586155_1.gff  branched-chain/collinearity/pseudomons_two_clade/clade2/Pseudom_citro_GCF_001586155_1.fna
+python  gff_to_gbk.py branched-chain/collinearity/pseudomons_two_clade/clade2/Pseudom_kna_GCF_009911755_1.gff branched-chain/collinearity/pseudomons_two_clade/clade2/Pseudom_kna_GCF_009911755_1.fna
+python  gff_to_gbk.py branched-chain/collinearity/pseudomons_two_clade/clade2/Pseudom_lal_GCF_008807375_1.gff branched-chain/collinearity/pseudomons_two_clade/clade2/Pseudom_lal_GCF_008807375_1.fna
+###Pseudom_citro_GCF_001586155_1和Pseudom_kna_GCF_009911755_1和Pseudom_lal_GCF_008807375_1的gbk提取
+python  fetch_gbk.py -i branched-chain/collinearity/pseudomons_two_clade/clade2/Pseudom_citro_GCF_001586155_1.gb -e 10000 -l brnQ -o branched-chain/collinearity/pseudomons_two_clade/clade2/Pseudom_citro_GCF_001586155_1
+python  fetch_gbk.py -i branched-chain/collinearity/pseudomons_two_clade/clade2/Pseudom_kna_GCF_009911755_1.gb -e 10000 -l brnQ -o branched-chain/collinearity/pseudomons_two_clade/clade2/Pseudom_kna_GCF_009911755_1
+python  fetch_gbk.py -i branched-chain/collinearity/pseudomons_two_clade/clade2/Pseudom_lal_GCF_008807375_1.gb -e 10000 -l brnQ -o branched-chain/collinearity/pseudomons_two_clade/clade2/Pseudom_lal_GCF_008807375_1
+```
 
 * other
 ```bash
@@ -920,11 +1035,3 @@ seqkit subseq  Pseudom_aeru_PAO1.fna -r 1722545:1732545 >PAO1_braB_front.fa
 seqkit subseq  Pseudom_aeru_PAO1.fna -r 1733858:1743858 >PAO1_braB_after.fa
 ```
 
-
-
-
-
-
-```r
-ggplot(data,aes(x=type,y=fold,col=type),show.legend = F)+ geom_violin()+ geom_boxplot()+theme_bw()+theme(panel.border = element_blank(),panel.grid.major = element_blank(),panel.grid.minor = element_blank(),axis.line = element_line(colour = "black"))+theme(text=element_text(size=16,family="Arial",face="bold"))
-ggsave('pse_aeru_identity.png', p,dpi = 480, width=8, height=6)  
