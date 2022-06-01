@@ -13,12 +13,13 @@
   - [2.5 统计diamond比对和hmmer比对时不同species中BCAA个数](#25-统计diamond比对和hmmer比对时不同species中bcaa个数)
   - [2.6 菌株中丢失了BCAA记为0](#26-菌株中丢失了bcaa记为0)
   - [2.7 绘制统计不同物种中BCAA平均拷贝数的表格](#27-绘制统计不同物种中bcaa平均拷贝数的表格)
+  - [2.8 重新统计去掉epsilon，alpha变形菌和放线菌门，支原体门,芽孢杆菌纲的砂眼衣原体等后的基因组数，物种数，BCAA拷贝数](#28-重新统计去掉epsilonalpha变形菌和放线菌门支原体门芽孢杆菌纲的砂眼衣原体等后的基因组数物种数bcaa拷贝数)
 - [3. 两种树](#3-两种树)
-  - [3.1铜绿假单胞菌物种内所有的braB和braZ序列建立基因树（不需要外类群,因为蛋白序列有一半是braB,有一半是braZ,无法区分)](#31铜绿假单胞菌物种内所有的brab和braz序列建立基因树不需要外类群因为蛋白序列有一半是brab有一半是braz无法区分)
+  - [3.1铜绿假单胞菌物种内所有的braB和braZ序列建立基因树（不需要外类群,因为蛋白序列有一半是braB,有一半是braZ,无法区分) (OK)](#31铜绿假单胞菌物种内所有的brab和braz序列建立基因树不需要外类群因为蛋白序列有一半是brab有一半是braz无法区分-ok)
   - [3.2铜绿假单胞菌物种内所有的braB和braZ序列建立物种树（需要外类群)](#32铜绿假单胞菌物种内所有的brab和braz序列建立物种树需要外类群)
   - [3.3假单胞菌属内(模式菌株15+代表菌株533 共有548)建立基因树(需要外类群)](#33假单胞菌属内模式菌株15代表菌株533-共有548建立基因树需要外类群)
-  - [3.4假单胞菌属内(模式菌株15+代表菌株533 共有548)建立物种树](#34假单胞菌属内模式菌株15代表菌株533-共有548建立物种树)
-  - [3.5gamma变形菌纲内(模式菌株15+代表菌株533 共有548)建立基因树 (需要外类群)](#35gamma变形菌纲内模式菌株15代表菌株533-共有548建立基因树-需要外类群)
+  - [3.4假单胞菌属内(模式菌株15+代表菌株533 共有548)建立物种树(OK)](#34假单胞菌属内模式菌株15代表菌株533-共有548建立物种树ok)
+  - [3.5gamma变形菌纲内(模式菌株15+代表菌株533 共有548)建立基因树 (需要外类群) (OK)](#35gamma变形菌纲内模式菌株15代表菌株533-共有548建立基因树-需要外类群-ok)
   - [3.6gamma变形菌纲(模式菌株15+代表菌株533 共有548)建立物种树，alpha变形菌纲作为外类群，厚壁菌门作为外类群(金黄色葡萄球菌和枯草芽孢杆菌)](#36gamma变形菌纲模式菌株15代表菌株533-共有548建立物种树alpha变形菌纲作为外类群厚壁菌门作为外类群金黄色葡萄球菌和枯草芽孢杆菌)
 - [4.生物环境](#4生物环境)
   - [4.1铜绿样本生物环境注释信息](#41铜绿样本生物环境注释信息)
@@ -26,6 +27,7 @@
 - [5.铜绿基因树的注释信息](#5铜绿基因树的注释信息)
 - [6.共线性的注意事项](#6共线性的注意事项)
 - [7.变形菌纲基因树和物种树的注释信息](#7变形菌纲基因树和物种树的注释信息)
+- [8.材料与方法](#8材料与方法)
 
 <!-- /TOC -->
 * 1.由于外类群不够，新添了一些基因组文件，由1514增加至1953个基因组文件，由此需要重新操作  
@@ -304,42 +306,58 @@ sed -i '1icopy\tgenus\tGCF'  branched-chain/branched-chain_hmmscan_GCF_copy.pfam
 ```bash
 cd ~/data/Pseudomonas
 mkdir -p branched-chain/diamond
-#删除all.replacd.fa的空字符
+#删除all.replace.fa的空字符
 sed -i 's/\x0//g' PROTEINS/all.replace.fa
 #提取hmmsearch和hmmscan结果
-cat branched-chain/branched-chain_minevalue.pfam.tsv | tsv-select -f 1,3 |
+cat branched-chain/branched-chain_minevalue.pfam.tsv | grep "PAO1" | grep "NP" | tsv-select -f 1,3 |
 tsv-filter --str-in-fld 2:"branched-chain" | cut -f 1 >branched-chain/diamond/branched-chain_diamond1.tsv
 #第一轮diamond(任取一条菌株里的braB序列进行blast)
+#相似性选择和覆盖度选择（结构阈330aa,braB437，330/437=0.755, 因此覆盖度选择70，相似性最低为55.606 ，因此相似性选50 ）
 faops some PROTEINS/all.replace.fa  branched-chain/diamond/branched-chain_diamond1.tsv branched-chain/diamond/branched-chain_diamond1.fa
 diamond makedb --in branched-chain/diamond/branched-chain_diamond1.fa --db branched-chain/diamond/branched-chain_diamond1
-diamond blastp --db branched-chain/diamond/branched-chain_diamond1.dmnd --query  PROTEINS/all.replace.fa -e 1e-5 --outfmt 6 --threads 4 --out branched-chain/diamond/branched-chain_result1.tsv --more-sensitive
+diamond blastp --db branched-chain/diamond/branched-chain_diamond1.dmnd --query  PROTEINS/all.replace.fa -e 1e-5 --outfmt 6 --threads 4 --out branched-chain/diamond/branched-chain_result1.tsv  --id 50 --subject-cover 50
 
 #第二轮diamond(将第一轮从蛋白数据库中抓取出的序列进行blast)
-faops some PROTEINS/all.replace.fa <(cat branched-chain/diamond/branched-chain_result1.tsv | cut -f 2 | sort -n | uniq)   branched-chain/diamond/branched-chain_diamond2.fa 
+faops some PROTEINS/all.replace.fa <(cat branched-chain/diamond/branched-chain_result1.tsv | cut -f 1 | sort -n | uniq)   branched-chain/diamond/branched-chain_diamond2.fa 
 diamond makedb --in branched-chain/diamond/branched-chain_diamond2.fa --db branched-chain/diamond/branched-chain_diamond2
-diamond blastp --db branched-chain/diamond/branched-chain_diamond2.dmnd --query  PROTEINS/all.replace.fa -e 1e-5 --outfmt 6 --threads 4 --out branched-chain/diamond/branched-chain_result2.tsv  --more-sensitive 
+diamond blastp --db branched-chain/diamond/branched-chain_diamond2.dmnd --query  PROTEINS/all.replace.fa -e 1e-5 --outfmt 6 --threads 4 --out branched-chain/diamond/branched-chain_result2.tsv  --id 50 --subject-cover 50
 
 #第三轮diamond
-faops some PROTEINS/all.replace.fa <(cat branched-chain/diamond/branched-chain_result2.tsv | cut -f 2 | sort -n | uniq)   branched-chain/diamond/branched-chain_diamond3.fa 
+faops some PROTEINS/all.replace.fa <(cat branched-chain/diamond/branched-chain_result2.tsv | cut -f 1 | sort -n | uniq)   branched-chain/diamond/branched-chain_diamond3.fa 
 diamond makedb --in branched-chain/diamond/branched-chain_diamond3.fa --db branched-chain/diamond/branched-chain_diamond3
-diamond blastp --db branched-chain/diamond/branched-chain_diamond3.dmnd --query  PROTEINS/all.replace.fa -e 1e-5 --outfmt 6 --threads 4 --out branched-chain/diamond/branched-chain_result3.tsv  --more-sensitive 
+diamond blastp --db branched-chain/diamond/branched-chain_diamond3.dmnd --query  PROTEINS/all.replace.fa -e 1e-5 --outfmt 6 --threads 4 --out branched-chain/diamond/branched-chain_result3.tsv --id 50 --subject-cover 50
+
+#第四轮diamond
+faops some PROTEINS/all.replace.fa <(cat branched-chain/diamond/branched-chain_result3.tsv | cut -f 1 | sort -n | uniq)   branched-chain/diamond/branched-chain_diamond4.fa 
+diamond makedb --in branched-chain/diamond/branched-chain_diamond4.fa --db branched-chain/diamond/branched-chain_diamond4
+diamond blastp --db branched-chain/diamond/branched-chain_diamond4.dmnd --query  PROTEINS/all.replace.fa -e 1e-5 --outfmt 6 --threads 4 --out branched-chain/diamond/branched-chain_result4.tsv --id 50 --subject-cover 50
+
 
 #hmmer结果
-cat branched-chain/diamond/branched-chain_diamond1.tsv | wc -l  #2140
+cat branched-chain/branched-chain_minevalue.tsv | wc -l  #2140 
 
 #第一轮diamond的query
-cut -f 1 branched-chain/diamond/branched-chain_result1.tsv | sort -n | uniq | wc -l #2144
+cut -f 1 branched-chain/diamond/branched-chain_result1.tsv | sort -n | uniq | wc -l #1893
 #第一轮diamond的target
-cut -f 2 branched-chain/diamond/branched-chain_result1.tsv | sort -n | uniq | wc -l #1492
+cut -f 2 branched-chain/diamond/branched-chain_result1.tsv | sort -n | uniq | wc -l #2
 #第二轮diamond的query
-cut -f 1 branched-chain/diamond/branched-chain_result2.tsv | sort -n | uniq | wc -l #2144
+cut -f 1 branched-chain/diamond/branched-chain_result2.tsv | sort -n | uniq | wc -l #2018
 #第二轮diamond的target
-cut -f 2 branched-chain/diamond/branched-chain_result2.tsv | sort -n | uniq | wc -l #1492
+cut -f 2 branched-chain/diamond/branched-chain_result2.tsv | sort -n | uniq | wc -l #1245
 #第三轮diamond的query
-cut -f 1 branched-chain/diamond/branched-chain_result3.tsv | sort -n | uniq | wc -l #2144
+cut -f 1 branched-chain/diamond/branched-chain_result3.tsv | sort -n | uniq | wc -l #2018
 #第三轮diamond的target
-cut -f 2 branched-chain/diamond/branched-chain_result3.tsv | sort -n | uniq | wc -l #1492
+cut -f 2 branched-chain/diamond/branched-chain_result3.tsv | sort -n | uniq | wc -l #1370
+#第四轮diamond的query
+cut -f 1 branched-chain/diamond/branched-chain_result4.tsv | sort -n | uniq | wc -l #2018
+#第四轮diamond的target
+cut -f 2 branched-chain/diamond/branched-chain_result4.tsv | sort -n | uniq | wc -l #1370
+
+
 #三轮diamond结果一致
+#查看hmmer结果和diamond结果的相同之处2108
+cat branched-chain/branched-chain_minevalue.tsv | cut -f 1 | grep -f <(cut -f 1 branched-chain/diamond/branched-chain_result4.tsv | sort -n | uniq)
+
 ```
 
 ## 2.5 统计diamond比对和hmmer比对时不同species中BCAA个数
@@ -372,15 +390,15 @@ keep-header -- tsv-sort -k2,2n >branched-chain/diamond/branched_chain_hmmer_spec
 ```bash
 #统计assembly总个数
 cat strains.taxon.tsv | cut -f 1 | sort -n | uniq | wc -l #1952 
-#统计不同species的所有assembly
+#统计不同species的所有assembly #572
 cat strains.taxon.tsv | tsv-summarize -g 4 --count | keep-header -- tsv-sort -k2,2n >branched-chain/diamond/assembly_species_num.tsv
-cat branched-chain/diamond/assembly_species_num.tsv | wc -l  #572
-#统计不同species的含有copy的assembly
-cat branched-chain/diamond/branched_chain_hmmer_speices_num.tsv | wc -l  #386
+#统计不同species的含有copy的assembly #386
+wc -l branched-chain/diamond/branched_chain_hmmer_species_num.tsv  
 ##根据不同物种的菌株数量和含有copy的菌株数量差异，发现有的菌株存在基因丢失情况
 ##因此基因存在丢失的菌株需要将拷贝记为0
 #差异数目为186
 cat branched-chain/diamond/assembly_species_num.tsv | grep -v -f <(cut -f 1 branched-chain/diamond/branched_chain_hmmer_species_num.tsv) | tr "\t" "," | perl -F, -alne '$name=$F[0];$num=0;print"$name\t$num";'  >branched-chain/diamond/branched_chain_hmmer_species_num_addinformation.tsv
+#合并未丢失和丢失的共有572个
 cat branched-chain/diamond/branched_chain_hmmer_species_num.tsv  branched-chain/diamond/branched_chain_hmmer_species_num_addinformation.tsv >branched-chain/diamond/branched_chain_hmmer_species_copy_num.tsv
 ```
 
@@ -388,14 +406,14 @@ cat branched-chain/diamond/branched_chain_hmmer_species_num.tsv  branched-chain/
 * 表格内容
 ```bash
 #species  | number of assemblies  | numbers of BCAA | average per genome 
-#合并不同菌株的组装体数目和不同菌株中的BCAA拷贝数并且相除计算copy per genome
+#合并不同菌株的组装体数目和不同菌株中的BCAA拷贝数并且相除计算copy per genome(572)
 cat branched-chain/diamond/branched_chain_hmmer_species_copy_num.tsv | 
 tsv-join -d 1 \
 -f branched-chain/diamond/assembly_species_num.tsv -k 1 \
 --append-fields 2 |
 tsv-select -f 1,3,2  | tr "\t" "," |
 perl -F, -alne '$per=$F[2]/$F[1];$per=sprintf "%.1f",$per;print"$F[0]\t$F[1]\t$F[2]\t$per";' >branched-chain/diamond/branched_chain_species_assembly_copy.tsv
-#添加属，科,目，纲和group species信息
+#添加属，科,目，纲和group species信息(572)
 cat branched-chain/diamond/branched_chain_species_assembly_copy.tsv | nwr append stdin -r class -r order -r family -r genus -r "species group" \
  >branched-chain/diamond/branched_chain_species_mean_copy.tsv
 #将不同物种的assembly个数和braz总个数及平均个数进行排序统计
@@ -409,18 +427,82 @@ mlr --itsv --ocsv cat  <(cat branched-chain/diamond/branched_chain_species_mean_
 #查看假单胞菌属的typical菌株的拷贝数目(9）
 cut -f 1,2,3 branched-chain/diamond/branched_chain_species_mean_copy.tsv | grep -v "number" | grep -f <(cat typical.lst | tsv-join -d 1 -f strains.taxon.tsv -k 1 --append-fields 4 | cut -f 2 | sort -n | uniq) | tr "\t" "," | perl -F, -alne '$per=$F[2]/$F[1];$per=sprintf "%.1f",$per;print"$F[0]\t$F[1]\t$F[2]\t$per";' |  
 tsv-sort -k1,1rn >branched-chain/diamond/branched_chain_copy_format1.tsv
-#查看假单胞菌属的非typical菌株的拷贝数目(57)
+#查看假单胞菌属的非typical菌株的拷贝数目(57) 共190
 cut -f 1,2,3 branched-chain/diamond/branched_chain_species_mean_copy.tsv | grep "Pseudomonas" | grep -v -f <(cut -f 1 branched-chain/diamond/branched_chain_copy_format1.tsv) | nwr append stdin -r class | tsv-summarize -g 4 --sum 2,3 | sed 's/Gammaproteobacteria/Other Pseudomonas/g'  | tr "\t" "," | 
 perl -F, -alne '$per=$F[2]/$F[1];$per=sprintf "%.1f",$per;print"$F[0]\t$F[1]\t$F[2]\t$per";'  >branched-chain/diamond/branched_chain_copy_format2.tsv
-#提取非假单胞菌属的其他目的结果(506/499) 去除拷贝为0的目
-cut -f 1,2,3,4,5,6 branched-chain/diamond/branched_chain_species_mean_copy.tsv |  grep -v "Pseudomonas" | grep -v "order" | grep "Gammaproteobacteria" | tsv-select -f 6,2,3 |  
+#提取gamma变形菌纲的非假单胞菌属的其他科的结果(506/499) 去除拷贝为0的科
+cut -f 1,2,3,4,5,6,7 branched-chain/diamond/branched_chain_species_mean_copy.tsv |  grep "Gammaproteobacteria" | grep -v "Pseudomonas"  | tsv-select -f 7,2,3 |  
 tsv-summarize -g 1 --sum 2,3 | tr "\t" "," | perl -F, -alne '$per=$F[2]/$F[1];$per=sprintf "%.1f",$per;print"$F[0]\t$F[1]\t$F[2]\t$per";' |  
 tsv-sort -k1,1rn  >branched-chain/diamond/branched_chain_copy_format3.tsv
 #合并三者的结果(由于只关注gamma变形菌纲，去除厚壁菌门的芽孢杆菌目和衣原体目)
+
 cat branched-chain/diamond/branched_chain_copy_format1.tsv  branched-chain/diamond/branched_chain_copy_format2.tsv branched-chain/diamond/branched_chain_copy_format3.tsv |  sed '1iTaxonomy\tNumber of assemblies\tNumber of braB\braZ\tAverage per genome'  >branched-chain/diamond/branched_chain_copy_whole.tsv
 mlr --itsv --ocsv cat branched-chain/diamond/branched_chain_copy_whole.tsv >branched-chain/diamond/branched_chain_copy_whole.csv
 ```
   
+## 2.8 重新统计去掉epsilon，alpha变形菌和放线菌门，支原体门,芽孢杆菌纲的砂眼衣原体等后的基因组数，物种数，BCAA拷贝数
+```bash
+#只保留变形菌纲和芽孢杆菌纲的(金葡和枯草芽孢杆菌和李斯特菌)三个物种作为外类群
+#统计剩余的基因组数量1947
+cat strains.taxon.tsv | cut -f 4  | nwr append stdin -r class | grep -E "Gammaproteobacteria|Bacilli" | grep -v "Listeria monocytogenes" | wc -l
+#统计剩余的基因组数量对应的物种数和family数量和order数量567和45
+cat strains.taxon.tsv | cut -f 4  | nwr append stdin -r class | grep -E "Gammaproteobacteria|Bacilli" |grep -v "Listeria monocytogenes" | tsv-summarize -g 1 --count | wc -l
+cat strains.taxon.tsv | cut -f 4  | nwr append stdin -r class | grep -E "Gammaproteobacteria|Bacilli" | grep -v "Listeria monocytogenes" |nwr append stdin -r family | tsv-summarize -g 3 --count | wc -l
+
+#统计变形菌纲对应的基因组数目和物种数和family数量1945和565和43
+cat strains.taxon.tsv | cut -f 4  | nwr append stdin -r class | grep  "Gammaproteobacteria" | wc -l
+cat strains.taxon.tsv | cut -f 4  | nwr append stdin -r class | grep "Gammaproteobacteria" | tsv-summarize -g 1 --count | wc -l
+cat strains.taxon.tsv | cut -f 4  | nwr append stdin -r class | grep "Gammaproteobacteria" | nwr append stdin -r family | tsv-summarize -g 3 --count | wc -l
+#统计只有变形菌纲的BCAA拷贝数2134(-6)
+cat branched-chain/branched-chain_minevalue.pfam.tsv | cut -f 1 |
+tsv-join -d 1 \
+-f PROTEINS/all.strain.tsv -k 1 \
+--append-fields 2 |
+tsv-join -d 2 \
+-f strains.taxon.tsv -k 1 \
+--append-fields 4 | tsv-select -f 3,1,2 | nwr append stdin -r class | grep  "Gammaproteobacteria" | wc -l 
+#统计只有变形菌纲的BCAA拷贝数对应的基因组数量1662(-3)
+cat branched-chain/branched-chain_minevalue.pfam.tsv | cut -f 1 |
+tsv-join -d 1 \
+-f PROTEINS/all.strain.tsv -k 1 \
+--append-fields 2 |
+tsv-join -d 2 \
+-f strains.taxon.tsv -k 1 \
+--append-fields 4 | tsv-select -f 3,1,2 | nwr append stdin -r class | grep  "Gammaproteobacteria" | tsv-summarize -g 3 --count | wc -l
+#统计只有变形菌纲的BCAA拷贝数对应的物种数量 383(-3)
+cat branched-chain/branched-chain_minevalue.pfam.tsv | cut -f 1 |
+tsv-join -d 1 \
+-f PROTEINS/all.strain.tsv -k 1 \
+--append-fields 2 |
+tsv-join -d 2 \
+-f strains.taxon.tsv -k 1 \
+--append-fields 4 | tsv-select -f 3,1,2 | nwr append stdin -r class | grep  "Gammaproteobacteria" | tsv-summarize -g 1 --count | wc -l
+#统计只有变形菌纲的BCAA拷贝数对应的科的数量 18
+cat branched-chain/branched-chain_minevalue.pfam.tsv | cut -f 1 |
+tsv-join -d 1 \
+-f PROTEINS/all.strain.tsv -k 1 \
+--append-fields 2 |
+tsv-join -d 2 \
+-f strains.taxon.tsv -k 1 \
+--append-fields 4 | tsv-select -f 3,1,2 | nwr append stdin -r class | grep  "Gammaproteobacteria" |nwr append stdin -r family | tsv-summarize -g 5 --count | wc -l
+#统计变形菌纲没有鉴定到BCAA的基因组数目283
+cat branched-chain/branched-chain_minevalue.pfam.tsv | cut -f 1 |
+tsv-join -d 1 \
+-f PROTEINS/all.strain.tsv -k 1 \
+--append-fields 2 |
+tsv-join -d 2 \
+-f strains.taxon.tsv -k 1 \
+--append-fields 4 | tsv-select -f 3,1,2 | nwr append stdin -r class | grep  "Gammaproteobacteria" | cut -f 3 >1.tsv
+cat strains.taxon.tsv | grep -v -f 1.tsv | tsv-select -f 4,1 | nwr append stdin -r class | grep "Gammaproteobacteria" | tsv-summarize -g 2 --count | wc -l
+#统计变形菌纲没有鉴定到BCAA的物种数目185
+cat strains.taxon.tsv | grep -v -f 1.tsv | tsv-select -f 4,1 | nwr append stdin -r class | grep "Gammaproteobacteria" | tsv-summarize -g 1 --count | wc -l
+#统计变形菌纲没有鉴定到BCAA的科数目85
+cat strains.taxon.tsv | grep -v -f 1.tsv | tsv-select -f 4,1 | nwr append stdin -r class -r family | grep "Gammaproteobacteria" | tsv-summarize -g 4 --count | wc -l
+```
+
+
+
+
 # 3. 两种树
 * [系统发育和系统发育生态学标记PhyEco marker](https://journals.plos.org/plosone/article?id=10.1371/journal.pone.0077033)
 * [系统识别细菌和古细菌不同分类水平的系统发育标记](https://figshare.com/articles/dataset/Systematically_identify_phylogenetic_markers_at_different_taxonomic_levels_for_bacteria_and_archaea/722713/1)
@@ -434,7 +516,7 @@ mlr --itsv --ocsv cat branched-chain/diamond/branched_chain_copy_whole.tsv >bran
 * 比对后处理:PhyDE 序列编辑软件，可以多开，方便多个比对结果之间进行比较。FastGap 可以对比对后的序列的gap进行重编码，提高序列信息使用效率。Gblocks 在线工具，选择序列保守区，使得后续系统发育分析免受变异过大的比对区域的不良影响。DAMBE 一个低调但全能的系统发育软件，定位与Mega类似，包括饱和度检测功能点。DNAsp 序列分析软件，计算各种序列多样性数据，如核苷酸多样性、序列信息位点含量、单倍型等
 * 目前常用的构建系统发育树的方法有：邻位归并法(Neighbor joining, NJ)、最大似然法(Maximum likelihood method, ML) 以及贝叶斯法（BI）。综合速度和准确度，ML用得较多。ML对替代模型非常敏感，因此利用ML法构建系统发育树之前，选择合适的替代模型是必不可少的过程。(如果序列的相似度较高，每种方法和模型构建的系统发育树差别不大)
 
-## 3.1铜绿假单胞菌物种内所有的braB和braZ序列建立基因树（不需要外类群,因为蛋白序列有一半是braB,有一半是braZ,无法区分)
+## 3.1铜绿假单胞菌物种内所有的braB和braZ序列建立基因树（不需要外类群,因为蛋白序列有一半是braB,有一半是braZ,无法区分) (OK)
 ```bash
 cd ~/data/Pseudomonas
 #提取所有的铜绿假单胞菌的单双拷贝蛋白序列(773)
@@ -445,7 +527,7 @@ faops size branched-chain/tree/branched-chain.Pseudom_aeru.protein.fa | wc -l
 #比对
 mafft --auto   branched-chain/tree/branched-chain.Pseudom_aeru.protein.fa > branched-chain/tree/branched-chain.Pseudom_aeru.aln.mafft.fa
 #使用iqtree2建树（超算上)773
-bsub -q mpi -n 24 -J "iq" ./iqtree2 -s branched-chain.Pseudom_aeru.aln.mafft.fa  -m MFP  --prefix branched-chain.Pseudom_aeru -T 20 -b 100  
+bsub -q mpi -n 24 -J "iq" ./iqtree2 -s branched-chain.Pseudom_aeru.aln.mafft.fa  -m MFP  --prefix branched-chain.Pseudom_aeru -T 20 -B 1000 --bnni 
 #改名
 mv branched-chain.Pseudom_aeru.treefile branched-chain.Pseudom_aeru.newick
 
@@ -559,24 +641,24 @@ faops some PROTEINS/all.replace.fa <(cat branched-chain/branched-chain_minevalue
 cat branched-chain/branched-chain_minevalue.tsv |  grep -v "Pseudom_aeru_PAO1_GCF_013001005_1" | grep -f <(cut -f 2 branched-chain/tree/branched-chain.Pseudomonas.protein.tsv) | cut -f 1 | tsv-join -d 1 -f PROTEINS/all.strain.tsv -k 1 --append-fields 2 | cut -f 2 | sort -n | uniq | wc -l
 #将外类群合并到铜绿序列中(52)
 cat branched-chain/tree/branched-chain.Pseudomonas.protein.outgroup.fa >>branched-chain/tree/branched-chain.Pseudomonas.protein.fa
-#比对(68)
+#比对(52)
 mafft --auto  branched-chain/tree/branched-chain.Pseudomonas.protein.fa >branched-chain/tree/branched-chain.Pseudomonas.protein.aln.fa
 #建树
-bsub -q mpi -n 24 -J "iq" ./iqtree2 -s branched-chain.Pseudomonas.protein.aln.fa -m MFP  --prefix branched-chain.Pseudomonas.protein -T 20 -b 100  -o  She_balt_GCF_003030925_1_WP_006084009,Vi_cho_GCF_008369605_1_WP_000815020
+bsub -q mpi -n 24 -J "iq" ./iqtree2 -s branched-chain.Pseudomonas.protein.aln.fa -m MFP  --prefix branched-chain.Pseudomonas.protein -T 20 -B 1000 --bnni   -o  She_balt_GCF_003030925_1_WP_006084009,Vi_cho_GCF_008369605_1_WP_000815020
 #改名
 mv  branched-chain.Pseudomonas.protein.treefile   branched-chain.Pseudomonas.protein.aln.newick
 ```
 
-## 3.4假单胞菌属内(模式菌株15+代表菌株533 共有548)建立物种树
+## 3.4假单胞菌属内(模式菌株15+代表菌株533 共有548)建立物种树(OK)
 ```bash
 cd ~/data/Pseudomonas
 #提取假单胞菌属的的（模式菌株+代表菌株)的菌株名字 #49
 cat branched-chain/branched-chain_minevalue.tsv| grep -v "Pseudom_aeru_PAO1_GCF_013001005_1" | grep -f <(cut -f 2 branched-chain/tree/branched-chain.Pseudomonas.protein.tsv) | cut -f 1 | tsv-join -d 1 -f PROTEINS/all.strain.tsv -k 1 --append-fields 2 | cut -f 2 | sort -n | uniq >branched-chain/tree/branched-chain.Pseudomonas.bac120.species.tsv
 #在假单胞菌属的物种中加上外类群 #51
 cat branched-chain/tree/branched-chain.Pseudomonas.bac120.outgroup.tsv >>branched-chain/tree/branched-chain.Pseudomonas.bac120.species.tsv
-#提取上述菌株名相应的bac120序列 #63
+#提取上述菌株名相应的bac120序列 #51
 faops some PROTEINS/bac120.trim.fa branched-chain/tree/branched-chain.Pseudomonas.bac120.species.tsv branched-chain/tree/branched-chain.Pseudomonas.bac120.species.fa
-#比对(63)
+#比对(51)
 mafft --auto  branched-chain/tree/branched-chain.Pseudomonas.bac120.species.fa >branched-chain/tree/branched-chain.Pseudomonas.bac120.aln.mafft.fa
 #建树
 bsub -q mpi -n 24 -J "iq" ./iqtree2 -s branched-chain.Pseudomonas.bac120.aln.mafft.fa -m MFP  --prefix branched-chain.Pseudomonas.bac120 -T 20 -B 1000 --bnni  -o  She_balt_GCF_003030925_1,Vi_cho_GCF_008369605_1
@@ -585,7 +667,7 @@ mv branched-chain.Pseudomonas.bac120.treefile branched-chain.Pseudomonas.bac120.
 ```
 
 
-## 3.5gamma变形菌纲内(模式菌株15+代表菌株533 共有548)建立基因树 (需要外类群)
+## 3.5gamma变形菌纲内(模式菌株15+代表菌株533 共有548)建立基因树 (需要外类群) (OK)
 ```bash
 cd ~/data/Pseudomonas
 #选择非gamma变形菌纲的作为外类群
@@ -617,7 +699,7 @@ faops some PROTEINS/all.replace.fa <(cat branched-chain/branched-chain_minevalue
 #比对(437)
 mafft --auto  branched-chain/tree/branched-chain.Gammaproteobacteria.protein.fa > branched-chain/tree/branched-chain.Gammaproteobacteria.protein.aln.mafft.fa
 #建树
-bsub -q mpi -n 24 -J "iq" ./iqtree2 -s branched-chain.Gammaproteobacteria.protein.aln.mafft.fa -m MFP  --prefix branched-chain.Gammaproteobacteria.protein  -T 20 -b 100 -o Bac_subti_subtilis_168_NP_390546,Sta_aure_aureus_NCTC_8325_YP_498750
+bsub -q mpi -n 24 -J "iq" ./iqtree2 -s branched-chain.Gammaproteobacteria.protein.aln.mafft.fa -m MFP  --prefix branched-chain.Gammaproteobacteria.protein  -T 20 -B 1000 -bnni -o Bac_subti_subtilis_168_NP_390546,Sta_aure_aureus_NCTC_8325_YP_498750
 #改名
 mv branched-chain.Gammaproteobacteria.protein.treefile branched-chain.Gammaproteobacteria.protein.newick
 ```
@@ -630,7 +712,9 @@ cd ~/data/Pseudomonas
 cat branched-chain/branched-chain_minevalue.tsv | grep -f <(cut -f 2 branched-chain/tree/branched-chain.Gammaproteobacteria.strain.tsv) | cut -f 1 | tsv-join -d 1 -f PROTEINS/all.strain.tsv -k 1 --append-fields 2 | cut -f 2 | sort -n | uniq >branched-chain/tree/branched-chain.Gammaproteobacteria.bac120.tsv
 #验证braB和braZ在变形菌纲的数目#364
 cat branched-chain/branched-chain_minevalue.tsv | grep -f representative.tsv | tsv-join -d 1 -f PROTEINS/all.strain.tsv -k 1 --append-fields 2 | cut -f 4 | tsv-join -d 1 -f strains.taxon.tsv -k 1 --append-fields 4 | tsv-select -f 2,1 | nwr append stdin -r class | tsv-filter --str-in-fld 3:"Gammaproteobacteria" | sort -n | uniq | wc -l
-#提取上述菌株名相应的bac120序列 #364
+#加上外类群名字366
+echo -e 'Bac_subti_subtilis_168_NP_390546\nSta_aure_aureus_NCTC_8325_YP_498750' >>branched-chain/tree/branched-chain.Gammaproteobacteria.bac120.tsv
+#提取上述菌株名相应的bac120序列 #366
 faops some PROTEINS/bac120.trim.fa branched-chain/tree/branched-chain.Gammaproteobacteria.bac120.tsv branched-chain/tree/branched-chain.Gammaproteobacteria.bac120.fa
 mafft --auto branched-chain/tree/branched-chain.Gammaproteobacteria.bac120.fa >branched-chain/tree/branched-chain.Gammaproteobacteria.bac120.mafft.aln.fa
 #建树
@@ -842,8 +926,10 @@ Rscript ./table2itol/table2itol.R -D plan3 -i spe  branched-chain.Gammaproteobac
 #提取注释信息(TREE_COLORS，包括range)
 Rscript ./table2itol/table2itol.R -D plan3 -i spe -b family -w 0.5  branched-chain.Gammaproteobacteria.bac120.anno.tsv
 cat branched-chain.Gammaproteobacteria.bac120.anno.tsv | cut -f 2 | sort -n | uniq | perl -e '$num=0;while(<>){chomp;$name=(split/\t/,$_)[0];$num+=1;print"$name\t$num\n";}' >family_num.tsv
- 
 Rscript ./table2itol/table2itol.R -D plan3 -i spe -b family -w 0   branched-chain.Gammaproteobacteria.protein.anno.tsv
-
-
 ```
+
+# 8.材料与方法
+```bash
+#统计所有菌株文件中菌株数量 572
+ cut -d , -f 1 ASSEMBLY/Pseudomonas.assembly.pass.csv | tsv-join -d 1  -f strains.taxon.tsv -k 1 --append-fields 4 | tsv-summarize -g 2 --count | wc -l
