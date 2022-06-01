@@ -9,6 +9,7 @@
 - [2.使用braZ上下游50000bp在nt库里找braZ水平基因转移的证据](#2使用braz上下游50000bp在nt库里找braz水平基因转移的证据)
   - [2.1自己在NCBI下载的bacteria representive数据](#21自己在ncbi下载的bacteria-representive数据)
   - [2.2根据王老师的nwr/doc/assembly.md下载数据](#22根据王老师的nwrdocassemblymd下载数据)
+  - [2.3提取PAO1的braB和braZ的上下游5k，10k，50k](#23提取pao1的brab和braz的上下游5k10k50k)
 - [3.统计二代测序宏基因组样本的抗性基因存在情况以及三代测序宏基因组样本的抗性基因存在情况](#3统计二代测序宏基因组样本的抗性基因存在情况以及三代测序宏基因组样本的抗性基因存在情况)
   - [3.1三代污泥宏基因组中的细菌物种存在情况(使用的是sludge_bin.fa)](#31三代污泥宏基因组中的细菌物种存在情况使用的是sludge_binfa)
   - [3.2三代chicken gut宏基因组中的细菌物种存在情况(使用的是chicken_bin.fa)](#32三代chicken-gut宏基因组中的细菌物种存在情况使用的是chicken_binfa)
@@ -439,10 +440,41 @@ cat bacteria_repre_download.tsv |
 gunzip *.gz
 python floder_split.py 
 #共有15条序列
-faops size *.fna #836316
+faops size *.fna | wc -l #8 2911 1672
 #更改序列名
 cat bac_repre.1.fna  | sed 's/\s/\//g' >bac_repre.1.re.fna
-faops size *.re.fna #836316
+faops size *.re.fna #830994
+
+```
+
+## 2.3提取PAO1的braB和braZ的上下游5k，10k，50k
+```r
+#提取PAO1的braB 1732545..1733858 
+#1314  
+seqkit subseq  PAO1_genomic.fa -r 1732545:1733858 >PAO1_braB.fa
+#提取braB的上下游各5k
+#11314
+seqkit subseq  PAO1_genomic.fa -r 1727545:1738858 >PAO1_braB_5k.fa
+#提取braB的上下游各10k
+#21314
+seqkit subseq  PAO1_genomic.fa -r 1722545:1743858 >PAO1_braB_10k.fa
+#提取braB的上下游各50k
+# 101314
+seqkit subseq  PAO1_genomic.fa -r 1682545:1783858 >PAO1_braB_50k.fa
+#提取PAO1的braZ 2151755..2153068
+#1314
+seqkit subseq  PAO1_genomic.fa -r 2151755:2153068 >PAO1_braz.fa
+#提取braZ的上下游各5k
+#11314
+seqkit subseq  PAO1_genomic.fa -r 2146755:2158068 >PAO1_braz_5k.fa
+#提取braZ的上下游各10k
+#21314
+seqkit subseq  PAO1_genomic.fa -r 2141755:2163068 >PAO1_braz_10k.fa
+#提取braZ的上下游各50k
+#101314
+seqkit subseq  PAO1_genomic.fa -r 2101755:2203068 >PAO1_braz_50k.fa
+
+
 #建库
 for filename in *.re.fna
 do
@@ -455,13 +487,41 @@ for filename in *.re.fna
 do
 base=$(basename $filename .re.fna)
 echo $base
-bsub -q mpi -n 24 -J "BL" blastn -db $base  -query braZ_50000bp.fa -out $base.braZ.tsv -outfmt 6 -num_threads 20  -evalue 1e-5
+bsub -q mpi -n 24 -J "BL" blastn -db $base  -query PAO1_braB_5k.fa -out $base.braB_5k.tsv -outfmt 6 -num_threads 20  -evalue 1e-5
 done 
-#合并分割的文件
-cat *.tsv >bac_repre_braZ_50000.tsv
+
+for filename in *.re.fna
+do
+base=$(basename $filename .re.fna)
+echo $base
+bsub -q mpi -n 20 -J "BL" blastn -db $base  -query PAO1_braB_10k.fa -out $base.braB_10k.tsv -outfmt 6 -num_threads 16  -evalue 1e-5
+done 
+
+
+for filename in *.re.fna
+do
+base=$(basename $filename .re.fna)
+echo $base
+bsub -q mpi -n 24 -J "BL" blastn -db $base  -query PAO1_braB_50k.fa -out $base.braB_50k.tsv -outfmt 5 -num_threads 20  -evalue 1e-5
+done 
+
+
+
+
+#blast结果可视化软件kablamm需要outfmt5
+#blast结果可视化软件ccircoletto不需要outfmt
+
+
+#转换blast结果格式
+cut -f 1,7,8 whole_braB_5k.tsv | perl -alne '($one,$two,$three)=(split/\t/,$_)[0,1,2];if($two < $three){$sec=$two;$thi=$three;}else{$thi=$two;$sec=$three;}print"$one\t$sec\t$thi";' >whole_braB_5k.bed
+cat whole_braB_5k.bed | tsv-filter --ff-le 2:3 | wc -l #4456
+#对blast结果排序
+tsv-sort -k2,2n -k3,3n  whole_braB_5k.bed | perl -alne '($one,$two,$thr)=(split/\t/,$_)[0,1,2];print"$one".":"."$two"."-"."$thr";' | sed 's/NC_002516.2/NC_002516/g' >whole_braB_5k.sort.tsv
+#统计测序深度
+spanr coverage whole_braB_5k.sort.tsv -d  >1.tsv
+
+
 ```
-
-
 
 
 
