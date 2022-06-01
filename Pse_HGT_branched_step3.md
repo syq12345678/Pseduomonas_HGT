@@ -91,22 +91,25 @@ url_ 分割后文件的前缀
 #按序列分割
 faops split-about nr.fa 3000000000 ./
 #建库
-for name in {000..059} 
+bsub -q mpi -n 24 -J "DIA"  ./diamond makedb --in PAO1_braB_braZ.fna -d PAO1 --threads 20
+#比对
+for name in {000..029} 
 do
 echo $name
-./diamond makedb --in $name.fa -d aaa_$name --threads 20
+bsub -q mpi -n 24 -J "DIA" ./diamond blastp -d PAO1.dmnd -q $name.fa -o aaa.$name.result.tsv --id 30  --subject-cover 30 --threads 20 -e 1e-5 
 done
 #比对
-for name in {042..053} 
+for name in {030..059} 
 do
 echo $name
-bsub -q mpi -n 24 -J "DIA" ./diamond blastp -d braz.dmnd -q $name.fa -o aaa.$name.result.tsv --id 30  --subject-cover 30 --threads 20 -e 1e-5 --more-sensitive
+bsub -q mpi -n 24 -J "DIA" ./diamond blastp -d PAO1.dmnd -q $name.fa -o aaa.$name.result.tsv --id 30  --subject-cover 30 --threads 20 -e 1e-5 
 done
-cat *.tsv >braz_nr_whole.tsv
+cat *.tsv >PAO1_braB_braZ_nr_whole.tsv
 #分开比对的braz_nr_whole.tsv与未分开比对的braz_nr_reverse.result.tsv结果一致
+#提取抓取出来的序列braZ（37986）
+#提取braB和braZ抓取出来的序列(72684)
+faops some *.fa <(cut -f 1 PAO1_braB_braZ_nr_whole.tsv) PAO1_braB_braZ_nr_reverse.fa 
 
-#提取抓取出来的序列（37986）
-faops some nr.fa <(cut -f 1 braz_nr_reverse.result.tsv) braz_nr_reverse.fa 
 ##提取抓取的序列对应的菌株蛋白名(37986)
 cat nr_protein_name.tsv | grep -Ff <(cut -f 1 braz_nr_reverse.result.tsv | sed  's/^/>&/g') >braz_nr_strain_protein.tsv
 #替换菌株名和蛋白名
