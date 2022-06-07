@@ -9,7 +9,9 @@
 - [2.使用braZ上下游50000bp在nt库里找braZ水平基因转移的证据](#2使用braz上下游50000bp在nt库里找braz水平基因转移的证据)
   - [2.1自己在NCBI下载的bacteria representive数据](#21自己在ncbi下载的bacteria-representive数据)
   - [2.2根据王老师的nwr/doc/assembly.md下载数据](#22根据王老师的nwrdocassemblymd下载数据)
-  - [2.3提取PAO1的braB和braZ的上下游5k，10k，50k](#23提取pao1的brab和braz的上下游5k10k50k)
+  - [2.3提取PAO1的braB和braZ的上下游5k，10k，50k并和nr比对](#23提取pao1的brab和braz的上下游5k10k50k并和nr比对)
+  - [2.4nr的blast结果比对可视化](#24nr的blast结果比对可视化)
+  - [2.5选择假单胞菌属的两个clade的10个菌和PAO1的上下游50k比对](#25选择假单胞菌属的两个clade的10个菌和pao1的上下游50k比对)
 - [3.统计二代测序宏基因组样本的抗性基因存在情况以及三代测序宏基因组样本的抗性基因存在情况](#3统计二代测序宏基因组样本的抗性基因存在情况以及三代测序宏基因组样本的抗性基因存在情况)
   - [3.1三代污泥宏基因组中的细菌物种存在情况(使用的是sludge_bin.fa)](#31三代污泥宏基因组中的细菌物种存在情况使用的是sludge_binfa)
   - [3.2三代chicken gut宏基因组中的细菌物种存在情况(使用的是chicken_bin.fa)](#32三代chicken-gut宏基因组中的细菌物种存在情况使用的是chicken_binfa)
@@ -443,11 +445,17 @@ python floder_split.py
 faops size *.fna | wc -l #8 2911 1672
 #更改序列名
 cat bac_repre.1.fna  | sed 's/\s/\//g' >bac_repre.1.re.fna
+cat bac_repre.2.fna  | sed 's/\s/\//g' >bac_repre.2.re.fna
+cat bac_repre.3.fna  | sed 's/\s/\//g' >bac_repre.3.re.fna
+cat bac_repre.4.fna  | sed 's/\s/\//g' >bac_repre.4.re.fna
+cat bac_repre.5.fna  | sed 's/\s/\//g' >bac_repre.5.re.fna
 faops size *.re.fna #830994
 
 ```
 
-## 2.3提取PAO1的braB和braZ的上下游5k，10k，50k
+## 2.3提取PAO1的braB和braZ的上下游5k，10k，50k并和nr比对
+* (blast结果可视化)[http://www.math.lsa.umich.edu/~dburns/548/bioperl-1.2/doc/howto/html/Graphics-HOWTO.html]
+* blast结果可视化脚本下载和示例(blast结果)[https://github.com/bioperl/bioperl.github.io/blob/62697e8c299eb15852a06dcc7d1e2d090e6f1ee3/howtos/BioGraphics_HOWTO.md]
 ```r
 #提取PAO1的braB 1732545..1733858 
 #1314  
@@ -482,49 +490,205 @@ base=$(basename $filename .re.fna)
 echo $base
 bsub -q mpi -n 24 -J "db" makeblastdb -in $base.re.fna -dbtype nucl -out $base
 done
-#比对
+#比对braB
 for filename in *.re.fna
 do
 base=$(basename $filename .re.fna)
 echo $base
-bsub -q mpi -n 24 -J "BL" blastn -db $base  -query PAO1_braB_5k.fa -out $base.braB_5k.tsv -outfmt 6 -num_threads 20  -evalue 1e-5
+bsub -q mpi -n 24 -J "BL" blastn -db $base  -query PAO1_braB_10k.fa -out $base.braB_10k.tsv -outfmt 6 -num_threads 20  -evalue 1e-5
 done 
 
 for filename in *.re.fna
 do
 base=$(basename $filename .re.fna)
 echo $base
-bsub -q mpi -n 20 -J "BL" blastn -db $base  -query PAO1_braB_10k.fa -out $base.braB_10k.tsv -outfmt 6 -num_threads 16  -evalue 1e-5
+bsub -q mpi -n 24 -J "BL" blastn -db $base  -query PAO1_braB_50k.fa -out $base.braB_50k.tsv -outfmt 6 -num_threads 20  -evalue 1e-5
 done 
 
+#比对braZ
+for filename in *.re.fna
+do
+base=$(basename $filename .re.fna)
+echo $base
+bsub -q mpi -n 24 -J "BL" blastn -db $base  -query PAO1_braz_10k.fa -out $base.braZ_10k.tsv -outfmt 6 -num_threads 20  -evalue 1e-5
+done 
 
 for filename in *.re.fna
 do
 base=$(basename $filename .re.fna)
 echo $base
-bsub -q mpi -n 24 -J "BL" blastn -db $base  -query PAO1_braB_50k.fa -out $base.braB_50k.tsv -outfmt 5 -num_threads 20  -evalue 1e-5
+bsub -q mpi -n 24 -J "BL" blastn -db $base  -query PAO1_braz_50k.fa -out $base.braZ_50k.tsv -outfmt 6 -num_threads 20  -evalue 1e-5
 done 
 
+#合并braB上下游10k仅保留300bp以上（相似性最低为70)（6153）(5802)
+cat *.braB_10k.tsv | tsv-filter --ge 4:300  >whole_braB_10k.tsv
+#合并braB上下游50k仅保留300bp以上（14894）(13706)
+cat *.braB_50k.tsv  | tsv-filter --ge 4:300 >whole_braB_50k.tsv
 
+#合并braZ上下游10k仅保留300bp以上（相似性最低为70)（3439）(1914)
+cat *.braZ_10k.tsv | tsv-filter --ge 4:300  >whole_braZ_10k.tsv
+#合并braZ上下游50k仅保留300bp以上（相似性最低为70)（10656）(8734)
+cat *.braZ_50k.tsv  | tsv-filter --ge 4:300 >whole_braZ_50k.tsv
 
+#####使用Bio::Graphics使blast结果可视化
+#处理braB上下游10k
+tsv-select -f  2,12,7,8 whole_braB_10k.tsv | sed 's/\// /g' | tsv-select -f 2,3,4,1 | cut -d "," -f 1 | tsv-select -f 4,1,2,3 | tsv-sort -k3,3n -k4,4n  >braB_10k.tsv
+perl  blast10k.pl braB_10k.tsv >braB_10k.png
+#处理braZ上下游10k
+tsv-select -f  2,12,7,8 whole_braZ_10k.tsv | sed 's/\// /g' | tsv-select -f 2,3,4,1 | cut -d "," -f 1 | tsv-select -f 4,1,2,3 | tsv-sort -k3,3n -k4,4n >braZ_10k.tsv
+perl  blast10k.pl braZ_10k.tsv >braZ_10k.png
 
-#blast结果可视化软件kablamm需要outfmt5
-#blast结果可视化软件ccircoletto不需要outfmt
+#处理braB上下游50k
+tsv-select -f  2,12,7,8 whole_braB_50k.tsv | sed 's/\// /g' | tsv-select -f 2,3,4,1 | cut -d "," -f 1 | tsv-select -f 4,1,2,3 | tsv-sort -k3,3n -k4,4n  >braB_50k.tsv
+perl  blast50k.pl braB_50k.tsv >braB_50k.png
+#处理braZ上下游50k
+tsv-select -f  2,12,7,8 whole_braZ_50k.tsv | sed 's/\// /g' | tsv-select -f 2,3,4,1 | cut -d "," -f 1 | tsv-select -f 4,1,2,3 | tsv-sort -k3,3n -k4,4n >braZ_50k.tsv
+perl  blast50k.pl braZ_50k.tsv >braZ_50k.png
 
-
-#转换blast结果格式
-cut -f 1,7,8 whole_braB_5k.tsv | perl -alne '($one,$two,$three)=(split/\t/,$_)[0,1,2];if($two < $three){$sec=$two;$thi=$three;}else{$thi=$two;$sec=$three;}print"$one\t$sec\t$thi";' >whole_braB_5k.bed
-cat whole_braB_5k.bed | tsv-filter --ff-le 2:3 | wc -l #4456
-#对blast结果排序
-tsv-sort -k2,2n -k3,3n  whole_braB_5k.bed | perl -alne '($one,$two,$thr)=(split/\t/,$_)[0,1,2];print"$one".":"."$two"."-"."$thr";' | sed 's/NC_002516.2/NC_002516/g' >whole_braB_5k.sort.tsv
-#统计测序深度
-spanr coverage whole_braB_5k.sort.tsv -d  >1.tsv
-
-
+#blast format结果解释
+qseqid query (e.g., unknown gene) sequence id
+sseqid subject (e.g., reference genome) sequence id
+pident percentage of identical matches
+length alignment length (sequence overlap)
+mismatch number of mismatches
+gapopen number of gap openings
+qstart start of alignment in query
+qend end of alignment in query
+sstart start of alignment in subject
+send end of alignment in subject
+evalue expect value
+bitscore bit score
 ```
 
+## 2.4nr的blast结果比对可视化
+```bash
+#####使用spanr查看测序深度然后画图(不太能用)
+#####包含假单胞菌属的其他物种 
+#转换braB的blast结果格式（13691）
+cat whole_braB_50k.tsv  | grep -v "aeruginosa"|cut -f 1,7,8 | perl -alne '($one,$two,$three)=(split/\t/,$_)[0,1,2];if($two < $three){$sec=$two;$thi=$three;}else{$thi=$two;$sec=$three;}print"$one\t$sec\t$thi";' >whole_braB_50k.bed
+cat whole_braB_50k.bed | tsv-filter --ff-le 2:3 | wc -l #13691
+#对braB的blast结果排序13691
+tsv-sort -k2,2n -k3,3n  whole_braB_50k.bed | perl -alne '($one,$two,$thr)=(split/\t/,$_)[0,1,2];print"$one".":"."$two"."-"."$thr";' | sed 's/NC_002516.2/NC_002516/g' >whole_braB_50k.sort.tsv
+#统计braB测序深度2149
+spanr coverage whole_braB_50k.sort.tsv -d | grep ":" | sed 's/^"/>/g'>whole_braB_50k.cover.tsv
+#统计测序深度改成画图格式文件1074
+perl format1.pl whole_braB_50k.cover.tsv | sed 's/"//g'| sed 's/\s*//g'| sed 's/:/\t/g' | sed '/^$/d' >whole_braB_50k.format1.tsv
+#统计测序深度改成画图格式文件4594
+perl  format2.pl whole_braB_50k.format1.tsv | tsv-select -f 2,3,1 | perl -alne '($one,$two,$thr)=(split/\t/,$_,3)[0,1,2];   if($thr=~m/-/){($four,$five)=(split/\-/,$thr,2)[0,1]}else{$four=$thr;$five=$thr} print"$one\t$two\t$four\t$five";' >whole_braB_50k.format2.tsv
 
 
+#####使用spanr查看测序深度然后画图 (不太能用)
+#####包含假单胞菌属的其他物种
+#转换braZ的blast结果格式（8727）
+cat whole_braZ_50k.tsv  | grep -v "aeruginosa"|cut -f 1,7,8 | perl -alne '($one,$two,$three)=(split/\t/,$_)[0,1,2];if($two < $three){$sec=$two;$thi=$three;}else{$thi=$two;$sec=$three;}print"$one\t$sec\t$thi";' >whole_braZ_50k.bed
+cat whole_braZ_50k.bed | tsv-filter --ff-le 2:3 | wc -l #8727
+#对braZ的blast结果排序8727
+tsv-sort -k2,2n -k3,3n  whole_braZ_50k.bed | perl -alne '($one,$two,$thr)=(split/\t/,$_)[0,1,2];print"$one".":"."$two"."-"."$thr";' | sed 's/NC_002516.2/NC_002516/g' >whole_braZ_50k.sort.tsv
+#统计braZ测序深度1142
+spanr coverage whole_braZ_50k.sort.tsv -d | grep ":" | sed 's/^"/>/g'>whole_braZ_50k.cover.tsv
+#统计测序深度改成画图格式文件571
+perl format1.pl whole_braZ_50k.cover.tsv | sed 's/"//g'| sed 's/\s*//g'| sed 's/:/\t/g' | sed '/^$/d' >whole_braZ_50k.format1.tsv
+#统计测序深度改成画图格式文件3345
+perl  format2.pl whole_braZ_50k.format1.tsv | tsv-select -f 2,3,1 | perl -alne '($one,$two,$thr)=(split/\t/,$_,3)[0,1,2];   if($thr=~m/-/){($four,$five)=(split/\-/,$thr,2)[0,1]}else{$four=$thr;$five=$thr} print"$one\t$two\t$four\t$five";' >whole_braZ_50k.format2.tsv
+
+#绘制测序深度图
+cat  whole_braB_50k.format1.tsv | sed 's/^/cov_&/g' | perl -alne '($one,$two,$thr)=(split/\t/,$_)[0,1,2];print"EST"."\t"."$one\t"."+"."\t"."$thr";' 
+cat  whole_braZ_50k.format1.tsv | sed 's/^/cov_&/g' | perl -alne '($one,$two,$thr)=(split/\t/,$_)[0,1,2];print"EST"."\t"."$one\t"."+"."\t"."$thr";'
+cat whole_braB_50k.format2.tsv | sed 's/^/cov_&/g' |perl -alne '($one,$two,$thr,$four)=(split/\t/,$_,4)[0,1,2,3];print"$two\t$one\t"."$thr"."-"."$four";' >braB.txt
+cat whole_braZ_50k.format2.tsv | sed 's/^/cov_&/g' |perl -alne '($one,$two,$thr,$four)=(split/\t/,$_,4)[0,1,2,3];print"$two\t$one\t"."$thr"."-"."$four";' >braZ.txt
+perl feature_draw.pl 2.gff braB.txt >braB.png
+perl feature_draw.pl 2.gff braZ.txt >braZ.png
+```
+## 2.5选择假单胞菌属的两个clade的10个菌和PAO1的上下游50k比对
+```bash
+cd ~/data/Pseudomonas
+mkdir -p branched-chain/50k
+#查看clade1的菌株，共4个
+cat branched-chain/collinearity/pseudomons_two_clade/clade1/clade1_species.tsv | grep -v "PAO1"
+for name in $(cat branched-chain/collinearity/pseudomons_two_clade/clade1/clade1_species.tsv)
+do
+echo $name
+cp ASSEMBLY/$name/*_genomic.fna.gz ./branched-chain/50k
+done
+#查看clade2的菌株，共6个
+cat branched-chain/collinearity/pseudomons_two_clade/clade2/clade2_species.tsv | grep -v "PAO1"
+for name in $(cat branched-chain/collinearity/pseudomons_two_clade/clade2/clade2_species.tsv)
+do
+echo $name
+cp ASSEMBLY/$name/*_genomic.fna.gz ./branched-chain/50k
+done
+#去除非基因组文件
+rm -rf ./branched-chain/50k/*_cds_from_genomic.fna.gz
+rm -rf ./branched-chain/50k/*_rna_from_genomic.fna.gz
+#对文件改名
+cd ~/data/Pseudomonas/branched-chain/50k
+mv GCF_008807375.1_ASM880737v1_genomic.fna.gz Pseudom_lal_GCF_008807375_1.fna.gz
+mv GCF_009911755.1_ASM991175v1_genomic.fna.gz Pseudom_kna_GCF_009911755_1.fna.gz
+mv GCF_001586155.1_ASM158615v1_genomic.fna.gz Pseudom_citro_GCF_001586155_1.fna.gz
+mv  GCF_000412675.1_ASM41267v1_genomic.fna.gz Pseudom_puti_NBRC_14164_GCF_000412675_1.fna.gz
+mv GCF_016694755.2_ASM1669475v2_genomic.fna.gz Pseudom_syr_GCF_016694755_2.fna.gz
+mv GCF_900215245.1_IMG-taxon_2617270901_annotated_assembly_genomic.fna.gz Pseudom_fluo_GCF_900215245_1.fna.gz
+mv GCF_011397855.1_ASM1139785v1_genomic.fna.gz Pseudom_oti_GCF_011397855_1.fna.gz
+mv  GCF_001597285.1_ASM159728v1_genomic.fna.gz Pseudom_alcalig_GCF_001597285_1.fna.gz
+mv   GCF_000733715.2_ASM73371v2_genomic.fna.gz Pseudom_men_S5_2_GCF_000733715_2.fna.gz
+mv GCF_019704535.1_ASM1970453v1_genomic.fna.gz Pseudom_stu_GCF_019704535_1.fna.gz
+mv GCF_000006765.1_ASM676v1_genomic.fna.gz Pseudom_aeru_PAO1.fna.gz
+gunzip *.gz
+cd ~/data/Pseudomonas
+#提取braB的上下游各50k
+# 101314
+seqkit subseq  branched-chain/50k/Pseudom_aeru_PAO1.fna -r 1682545:1783858 >branched-chain/50k/PAO1_braB_50k.fa
+#提取braZ的上下游各50k
+#101314
+seqkit subseq  branched-chain/50k/Pseudom_aeru_PAO1.fna -r 2101755:2203068 >branched-chain/50k/PAO1_braZ_50k.fa
+
+#将其他序列建库，用braB和braZ的上下游50k去比对
+rm -rf branched-chain/50k/Pseudom_aeru_PAO1.fna
+#查看菌株序列数，共11条，多出一条。Pseudom_men_S5_2_GCF_000733715_2文件中含有一条染色体序列NZ_CP013124.1，一条质粒序列NZ_CP013125.1
+cat branched-chain/50k/*.fna >branched-chain/50k/whole.fna
+#共10各菌株的10条基因组序列
+faops some branched-chain/50k/whole.fna <(faops size branched-chain/50k/whole.fna | grep -v "NZ_CP013125.1" | cut -f 1 ) branched-chain/50k/ten_bac.fna
+#建库
+makeblastdb -in branched-chain/50k/ten_bac.fna -dbtype nucl -out branched-chain/50k/ten_bac
+#比对braB(275)
+blastn -db  branched-chain/50k/ten_bac  -query branched-chain/50k/PAO1_braB_50k.fa -out branched-chain/50k/PAO1_braB_50k.tsv -outfmt 6  -evalue 1e-10 -subject_besthit
+#比对braZ(248
+blastn -db  branched-chain/50k/ten_bac  -query branched-chain/50k/PAO1_braZ_50k.fa -out branched-chain/50k/PAO1_braZ_50k.tsv -outfmt 6  -evalue 1e-10 -subject_besthit 
+
+#转换braB的blast结果格式（275）
+cat branched-chain/50k/PAO1_braB_50k.tsv  |cut -f 1,2,7,8 | perl -alne '($one,$four,$two,$three)=(split/\t/,$_)[0,1,2,3];if($two < $three){$sec=$two;$thi=$three;}else{$thi=$two;$sec=$three;}print"$one\t$four\t$sec\t$thi";' | tsv-sort -k3,3n -k4,4n >branched-chain/50k/PAO1_braB_50k.bed
+cat  branched-chain/50k/PAO1_braB_50k.bed | perl -alne '($one,$two,$thr)=(split/\t/,$_)[0,2,3];print"$one".":"."$two"."-"."$thr";' | sed 's/NC_002516.2/NC_002516/g' >branched-chain/50k/PAO1_braB_50k.sort.tsv
+#转换braZ的blast结果格式（248）
+cat branched-chain/50k/PAO1_braZ_50k.tsv  |cut -f 1,2,7,8 | perl -alne '($one,$four,$two,$three)=(split/\t/,$_)[0,1,2,3];if($two < $three){$sec=$two;$thi=$three;}else{$thi=$two;$sec=$three;}print"$one\t$four\t$sec\t$thi";' | tsv-sort -k3,3n -k4,4n >branched-chain/50k/PAO1_braZ_50k.bed
+cat  branched-chain/50k/PAO1_braZ_50k.bed | perl -alne '($one,$two,$thr)=(split/\t/,$_)[0,2,3];print"$one".":"."$two"."-"."$thr";' | sed 's/NC_002516.2/NC_002516/g' >branched-chain/50k/PAO1_braZ_50k.sort.tsv 
+
+#统计braB测序深度
+spanr coverage branched-chain/50k/PAO1_braB_50k.sort.tsv -d | grep ":" | sed 's/^"/>/g'>branched-chain/50k/PAO1_braB_50k.cover.tsv
+#统计测序深度改成画图格式文件12
+perl format1.pl branched-chain/50k/PAO1_braB_50k.cover.tsv | sed 's/"//g'| sed 's/\s*//g'| sed 's/:/\t/g' | sed '/^$/d' >branched-chain/50k/PAO1_braB_50k.format1.tsv
+#统计测序深度改成画图格式文件411
+perl  format2.pl branched-chain/50k/PAO1_braB_50k.format1.tsv | tsv-select -f 2,3,1 | perl -alne '($one,$two,$thr)=(split/\t/,$_,3)[0,1,2];   if($thr=~m/-/){($four,$five)=(split/\-/,$thr,2)[0,1]}else{$four=$thr;$five=$thr} print"$one\t$two\t$four\t$five";' >branched-chain/50k/PAO1_braB_50k.format2.tsv
+
+#统计braZ测序深度
+spanr coverage branched-chain/50k/PAO1_braZ_50k.sort.tsv -d | grep ":" | sed 's/^"/>/g'>branched-chain/50k/PAO1_braZ_50k.cover.tsv
+#统计测序深度改成画图格式文件15
+perl format1.pl branched-chain/50k/PAO1_braZ_50k.cover.tsv | sed 's/"//g'| sed 's/\s*//g'| sed 's/:/\t/g' | sed '/^$/d' >branched-chain/50k/PAO1_braZ_50k.format1.tsv
+#统计测序深度改成画图格式文件352
+perl  format2.pl branched-chain/50k/PAO1_braZ_50k.format1.tsv | tsv-select -f 2,3,1 | perl -alne '($one,$two,$thr)=(split/\t/,$_,3)[0,1,2];   if($thr=~m/-/){($four,$five)=(split/\-/,$thr,2)[0,1]}else{$four=$thr;$five=$thr} print"$one\t$two\t$four\t$five";' >branched-chain/50k/PAO1_braZ_50k.format2.tsv
+
+#绘制测序coverage图
+cat branched-chain/50k/PAO1_braB_50k.format2.tsv | sed 's/^/cov_&/g' |perl -alne '($one,$two,$thr,$four)=(split/\t/,$_,4)[0,1,2,3];print"$two\t$one\t"."$thr"."-"."$four";' >branched-chain/50k/PAO1_braB_50k.txt
+cat branched-chain/50k/PAO1_braZ_50k.format2.tsv | sed 's/^/cov_&/g' |perl -alne '($one,$two,$thr,$four)=(split/\t/,$_,4)[0,1,2,3];print"$two\t$one\t"."$thr"."-"."$four";' >branched-chain/50k/PAO1_braZ_50k.txt
+
+cp ASSEMBLY/Pseudom_aeru_PAO1/GCF_000006765.1_ASM676v1_genomic.gff.gz branched-chain/50k/PAO1.gff.gz
+gunzip branched-chain/50k/PAO1.gff.gz 
+cat branched-chain/50k/PAO1.gff | grep "braB" | tsv-filter --str-in-fld 3:"gene" >branched-chain/50k/PAO1_braB.gff
+cat branched-chain/50k/PAO1.gff | grep "braZ" | tsv-filter --str-in-fld 3:"gene" >branched-chain/50k/PAO1_braZ.gff
+
+perl feature_draw.pl 2.gff  branched-chain/50k/PAO1_braB_50k.txt >braB.png
+perl feature_draw.pl 2.gff  branched-chain/50k/PAO1_braZ_50k.txt >braZ.png
+
+```
 
 # 3.统计二代测序宏基因组样本的抗性基因存在情况以及三代测序宏基因组样本的抗性基因存在情况
 ## 3.1三代污泥宏基因组中的细菌物种存在情况(使用的是sludge_bin.fa)
