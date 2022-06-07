@@ -353,10 +353,22 @@ cut -f 1 branched-chain/diamond/branched-chain_result4.tsv | sort -n | uniq | wc
 #第四轮diamond的target
 cut -f 2 branched-chain/diamond/branched-chain_result4.tsv | sort -n | uniq | wc -l #1370
 
-
 #三轮diamond结果一致
 #查看hmmer结果和diamond结果的相同之处2108
 cat branched-chain/branched-chain_minevalue.tsv | cut -f 1 | grep -f <(cut -f 1 branched-chain/diamond/branched-chain_result4.tsv | sort -n | uniq)
+
+
+
+
+
+
+
+#第一轮diamond(任取一条菌株里的braB序列进行blast)
+#相似性选择和覆盖度选择（结构阈330aa,braB437，330/437=0.755, 因此覆盖度选择70，相似性最低为55.606 ，因此相似性选50 ）
+mkdir  -p branched-chain/blastp
+faops some PROTEINS/all.replace.fa  branched-chain/diamond/branched-chain_diamond1.tsv branched-chain/blastp/branched-chain_blastp1.fa
+makeblastdb -in PROTEINS/all.replace.fa -dbtype prot -out whole
+blastp -db whole -query branched-chain/blastp/branched-chain_blastp1.fa -out branched-chain/blastp/branched-chain_result1.tsv -outfmt 6 -evalue 1e-5
 
 ```
 
@@ -527,7 +539,7 @@ faops size branched-chain/tree/branched-chain.Pseudom_aeru.protein.fa | wc -l
 #比对
 mafft --auto   branched-chain/tree/branched-chain.Pseudom_aeru.protein.fa > branched-chain/tree/branched-chain.Pseudom_aeru.aln.mafft.fa
 #使用iqtree2建树（超算上)773
-bsub -q mpi -n 24 -J "iq" ./iqtree2 -s branched-chain.Pseudom_aeru.aln.mafft.fa  -m MFP  --prefix branched-chain.Pseudom_aeru -T 20 -B 1000 --bnni 
+bsub -q mpi -n 24 -J "iq" ./iqtree2 -s branched-chain.Pseudom_aeru.aln.mafft.fa  -m MFP  --prefix branched-chain.Pseudom_aeru -T 20 -b 100
 #改名
 mv branched-chain.Pseudom_aeru.treefile branched-chain.Pseudom_aeru.newick
 
