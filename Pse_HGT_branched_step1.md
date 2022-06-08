@@ -14,7 +14,7 @@
   - [2.6 菌株中丢失了BCAA记为0](#26-菌株中丢失了bcaa记为0)
   - [2.7 绘制统计不同物种中BCAA平均拷贝数的表格](#27-绘制统计不同物种中bcaa平均拷贝数的表格)
     - [2.7.1统计物种水平的拷贝数分布](#271统计物种水平的拷贝数分布)
-    - [2.7.1统计属水平的拷贝数分布](#271统计属水平的拷贝数分布)
+    - [2.7.1统计属水平和科水平的拷贝数分布](#271统计属水平和科水平的拷贝数分布)
   - [2.8 重新统计去掉epsilon，alpha变形菌和放线菌门，支原体门,芽孢杆菌纲的砂眼衣原体等后的基因组数，物种数，BCAA拷贝数（无用)](#28-重新统计去掉epsilonalpha变形菌和放线菌门支原体门芽孢杆菌纲的砂眼衣原体等后的基因组数物种数bcaa拷贝数无用)
 - [3. 两种树](#3-两种树)
   - [3.1铜绿假单胞菌物种内所有的braB和braZ序列建立基因树（不需要外类群,因为蛋白序列有一半是braB,有一半是braZ,无法区分) (OK)](#31铜绿假单胞菌物种内所有的brab和braz序列建立基因树不需要外类群因为蛋白序列有一半是brab有一半是braz无法区分-ok)
@@ -26,7 +26,6 @@
 - [4.生物环境](#4生物环境)
   - [4.1铜绿样本生物环境注释信息](#41铜绿样本生物环境注释信息)
   - [4.2注释信息自动生成配色](#42注释信息自动生成配色)
-  - [4.3提取临床环境的序列，非临床环境的序列并计算kaks](#43提取临床环境的序列非临床环境的序列并计算kaks)
 - [5.铜绿基因树的注释信息（无用)](#5铜绿基因树的注释信息无用)
 - [6.变形菌纲基因树和物种树的注释信息(无用)](#6变形菌纲基因树和物种树的注释信息无用)
 
@@ -410,7 +409,7 @@ branched-chain/diamond/branched_chain_species_mean_copy.tsv
 mlr --itsv --ocsv cat  <(cat branched-chain/diamond/branched_chain_species_mean_copy.tsv |  keep-header -- tsv-sort -k3,3rn -k4,4rn  )\
  > branched-chain/diamond/branched_chain_species_mean_copy.csv
 ```
-### 2.7.1统计属水平的拷贝数分布
+### 2.7.1统计属水平和科水平的拷贝数分布
 ```bash
 #查看假单胞菌属的typical菌株的拷贝数目(9）
 cut -f 1,2,3 branched-chain/diamond/branched_chain_species_mean_copy.tsv | grep -v "number" | grep -f <(cat typical.lst | tsv-join -d 1 -f strains.taxon.tsv -k 1 --append-fields 4 | cut -f 2 | sort -n | uniq) | tr "\t" "," | perl -F, -alne '$per=$F[2]/$F[1];$per=sprintf "%.1f",$per;print"$F[0]\t$F[1]\t$F[2]\t$per";' |  
@@ -418,7 +417,7 @@ tsv-sort -k1,1rn >branched-chain/diamond/branched_chain_copy_format1.tsv
 #查看假单胞菌属的非typical菌株的拷贝数目(57) 共190
 cut -f 1,2,3 branched-chain/diamond/branched_chain_species_mean_copy.tsv | grep "Pseudomonas" | grep -v -f <(cut -f 1 branched-chain/diamond/branched_chain_copy_format1.tsv) | nwr append stdin -r class | tsv-summarize -g 4 --sum 2,3 | sed 's/Gammaproteobacteria/Other Pseudomonas/g'  | tr "\t" "," | 
 perl -F, -alne '$per=$F[2]/$F[1];$per=sprintf "%.1f",$per;print"$F[0]\t$F[1]\t$F[2]\t$per";'  >branched-chain/diamond/branched_chain_copy_format2.tsv
-#提取gamma变形菌纲的非假单胞菌属的其他科的结果(506/499) 去除拷贝为0的科
+#提取gamma变形菌纲的非假单胞菌属的其他科的结果(506/499) 
 cut -f 1,2,3,4,5,6,7 branched-chain/diamond/branched_chain_species_mean_copy.tsv |  grep "Gammaproteobacteria" | grep -v "Pseudomonas"  | tsv-select -f 7,2,3 |  
 tsv-summarize -g 1 --sum 2,3 | tr "\t" "," | perl -F, -alne '$per=$F[2]/$F[1];$per=sprintf "%.1f",$per;print"$F[0]\t$F[1]\t$F[2]\t$per";' |  
 tsv-sort -k1,1rn  >branched-chain/diamond/branched_chain_copy_format3.tsv
@@ -429,7 +428,7 @@ mlr --itsv --ocsv cat branched-chain/diamond/branched_chain_copy_whole.tsv >bran
   
 ## 2.8 重新统计去掉epsilon，alpha变形菌和放线菌门，支原体门,芽孢杆菌纲的砂眼衣原体等后的基因组数，物种数，BCAA拷贝数（无用)
 ```bash
-#只保留变形菌纲和芽孢杆菌纲的(金葡和枯草芽孢杆菌和李斯特菌)三个物种作为外类群
+#只保留变形菌纲和芽孢杆菌纲的(金葡和枯草芽孢杆菌)两个物种作为外类群，去除芽孢杆菌纲的和李斯特菌
 #统计剩余的基因组数量1947
 cat strains.taxon.tsv | cut -f 4  | nwr append stdin -r class | grep -E "Gammaproteobacteria|Bacilli" | grep -v "Listeria monocytogenes" | wc -l
 #统计剩余的基因组数量对应的物种数和family数量和order数量567和45
@@ -479,12 +478,12 @@ tsv-join -d 1 \
 --append-fields 2 |
 tsv-join -d 2 \
 -f strains.taxon.tsv -k 1 \
---append-fields 4 | tsv-select -f 3,1,2 | nwr append stdin -r class | grep  "Gammaproteobacteria" | cut -f 3 >1.tsv
-cat strains.taxon.tsv | grep -v -f 1.tsv | tsv-select -f 4,1 | nwr append stdin -r class | grep "Gammaproteobacteria" | tsv-summarize -g 2 --count | wc -l
+--append-fields 4 | tsv-select -f 3,1,2 | nwr append stdin -r class | grep  "Gammaproteobacteria" | cut -f 3 >branched-chain/branched_chain_no_copy.tsv
+cat strains.taxon.tsv | grep -v -f branched-chain/branched_chain_no_copy.tsv| tsv-select -f 4,1 | nwr append stdin -r class | grep "Gammaproteobacteria" | tsv-summarize -g 2 --count | wc -l
 #统计变形菌纲没有鉴定到BCAA的物种数目185
-cat strains.taxon.tsv | grep -v -f 1.tsv | tsv-select -f 4,1 | nwr append stdin -r class | grep "Gammaproteobacteria" | tsv-summarize -g 1 --count | wc -l
+cat strains.taxon.tsv | grep -v -f branched-chain/branched_chain_no_copy.tsv | tsv-select -f 4,1 | nwr append stdin -r class | grep "Gammaproteobacteria" | tsv-summarize -g 1 --count | wc -l
 #统计变形菌纲没有鉴定到BCAA的科数目85
-cat strains.taxon.tsv | grep -v -f 1.tsv | tsv-select -f 4,1 | nwr append stdin -r class -r family | grep "Gammaproteobacteria" | tsv-summarize -g 4 --count | wc -l
+cat strains.taxon.tsv | grep -v -f branched-chain/branched_chain_no_copy.tsv | tsv-select -f 4,1 | nwr append stdin -r class -r family | grep "Gammaproteobacteria" | tsv-summarize -g 4 --count | wc -l
 ```
 
 # 3. 两种树
@@ -732,47 +731,6 @@ sed -i 's/#33a02c/#304ffe/g' iTOL_colorstrip-class2.txt
 sed -i 's/#b2df8a/#bbdefb/g' iTOL_colorstrip-class2.txt
 sed -i 's/#1f78b4/#ef9a9a/g' iTOL_colorstrip-class2.txt
 ```
-
-## 4.3提取临床环境的序列，非临床环境的序列并计算kaks
-```bash
-cd ~/data/Pseudomonas
-mkdir -p branched-chain/kaks/biosample
-wc -l biosample/biosample_env_anno.tsv  #391
-#查看生境为临床的铜绿菌株数
-cat biosample/biosample_env_anno.tsv | grep "clinical" | wc -l #334
-#生境为临床的铜绿菌株蛋白 660
-cat branched-chain/branched-chain_minevalue.pfam.tsv | cut -f 1 | grep -f <(cat biosample/biosample_env_anno.tsv | grep "clinical" | cut -f 2) >branched-chain/kaks/biosample/biosample_clincal_pro.tsv
-#提取对应的cds序列名字661
-faops size branched-chain/kaks/aeru/branched-chain.CDS.fa | cut -f 1  | grep -f <(perl -alne 's/\_([W|N]P)/\_cds\_$1/;print"$_";' branched-chain/kaks/biosample/biosample_clincal_pro.tsv) >branched-chain/kaks/biosample/biosample_clincal_cds.tsv
-#簇1braB的序列数376
-wc -l branched-chain/kaks/aeru/branched-chain_cluster1.cds.tsv
-#簇2braZ的序列数398
-wc -l branched-chain/kaks/aeru/branched-chain_cluster2.cds.tsv
-#提取生境为临床的braB的cds序列 321
-cat branched-chain/kaks/aeru/branched-chain_cluster1.cds.tsv | grep -f branched-chain/kaks/biosample/biosample_clincal_cds.tsv | wc -l 
-faops some branched-chain/kaks/aeru/branched-chain.CDS.fa <(cat branched-chain/kaks/aeru/branched-chain_cluster1.cds.tsv | grep -f branched-chain/kaks/biosample/biosample_clincal_cds.tsv ) branched-chain/kaks/biosample/biosample_clincal_braB.fa #321
-#提取生境为临床的braZ的cds序列 340
-cat branched-chain/kaks/aeru/branched-chain_cluster2.cds.tsv | grep -f branched-chain/kaks/biosample/biosample_clincal_cds.tsv | wc -l 
-faops some branched-chain/kaks/aeru/branched-chain.CDS.fa <(cat branched-chain/kaks/aeru/branched-chain_cluster2.cds.tsv | grep -f branched-chain/kaks/biosample/biosample_clincal_cds.tsv ) branched-chain/kaks/biosample/biosample_clincal_braZ.fa #340
-
-#生境为非临床的铜绿菌株数 
-cat biosample/biosample_env_anno.tsv | grep -v "unknow" | grep -v "clinical" | wc -l #42
-#生境为非临床的铜绿蛋白
-cat branched-chain/branched-chain_minevalue.pfam.tsv | cut -f 1| grep -f <(cat biosample/biosample_env_anno.tsv | grep -v "unknow" | grep -v "clinical" | cut -f 2) >branched-chain/kaks/biosample/biosample_other_pro.tsv   #84
-#提取对应的cds序列名字84
-faops size branched-chain/kaks/aeru/branched-chain.CDS.fa | cut -f 1  | grep -f <(perl -alne 's/\_([W|N]P)/\_cds\_$1/;print"$_";' branched-chain/kaks/biosample/biosample_other_pro.tsv) >branched-chain/kaks/biosample/biosample_other_cds.tsv
-#簇1braB的序列数376
-wc -l branched-chain/kaks/aeru/branched-chain_cluster1.cds.tsv
-#簇2braZ的序列数398
-wc -l branched-chain/kaks/aeru/branched-chain_cluster2.cds.tsv
-#提取生境为非临床的braB的cds序列 41
-cat branched-chain/kaks/aeru/branched-chain_cluster1.cds.tsv | grep -f branched-chain/kaks/biosample/biosample_other_cds.tsv | wc -l 
-faops some branched-chain/kaks/aeru/branched-chain.CDS.fa <(cat branched-chain/kaks/aeru/branched-chain_cluster1.cds.tsv | grep -f branched-chain/kaks/biosample/biosample_other_cds.tsv ) branched-chain/kaks/biosample/biosample_other_braB.fa #41
-#提取生境为非临床的braZ的cds序列 43
-cat branched-chain/kaks/aeru/branched-chain_cluster2.cds.tsv | grep -f branched-chain/kaks/biosample/biosample_other_cds.tsv | wc -l 
-faops some branched-chain/kaks/aeru/branched-chain.CDS.fa <(cat branched-chain/kaks/aeru/branched-chain_cluster2.cds.tsv | grep -f branched-chain/kaks/biosample/biosample_other_cds.tsv ) branched-chain/kaks/biosample/biosample_other_braZ.fa #43
-```
-
 
 # 5.铜绿基因树的注释信息（无用)
 ```R
