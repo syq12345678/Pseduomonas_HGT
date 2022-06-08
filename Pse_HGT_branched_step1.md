@@ -319,15 +319,9 @@ blastp -db branched-chain/blastp/whole -query branched-chain/blastp/branched-cha
 faops some PROTEINS/all.replace.fa  <(cut -f 2 branched-chain/blastp/branched-chain_result1.tsv | sort -n | uniq) branched-chain/blastp/branched-chain_blastp2.fa
 blastp -db branched-chain/blastp/whole -query branched-chain/blastp/branched-chain_blastp2.fa -out branched-chain/blastp/branched-chain_result2.tsv -outfmt 6 -evalue 1e-5
 
-#第一轮diamond的query
-cut -f 1 branched-chain/diamond/branched-chain_result1.tsv | sort -n | uniq | wc -l #2140
-#第一轮diamond的target
-cut -f 2 branched-chain/diamond/branched-chain_result1.tsv | sort -n | uniq | wc -l #1492
-
-
 
 #第一轮diamond(将hmmsearhc和hmmscan的结果放在所有的蛋白序列库里进行blast)
-#相似性选择和覆盖度选择（结构阈330aa,braB437，330/437=0.755, 因此覆盖度选择70，相似性最低为55.606 ，因此相似性选50 ）
+#相似性选择和覆盖度选择（结构阈330aa,braB437，330/437=0.755, 因此覆盖度选择50，相似性最低为55.606 ，因此相似性选50 ）
 mkdir -p branched-chain/diamond
 faops some PROTEINS/all.replace.fa  <(cut -f 1 branched-chain/branched-chain_minevalue.pfam.tsv)  branched-chain/diamond/branched-chain_diamond1.fa
 faops size branched-chain/diamond/branched-chain_diamond1.fa | wc -l #2140
@@ -339,12 +333,14 @@ faops some PROTEINS/all.replace.fa  <(cut -f 2 branched-chain/diamond/branched-c
 faops size branched-chain/diamond/branched-chain_diamond2.fa | wc -l #1492
 diamond blastp --db branched-chain/diamond/whole.dmnd --query  branched-chain/diamond/branched-chain_diamond2.fa -e 1e-5 --outfmt 6 --threads 4 --out branched-chain/diamond/branched-chain_result2.tsv  --id 50 --subject-cover 50
 
-
 #第一轮diamond的query
 cut -f 1 branched-chain/diamond/branched-chain_result1.tsv | sort -n | uniq | wc -l #2140
 #第一轮diamond的target
 cut -f 2 branched-chain/diamond/branched-chain_result1.tsv | sort -n | uniq | wc -l #1492
-
+#第二轮diamond的query
+cut -f 1 branched-chain/diamond/branched-chain_result2.tsv | sort -n | uniq | wc -l #1492
+#第二轮diamond的target
+cut -f 2 branched-chain/diamond/branched-chain_result2.tsv | sort -n | uniq | wc -l #1494
 
 
 
