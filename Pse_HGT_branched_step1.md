@@ -13,7 +13,9 @@
   - [2.5 统计diamond比对和hmmer比对时不同species中BCAA个数](#25-统计diamond比对和hmmer比对时不同species中bcaa个数)
   - [2.6 菌株中丢失了BCAA记为0](#26-菌株中丢失了bcaa记为0)
   - [2.7 绘制统计不同物种中BCAA平均拷贝数的表格](#27-绘制统计不同物种中bcaa平均拷贝数的表格)
-  - [2.8 重新统计去掉epsilon，alpha变形菌和放线菌门，支原体门,芽孢杆菌纲的砂眼衣原体等后的基因组数，物种数，BCAA拷贝数](#28-重新统计去掉epsilonalpha变形菌和放线菌门支原体门芽孢杆菌纲的砂眼衣原体等后的基因组数物种数bcaa拷贝数)
+    - [2.7.1统计物种水平的拷贝数分布](#271统计物种水平的拷贝数分布)
+    - [2.7.1统计属水平的拷贝数分布](#271统计属水平的拷贝数分布)
+  - [2.8 重新统计去掉epsilon，alpha变形菌和放线菌门，支原体门,芽孢杆菌纲的砂眼衣原体等后的基因组数，物种数，BCAA拷贝数（无用)](#28-重新统计去掉epsilonalpha变形菌和放线菌门支原体门芽孢杆菌纲的砂眼衣原体等后的基因组数物种数bcaa拷贝数无用)
 - [3. 两种树](#3-两种树)
   - [3.1铜绿假单胞菌物种内所有的braB和braZ序列建立基因树（不需要外类群,因为蛋白序列有一半是braB,有一半是braZ,无法区分) (OK)](#31铜绿假单胞菌物种内所有的brab和braz序列建立基因树不需要外类群因为蛋白序列有一半是brab有一半是braz无法区分-ok)
   - [3.2铜绿假单胞菌物种内所有的braB和braZ序列建立物种树（需要外类群)](#32铜绿假单胞菌物种内所有的brab和braz序列建立物种树需要外类群)
@@ -24,9 +26,9 @@
 - [4.生物环境](#4生物环境)
   - [4.1铜绿样本生物环境注释信息](#41铜绿样本生物环境注释信息)
   - [4.2注释信息自动生成配色](#42注释信息自动生成配色)
-- [5.铜绿基因树的注释信息](#5铜绿基因树的注释信息)
-- [6.共线性的注意事项](#6共线性的注意事项)
-- [7.变形菌纲基因树和物种树的注释信息](#7变形菌纲基因树和物种树的注释信息)
+  - [4.3提取临床环境的序列，非临床环境的序列并计算kaks](#43提取临床环境的序列非临床环境的序列并计算kaks)
+- [5.铜绿基因树的注释信息（无用)](#5铜绿基因树的注释信息无用)
+- [6.变形菌纲基因树和物种树的注释信息(无用)](#6变形菌纲基因树和物种树的注释信息无用)
 
 <!-- /TOC -->
 * 1.由于外类群不够，新添了一些基因组文件，由1514增加至1953个基因组文件，由此需要重新操作  
@@ -326,8 +328,7 @@ mkdir -p branched-chain/diamond
 faops some PROTEINS/all.replace.fa  <(cut -f 1 branched-chain/branched-chain_minevalue.pfam.tsv)  branched-chain/diamond/branched-chain_diamond1.fa
 faops size branched-chain/diamond/branched-chain_diamond1.fa | wc -l #2140
 diamond makedb --in PROTEINS/all.replace.fa --db branched-chain/diamond/whole
-diamond blastp --db branched-chain/diamond/whole.dmnd --query  branched-chain/diamond/branched-chain_diamond1.fa -e 1e-5 --outfmt 6 --threads 4 --out branched-chain/diamond/branched-chain_result1.tsv  
---id 50 --subject-cover 50
+diamond blastp --db branched-chain/diamond/whole.dmnd --query  branched-chain/diamond/branched-chain_diamond1.fa -e 1e-5 --outfmt 6 --threads 4 --out branched-chain/diamond/branched-chain_result1.tsv  --id 50 --subject-cover 50
 #第二轮diamond(将第一轮从蛋白数据库中抓取出的序列作为query序列继续进行blast)
 faops some PROTEINS/all.replace.fa  <(cut -f 2 branched-chain/diamond/branched-chain_result1.tsv | sort -n | uniq) branched-chain/diamond/branched-chain_diamond2.fa
 faops size branched-chain/diamond/branched-chain_diamond2.fa | wc -l #1492
@@ -340,24 +341,17 @@ cut -f 2 branched-chain/diamond/branched-chain_result1.tsv | sort -n | uniq | wc
 #第二轮diamond的query
 cut -f 1 branched-chain/diamond/branched-chain_result2.tsv | sort -n | uniq | wc -l #1492
 #第二轮diamond的target
-cut -f 2 branched-chain/diamond/branched-chain_result2.tsv | sort -n | uniq | wc -l #1494
+cut -f 2 branched-chain/diamond/branched-chain_result2.tsv | sort -n | uniq | wc -l #1492
+#diamond使用默认的参数时和上述参数设置为50,50的结果和上述参数设置为30,30的结果相同
 
-
-
-
-
-#三轮diamond结果一致
-#查看hmmer结果和diamond结果的相同之处2108
-cat branched-chain/branched-chain_minevalue.tsv | cut -f 1 | grep -f <(cut -f 1 branched-chain/diamond/branched-chain_result4.tsv | sort -n | uniq)
-
-
-
+#查看hmmer结果和diamond结果的交集1492
+cat branched-chain/branched-chain_minevalue.tsv | cut -f 1 | grep -f <(cut -f 1 branched-chain/diamond/branched-chain_result2.tsv | sort -n | uniq)
 ```
 
 ## 2.5 统计diamond比对和hmmer比对时不同species中BCAA个数
 ```bash
 #统计diamond抓取的braB个数
-cat branched-chain/diamond/branched-chain_result3.tsv | tsv-filter --eq 3:100 |cut -f 1 | sort -n | uniq |
+cat branched-chain/diamond/branched-chain_result2.tsv | tsv-filter --eq 3:100 |cut -f 1 | sort -n | uniq |
 tsv-join -d 1 \
 -f PROTEINS/all.strain.tsv -k 1 \
 --append-fields 2 |
@@ -369,7 +363,7 @@ keep-header -- tsv-sort -k2,2n >branched-chain/diamond/branched_chain_diamond_sp
 
 #统计hmmer抓取的braB个数
 cat branched-chain/branched-chain_minevalue.pfam.tsv | tsv-select -f 1,3 | 
-tsv-filter --str-in-fld 2:"branched-chain" | cut -f 1 | 
+tsv-filter --str-in-fld 2:"Branched-chain" | cut -f 1 | 
 tsv-join -d 1 \
 -f PROTEINS/all.strain.tsv -k 1 \
 --append-fields 2 |
@@ -397,7 +391,7 @@ cat branched-chain/diamond/branched_chain_hmmer_species_num.tsv  branched-chain/
 ```
 
 ## 2.7 绘制统计不同物种中BCAA平均拷贝数的表格
-* 表格内容
+### 2.7.1统计物种水平的拷贝数分布
 ```bash
 #species  | number of assemblies  | numbers of BCAA | average per genome 
 #合并不同菌株的组装体数目和不同菌株中的BCAA拷贝数并且相除计算copy per genome(572)
@@ -416,7 +410,7 @@ branched-chain/diamond/branched_chain_species_mean_copy.tsv
 mlr --itsv --ocsv cat  <(cat branched-chain/diamond/branched_chain_species_mean_copy.tsv |  keep-header -- tsv-sort -k3,3rn -k4,4rn  )\
  > branched-chain/diamond/branched_chain_species_mean_copy.csv
 ```
-* 表格形式
+### 2.7.1统计属水平的拷贝数分布
 ```bash
 #查看假单胞菌属的typical菌株的拷贝数目(9）
 cut -f 1,2,3 branched-chain/diamond/branched_chain_species_mean_copy.tsv | grep -v "number" | grep -f <(cat typical.lst | tsv-join -d 1 -f strains.taxon.tsv -k 1 --append-fields 4 | cut -f 2 | sort -n | uniq) | tr "\t" "," | perl -F, -alne '$per=$F[2]/$F[1];$per=sprintf "%.1f",$per;print"$F[0]\t$F[1]\t$F[2]\t$per";' |  
@@ -429,12 +423,11 @@ cut -f 1,2,3,4,5,6,7 branched-chain/diamond/branched_chain_species_mean_copy.tsv
 tsv-summarize -g 1 --sum 2,3 | tr "\t" "," | perl -F, -alne '$per=$F[2]/$F[1];$per=sprintf "%.1f",$per;print"$F[0]\t$F[1]\t$F[2]\t$per";' |  
 tsv-sort -k1,1rn  >branched-chain/diamond/branched_chain_copy_format3.tsv
 #合并三者的结果(由于只关注gamma变形菌纲，去除厚壁菌门的芽孢杆菌目和衣原体目)
-
 cat branched-chain/diamond/branched_chain_copy_format1.tsv  branched-chain/diamond/branched_chain_copy_format2.tsv branched-chain/diamond/branched_chain_copy_format3.tsv |  sed '1iTaxonomy\tNumber of assemblies\tNumber of braB\braZ\tAverage per genome'  >branched-chain/diamond/branched_chain_copy_whole.tsv
 mlr --itsv --ocsv cat branched-chain/diamond/branched_chain_copy_whole.tsv >branched-chain/diamond/branched_chain_copy_whole.csv
 ```
   
-## 2.8 重新统计去掉epsilon，alpha变形菌和放线菌门，支原体门,芽孢杆菌纲的砂眼衣原体等后的基因组数，物种数，BCAA拷贝数
+## 2.8 重新统计去掉epsilon，alpha变形菌和放线菌门，支原体门,芽孢杆菌纲的砂眼衣原体等后的基因组数，物种数，BCAA拷贝数（无用)
 ```bash
 #只保留变形菌纲和芽孢杆菌纲的(金葡和枯草芽孢杆菌和李斯特菌)三个物种作为外类群
 #统计剩余的基因组数量1947
@@ -494,9 +487,6 @@ cat strains.taxon.tsv | grep -v -f 1.tsv | tsv-select -f 4,1 | nwr append stdin 
 cat strains.taxon.tsv | grep -v -f 1.tsv | tsv-select -f 4,1 | nwr append stdin -r class -r family | grep "Gammaproteobacteria" | tsv-summarize -g 4 --count | wc -l
 ```
 
-
-
-
 # 3. 两种树
 * [系统发育和系统发育生态学标记PhyEco marker](https://journals.plos.org/plosone/article?id=10.1371/journal.pone.0077033)
 * [系统识别细菌和古细菌不同分类水平的系统发育标记](https://figshare.com/articles/dataset/Systematically_identify_phylogenetic_markers_at_different_taxonomic_levels_for_bacteria_and_archaea/722713/1)
@@ -512,6 +502,12 @@ cat strains.taxon.tsv | grep -v -f 1.tsv | tsv-select -f 4,1 | nwr append stdin 
 
 ## 3.1铜绿假单胞菌物种内所有的braB和braZ序列建立基因树（不需要外类群,因为蛋白序列有一半是braB,有一半是braZ,无法区分) (OK)
 ```bash
+#使用iqtree2建树
+wget -c https://github.com/iqtree/iqtree2/releases/download/v2.1.3/iqtree-2.1.3-Linux.tar.gz
+tar -zxvf iqtree-2.1.3-Linux.tar.gz
+echo 'export PATH="~/iqtree-2.1.3-Linux/bin:$PATH"'>>~/.bashrc
+source ~/.bashrc
+
 cd ~/data/Pseudomonas
 #提取所有的铜绿假单胞菌的单双拷贝蛋白序列(773)
 mkdir -p ~/data/Pseudomonas/branched-chain/tree
@@ -525,68 +521,7 @@ bsub -q mpi -n 24 -J "iq" ./iqtree2 -s branched-chain.Pseudom_aeru.aln.mafft.fa 
 #改名
 mv branched-chain.Pseudom_aeru.treefile branched-chain.Pseudom_aeru.newick
 
-
-#modeltest-ng查看最佳建树模型
-modeltest-ng -d nt -i 输入fas -o 输出名称 -T mrbayes/raxml --force -p 2
-#-d 表示数据类型，nt表示核酸，aa表示蛋白质
-#-i 表示输入文件，可以是fas或者phylip格式
-#-o 表示输出名称
-#-T 表示模版，有raxml, phyml, mrbayes, paup 可以选择
-#-p 表示处理器使用个数
-#可以在 log 文件中查看输出的最佳模型。
-
-#raxml-ng建树速度提升，得到更准确的结果，支持22个核酸进化模型，多线程效率提升
-brew install  raxml-ng 
-#第一步：检查比对后的序列MSA是否可以读取（MSA可以使用FASTA、PHYLIP格式）。注：这一步骤还会给出哪些序列是相同序列（推荐执行）
-raxml-ng --check --msa prim.phy --model GTR --prefix T1
-#第二步：构建核苷酸树（模型GTR，1000次自检值抽样）。 注：蛋白树可用LG模型 
-raxml-ng --all --msa prim.phy --model LG --prefix T15 --threads 10  --bs-trees 1000
-#-msa 比对好的序列文件
-#--model 模型，可以参照 modeltest-ng 的输出
-#--prefix 前缀
-#--bs-trees BootStrap 树的个数
-
-#重定根
-#nw_stats显示树的属性
-#nw_clade： 提取由节点标签指定的子树
-#nw_labels：打印节点标签
-#nw_order：排序
-#nw_reroot：重置根
-#nw_rename：标签重命名
-
-#使用iqtree2建树
-wget -c https://github.com/iqtree/iqtree2/releases/download/v2.1.3/iqtree-2.1.3-Linux.tar.gz
-tar -zxvf iqtree-2.1.3-Linux.tar.gz
-echo 'export PATH="~/iqtree-2.1.3-Linux/bin:$PATH"'>>~/.bashrc
-source ~/.bashrc
-cd iqtree-2.1.3-Linux/bin
-#根据ModelFinder自动选择的最适合模型，从序列比对(example.phy)中推断出最大似然树：
-#-s指定 IQ-TREE 需要的比对文件的名称,可选PHYLIP、FASTA、NEXUS、CLUSTAL、MSF
-#-m是指定要在分析期间使用的模型名称的选项。特殊MFP关键字代表ModelFinder Plus，它告诉IQ-TREE使用所选模型执行ModelFinder和剩余分析.ModelFinder计算许多不同模型和Akaike信息准则(AIC)、校正Akaike信息准则(AICc)和贝叶斯信息准则(BIC)的初始简约树的对数似然。然后ModelFinder选择最小化BIC分数的模型（您也可以通过添加选项-AIC或-AICc分别更改为AIC或AICc）。当使用了ModelFinder模型时，IQ-TREE将写入一个附加文件：example.phy.model：所有测试模型的对数似然。它用作检查点文件以恢复中断的模型选择。如果您现在查看，example.phy.iqtree您将看到IQ-TREE被选TIM2+I+G4为此示例数据的最佳拟合模型
-#-o：外类群列表，不同物种之间逗号隔开
-#--prefix 更改输出前缀
-#--seed：随机数种子，主要出于调试目的
-#-T：程序运行使用的核数，可设置具体数字或者AUTO（推荐），默认为1
-#-b：非参数bootstrap次数，大于等于100
-#-B：超快速bootstrap次数，大于等于1000
-#--bnni：使用NNI优化超快速bootstrap的树，搭配-B使用
-#--alrt：SH近似似然比检验重复次数
-#-m：模型选择，设置MF自动选择最佳模型但不建树；设置MFP自动检测最佳模型并建树。此外还可以设置具体的模型，或者多个可选模型，例如-m LG,WAG
-#--ancestral：基于经验贝叶斯的祖先状态重建
-#正常情况下，在运行结束时IQ-TREE将写入几个输出文件，包括：
-#example.phy.iqtree：自读的主要报告文件。您可以查看此文件以查看计算结果。它还包含最终树的文本表示（见下文）。
-#example.phy.treefile：NEWICK格式的ML树，可以通过任何支持的树查看器程序（如FigTree或iTOL）进行可视化。
-#example.phy.log：整个运行的日志文件（也打印在屏幕上）。要报告错误，请将此日志文件和原始比对文件发送给作者。
-
-#-m 设置MFP自动检测最佳模型并建树
-iqtree2 -s example.phy -m MFP  --prefix myprefix -T 20
-#使用bootstrap自助法计算节点支持率（类似于RaxML）：
-iqtree -s example.phy -m MFP -b 100 -T AUTO
-#使用超快速bootstrap自助法计算节点支持率：
-iqtree -s example.phy -m MFP -B 1000 --bnni -T AUTO
-#使用上述设置构建500个基因组的120个串联蛋白树需要两天左右。超快自助法ultrafast bootstrap1000次比普通自助法100次要快10倍左右，是该软件的特有算法，所以一般使用Iqtree的超快自助法建树。
 ```
-
 
 ## 3.2铜绿假单胞菌物种内所有的braB和braZ序列建立物种树（需要外类群)
 ```bash
@@ -722,55 +657,55 @@ mv branched-chain.Gammaproteobacteria.bac120.treefile branched-chain.Gammaproteo
 ## 4.1铜绿样本生物环境注释信息
 ```BASH
 #共有391个铜绿组装体(有390个有样本信息)(有373个有生境信息)
-for filename in *.txt
+cd ~/data/Pseudomonas/
+mkdir -p biosample/json
+for filename in biosample/*.txt
 do
 base=$(basename $filename .txt)
 echo $base
-cat $base.txt | grep -A 20 "Pseudomonas aeruginosa" | grep "/" |grep -E "isolation source|environmental medium|description|host">$base.json
+cat biosample/$base.txt | grep -A 20 "Pseudomonas aeruginosa" | grep "/" |grep -E "isolation source|environmental medium|description|host">biosample/json/$base.json
 done  
-
 #提取样本环境信息
-for filename in *.json
+for filename in biosample/json/*.json
 do
 base=$(basename $filename .json)
-sample=$(cat $base.json | cut -d "\"" -f 2)
+sample=$(cat biosample/json/$base.json | cut -d "\"" -f 2)
 echo -e "$base\t$sample"
-done >env_sample.tsv
+done >biosample/env_sample.tsv
 
 #选择样本信息和菌株信息391
- cat Pseudomonas.assembly.pass.csv| grep "Pseudom_aeru"| cut -d "," -f 1,2,6 | tr "," "\t" >biosample_strain.tsv
-#拼接样本环境信息和菌株信息 347
-cat env_sample.tsv | tsv-join -d 1 -f biosample_strain.tsv -k 3 --append-fields 1 | tsv-select -f 1,3,2 >biosample_strain_env.tsv
+ cat ASSEMBLY/Pseudomonas.assembly.pass.csv| grep "Pseudom_aeru"| cut -d "," -f 1,2,6 | tr "," "\t" >biosample/biosample_strain.tsv
+#拼接样本环境信息和菌株信息 390 
+cat biosample/env_sample.tsv | tsv-join -d 1 -f biosample/biosample_strain.tsv -k 3 --append-fields 1 | tsv-select -f 1,3,2 >biosample/biosample_strain_env.tsv
 #最终手工分类注释的信息表!!!!!!
-biosamle_env_anno.tsv
-cut -f 2,4 biosample_env_anno.tsv |sed '1itip\tclass1' >biosample_env_class.tsv 
-
+#手工注释的文件名 biosamle_env_anno.tsv 
+wc -l biosample/biosample_env_anno.tsv #391
+cut -f 2,4 biosample/biosample_env_anno.tsv |sed '1itip\tclass1' >biosample/biosample_env_class.tsv #392
 #添加拷贝数信息
 cat branched-chain/branched-chain_minevalue.pfam.tsv | tsv-select -f 1,3 |
-tsv-filter --str-in-fld 2:"branched-chain" |
+tsv-filter --str-in-fld 2:"Branched-chain" |
 tsv-join -d 1 \
 -f PROTEINS/all.strain.tsv -k 1 \
 --append-fields 2 | grep "Pseudom_aeru" |tsv-summarize -g 3 --count >branched-chain/branched-chain_Pseudom.aeru.copy.num.tsv
-
-#cat branched-chain_Pseudom.aeru.copy.num.tsv  | perl -alne '$_=~s/\t1/\tA/g;$_=~s/\t2/\tB/g;print"$_";' | sed '1itip\tclass2' >biosample_env_class2.tsv
-cut -f 2,4  biosample_env_copy_special.tsv | sed 's/one braB-like copy and one braZ-like copy/braB_braZ/g' | sed 's/one braB-like copy without braZ-like copies/one_braB/g' | sed 's/one braZ-like copy without braB-like copies/one_braZ/g'  | sed 's/two braZ-like copies without braB-like copies/two_braZ/g'  | sed '1itip\tclass2' >biosample_env_class2.tsv
+#添加含有的拷贝数是one_braB, one_braZ or two_braZ
+#梁师兄手动注释的拷贝分布表 biosample_env_copy_special.tsv 
+cut -f 2,4  biosample/biosample_env_copy_special.tsv | sed 's/one braB-like copy and one braZ-like copy/braB_braZ/g' | sed 's/one braB-like copy without braZ-like copies/one_braB/g' | sed 's/one braZ-like copy without braB-like copies/one_braZ/g'  | sed 's/two braZ-like copies without braB-like copies/two_braZ/g'  | sed '1itip\tclass2' >biosample/biosample_env_class2.tsv  #392
 ```
+
 ## 4.2注释信息自动生成配色
 * table2itol是在GitHup上公开的R语言包，其作用是专门为iTOL生成所需的注释文件，只需准备表格形式的数据，包含配色方案的注释文件就会自动生成，极大提高了准备注释文件的效率。
 * [table2itol地址](https://github.com/mgoeker/table2itol)
 ```r
 #linux安装
+cd ~/data/Pseudomonas/
 wget https://github.com/mgoeker/table2itol/archive/master.zip 
 unzip master.zip 
 mv table2itol-master table2itol
 ## 测试 
 chmod +x table2itol/table2itol.R  
-Rscript ./table2itol/table2itol.R 
-#optparse--强大的命令行参数处理包 
-#optparse使得我们很方便地给R脚本设置命令行参数，从而使得R脚本的复用和流程化使用
-install.packages("optparse")
-library("optparse")
-Rscript ./table2itol/table2itol.R  -D plan1 -i tip  -b class  -w 0.5 biosample_env_class.tsv biosample_env_class2.tsv
+cd ~/data/Pseudomonas/biosample
+Rscript ./../table2itol/table2itol.R  -D  pse_aeru -i tip  -b class  -w 0.5  biosample_env_class.tsv biosample_env_class2.tsv 
+#使用参数
 -D 输出目录
 -b设置背景色
 --na-strings X 颜色圈放在名称外面
@@ -782,10 +717,9 @@ Rscript ./table2itol/table2itol.R  -D plan1 -i tip  -b class  -w 0.5 biosample_e
  -D输出目录，
  -i OTU列名，
  -l OTU显示名称如种/属/科名，
-#第一个文件第一行是表头，第一列是进化树中的叶标签tip，第二列为分类信息class1
-#第二个文件第一行是表头，第一列是进化树中的叶标签tip，第二列为分类信息class2
 
 #手工替换颜色
+cd ~/data/Pseudomonas/biosample/pse_aeru
 sed -i 's/#1f78b4/#e040fb/g' iTOL_colorstrip-class1.txt
 sed -i 's/#fb9a99/#ffb74d/g' iTOL_colorstrip-class1.txt
 sed -i 's/#33a02c/#b2ff59/g' iTOL_colorstrip-class1.txt
@@ -797,33 +731,50 @@ sed -i 's/#a6cee3/#fafafa/g' iTOL_colorstrip-class2.txt
 sed -i 's/#33a02c/#304ffe/g' iTOL_colorstrip-class2.txt
 sed -i 's/#b2df8a/#bbdefb/g' iTOL_colorstrip-class2.txt
 sed -i 's/#1f78b4/#ef9a9a/g' iTOL_colorstrip-class2.txt
+```
 
+## 4.3提取临床环境的序列，非临床环境的序列并计算kaks
+```bash
+cd ~/data/Pseudomonas
+mkdir -p branched-chain/kaks/biosample
+wc -l biosample/biosample_env_anno.tsv  #391
+#查看生境为临床的铜绿菌株数
+cat biosample/biosample_env_anno.tsv | grep "clinical" | wc -l #334
+#生境为临床的铜绿菌株蛋白 660
+cat branched-chain/branched-chain_minevalue.pfam.tsv | cut -f 1 | grep -f <(cat biosample/biosample_env_anno.tsv | grep "clinical" | cut -f 2) >branched-chain/kaks/biosample/biosample_clincal_pro.tsv
+#提取对应的cds序列名字661
+faops size branched-chain/kaks/aeru/branched-chain.CDS.fa | cut -f 1  | grep -f <(perl -alne 's/\_([W|N]P)/\_cds\_$1/;print"$_";' branched-chain/kaks/biosample/biosample_clincal_pro.tsv) >branched-chain/kaks/biosample/biosample_clincal_cds.tsv
+#簇1braB的序列数376
+wc -l branched-chain/kaks/aeru/branched-chain_cluster1.cds.tsv
+#簇2braZ的序列数398
+wc -l branched-chain/kaks/aeru/branched-chain_cluster2.cds.tsv
+#提取生境为临床的braB的cds序列 321
+cat branched-chain/kaks/aeru/branched-chain_cluster1.cds.tsv | grep -f branched-chain/kaks/biosample/biosample_clincal_cds.tsv | wc -l 
+faops some branched-chain/kaks/aeru/branched-chain.CDS.fa <(cat branched-chain/kaks/aeru/branched-chain_cluster1.cds.tsv | grep -f branched-chain/kaks/biosample/biosample_clincal_cds.tsv ) branched-chain/kaks/biosample/biosample_clincal_braB.fa #321
+#提取生境为临床的braZ的cds序列 340
+cat branched-chain/kaks/aeru/branched-chain_cluster2.cds.tsv | grep -f branched-chain/kaks/biosample/biosample_clincal_cds.tsv | wc -l 
+faops some branched-chain/kaks/aeru/branched-chain.CDS.fa <(cat branched-chain/kaks/aeru/branched-chain_cluster2.cds.tsv | grep -f branched-chain/kaks/biosample/biosample_clincal_cds.tsv ) branched-chain/kaks/biosample/biosample_clincal_braZ.fa #340
 
-#window安装
-setwd("D:/braB_Z_HGT/biosample")
-#table2itol使用需要依赖很多包
-site="https://mirrors.tuna.tsinghua.edu.cn/CRAN" 
-# 依赖包列表：参数解析、数据变换、绘图和开发包安装、安装依赖、ggplot主题 
-package_list = c("grid","ggplot2","gridExtra","vegan","reshape2","readODS") 
-# 判断R包加载是否成功来决定是否安装后再加载 
-for(p in package_list){  
-    if(!suppressWarnings(suppressMessages(require(p, character.only = TRUE, quietly = TRUE, warn.conflicts = FALSE)))){   
-        install.packages(p, repos=site)   
-        suppressWarnings(suppressMessages(library(p, character.only = TRUE, quietly = TRUE, warn.conflicts = FALSE)))   
-    } 
-}  
-#### 安装缺少的R包 
-source("http://bioconductor.org/biocLite.R") 
-biocLite(c("optparse", "plotrix", "readODS", "readxl", "yaml"))
-#输入文件准备
-
-source("table2itol.R") 
-create_itol_files(infiles ="2.tsv",
-   identifier = "tip", label = "class", na.strings = "X")
+#生境为非临床的铜绿菌株数 
+cat biosample/biosample_env_anno.tsv | grep -v "unknow" | grep -v "clinical" | wc -l #42
+#生境为非临床的铜绿蛋白
+cat branched-chain/branched-chain_minevalue.pfam.tsv | cut -f 1| grep -f <(cat biosample/biosample_env_anno.tsv | grep -v "unknow" | grep -v "clinical" | cut -f 2) >branched-chain/kaks/biosample/biosample_other_pro.tsv   #84
+#提取对应的cds序列名字84
+faops size branched-chain/kaks/aeru/branched-chain.CDS.fa | cut -f 1  | grep -f <(perl -alne 's/\_([W|N]P)/\_cds\_$1/;print"$_";' branched-chain/kaks/biosample/biosample_other_pro.tsv) >branched-chain/kaks/biosample/biosample_other_cds.tsv
+#簇1braB的序列数376
+wc -l branched-chain/kaks/aeru/branched-chain_cluster1.cds.tsv
+#簇2braZ的序列数398
+wc -l branched-chain/kaks/aeru/branched-chain_cluster2.cds.tsv
+#提取生境为非临床的braB的cds序列 41
+cat branched-chain/kaks/aeru/branched-chain_cluster1.cds.tsv | grep -f branched-chain/kaks/biosample/biosample_other_cds.tsv | wc -l 
+faops some branched-chain/kaks/aeru/branched-chain.CDS.fa <(cat branched-chain/kaks/aeru/branched-chain_cluster1.cds.tsv | grep -f branched-chain/kaks/biosample/biosample_other_cds.tsv ) branched-chain/kaks/biosample/biosample_other_braB.fa #41
+#提取生境为非临床的braZ的cds序列 43
+cat branched-chain/kaks/aeru/branched-chain_cluster2.cds.tsv | grep -f branched-chain/kaks/biosample/biosample_other_cds.tsv | wc -l 
+faops some branched-chain/kaks/aeru/branched-chain.CDS.fa <(cat branched-chain/kaks/aeru/branched-chain_cluster2.cds.tsv | grep -f branched-chain/kaks/biosample/biosample_other_cds.tsv ) branched-chain/kaks/biosample/biosample_other_braZ.fa #43
 ```
 
 
-# 5.铜绿基因树的注释信息
+# 5.铜绿基因树的注释信息（无用)
 ```R
 #参考菌株的branched蛋白树
 setwd("D:/")
@@ -882,30 +833,13 @@ brewer.pal(11,"RdBu")  #查看颜色码
 #深蓝 #08519C  
 #浅红 #FCC5C0   braB 
 #浅蓝 #C6DBEF  braZ
-```
 
-# 6.共线性的注意事项
-```bash
-#pse_aeru
-python  fetch_gbk.py -i Pseudom_aeru_PAO1.gbff -u 4000 -d 6000 -l braB -o PAO1_braB
-python  fetch_gbk.py -i Pseudom_aeru_PAO1.gbff -u 7000 -d 4000 -l braZ -o PAO1_braZ
+#共线性的注意事项
 #将共线性的基因调整到10个以内，铜绿假单胞菌其他菌株都是上下游各5000bp
 #共线性的页面结果调整scale factor为25 vertical spacing为30
-
-#two_braZ
-python  fetch_gbk.py -i Pseudom_aeru_PAO1.gbff -u 7000 -d 7000 -l braB -o PAO1_braB
-python  fetch_gbk.py -i Pseudom_aeru_PAO1.gbff -u 7000 -d 7000 -l braZ -o PAO1_braZ
-
-for filename in *.gbff 
-do
-base=$(basename $filename .gbff)
-python fetch_gbk.py -i $base.gbff -u 7000 -d 7000 -l brnQ -o braB
-done
-
-
 ```
 
-# 7.变形菌纲基因树和物种树的注释信息
+# 6.变形菌纲基因树和物种树的注释信息(无用)
 ```r
 #提取变形菌纲的科分类信息，方便后续分类,不加外类群448
 #共有18个对应的科
@@ -922,4 +856,5 @@ Rscript ./table2itol/table2itol.R -D plan3 -i spe -b family -w 0.5  branched-cha
 cat branched-chain.Gammaproteobacteria.bac120.anno.tsv | cut -f 2 | sort -n | uniq | perl -e '$num=0;while(<>){chomp;$name=(split/\t/,$_)[0];$num+=1;print"$name\t$num\n";}' >family_num.tsv
 Rscript ./table2itol/table2itol.R -D plan3 -i spe -b family -w 0   branched-chain.Gammaproteobacteria.protein.anno.tsv
 ```
+
 
