@@ -216,15 +216,14 @@ hmmpress ~/data/HMM/TIGRFAM/tigerfam.hmm
 #提取抓出来的序列2140
 faops some PROTEINS/all.replace.fa <(tsv-select -f 2 branched-chain/branched.tigerfam.replace.tsv) branched-chain/branched-chain.fa
 
-E_VALUE=1e-10
+E_VALUE=1e-20
 NAME=branched-chain
 hmmscan --cpu 4 -E ${E_VALUE} --domE ${E_VALUE} --noali \
 -o ${NAME}/${NAME}_progress.tigerfam.txt --tblout ${NAME}/${NAME}.tigerfam.tbl  \
    ~/data/HMM/TIGRFAM/tigerfam.hmm  ${NAME}/${NAME}.fa
 
 perl abstract1.pl branched-chain/branched-chain.tigerfam.tbl >branched-chain/branched-chain.tigerfam.abstract.tsv
-tsv-filter --le 4:1e-50 branched-chain/branched-chain.tigerfam.abstract.tsv >branched-chain/branched-chain.tigerfam.cutoff.tsv
-tsv-summarize  -g 8 --count branched-chain/branched-chain.tigerfam.cutoff.tsv
+tsv-summarize  -g 8 --count branched-chain/branched-chain.tigerfam.abstract.tsv
 #查看以e值过滤后的结果
 livcs:_branched-chain_amino_acid_transport_system_II_carrier_protein    2140
 
@@ -270,15 +269,14 @@ hmmpress ~/data/HMM/PFAM/Pfam-A.hmm
 
 #提取抓出来的序列2140
 faops some PROTEINS/all.replace.fa <(tsv-select -f 2 branched-chain/branched.pfam.replace.tsv) branched-chain/branched-chain.pfam.fa
-E_VALUE=1e-10
+E_VALUE=1e-20
 NAME=branched-chain
 hmmscan --cpu 4 -E ${E_VALUE} --domE ${E_VALUE} --noali \
 -o ${NAME}/${NAME}_progress.pfam.txt --tblout ${NAME}/${NAME}.pfam.tbl  \
    ~/data/HMM/PFAM/Pfam-A.hmm  ${NAME}/${NAME}.pfam.fa
 
 perl abstract1.pl branched-chain/branched-chain.pfam.tbl >branched-chain/branched-chain.abstract.pfam.tsv
-tsv-filter --le 4:1e-50 branched-chain/branched-chain.abstract.pfam.tsv >branched-chain/branched-chain.cutoff.pfam.tsv
-tsv-summarize  -g 8 --count branched-chain/branched-chain.cutoff.pfam.tsv
+tsv-summarize  -g 8 --count branched-chain/branched-chain.abstract.pfam.tsv
 #查看以e值过滤后的结果
 Branched-chain_amino_acid_transport_protein     2140
 #同一蛋白序列可以匹配到多条model序列,只保留e值最小的且description符合该famliy的菌株蛋白序列名
@@ -319,7 +317,14 @@ blastp -db branched-chain/blastp/whole -query branched-chain/blastp/branched-cha
 #第二轮blastp 
 faops some PROTEINS/all.replace.fa  <(cut -f 2 branched-chain/blastp/branched-chain_result1.tsv | sort -n | uniq) branched-chain/blastp/branched-chain_blastp2.fa
 blastp -db branched-chain/blastp/whole -query branched-chain/blastp/branched-chain_blastp2.fa -out branched-chain/blastp/branched-chain_result2.tsv -outfmt 6 -evalue 1e-5
-
+#第一轮blastp的query
+cut -f 1 branched-chain/diamond/branched-chain_result1.tsv | sort -n | uniq | wc -l #2140
+#第一轮blastp的target
+cut -f 2 branched-chain/diamond/branched-chain_result1.tsv | sort -n | uniq | wc -l #2140
+#第二轮blastp的query
+cut -f 1 branched-chain/diamond/branched-chain_result2.tsv | sort -n | uniq | wc -l #2140
+#第二轮blastp的target
+cut -f 2 branched-chain/diamond/branched-chain_result2.tsv | sort -n | uniq | wc -l #2140
 
 #第一轮diamond(将hmmsearhc和hmmscan的结果放在所有的蛋白序列库里进行blast)
 #相似性选择和覆盖度选择（结构阈330aa,braB437，330/437=0.755, 因此覆盖度选择50，相似性最低为55.606 ，因此相似性选50 ）
@@ -345,6 +350,11 @@ cut -f 2 branched-chain/diamond/branched-chain_result2.tsv | sort -n | uniq | wc
 
 #查看hmmer结果和diamond结果的交集1492
 cat branched-chain/branched-chain_minevalue.tsv | cut -f 1 | grep -f <(cut -f 1 branched-chain/diamond/branched-chain_result2.tsv | sort -n | uniq)
+
+#查看hmmer结果和blastp结果的交集2140
+cat branched-chain/branched-chain_minevalue.tsv | cut -f 1 | grep -f <(cut -f 1 branched-chain/blastp/branched-chain_result2.tsv | sort -n | uniq)
+
+#diamond软件可能在建库上存在一定的问题，目前已经测试过非diamond版本的原因
 ```
 
 ## 2.5 统计diamond比对和hmmer比对时不同species中BCAA个数
