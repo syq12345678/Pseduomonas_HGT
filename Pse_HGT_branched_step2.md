@@ -1,12 +1,10 @@
 <!-- TOC -->
 
-- [1. kaks的文件准备 （铜绿假单胞菌的拷贝信息需要修正，不能用)](#1-kaks的文件准备-铜绿假单胞菌的拷贝信息需要修正不能用)
+- [1. kaks的文件准备 （铜绿假单胞菌的拷贝信息需要修正，不能用)!!!!!](#1-kaks的文件准备-铜绿假单胞菌的拷贝信息需要修正不能用)
   - [1.1 分别提取branched在铜绿假单胞菌中的两个拷贝蛋白序列](#11-分别提取branched在铜绿假单胞菌中的两个拷贝蛋白序列)
   - [1.2提取branched在铜绿假单胞菌中的两个CDS](#12提取branched在铜绿假单胞菌中的两个cds)
   - [1.3 铜绿假单胞菌copy1准备列表文件，cds和protein](#13-铜绿假单胞菌copy1准备列表文件cds和protein)
   - [1.4 铜绿假单胞菌copy2准备列表文件，cds和protein](#14-铜绿假单胞菌copy2准备列表文件cds和protein)
-  - [1.3 copy1准备列表文件，cds和protein](#13-copy1准备列表文件cds和protein)
-  - [1.4 铜绿假单胞菌copy2准备列表文件，cds和protein](#14-铜绿假单胞菌copy2准备列表文件cds和protein-1)
 - [2. 使用paraAT2和caculator2计算铜绿假单胞菌的kaks （铜绿假单胞菌的拷贝信息需要修正，不能用)](#2-使用paraat2和caculator2计算铜绿假单胞菌的kaks-铜绿假单胞菌的拷贝信息需要修正不能用)
   - [2.1 安装paraAT2](#21-安装paraat2)
   - [2.2 计算铜绿假单胞菌copy1的kaks](#22-计算铜绿假单胞菌copy1的kaks)
@@ -14,10 +12,12 @@
   - [2.4 铜绿假单胞菌kaks结果画图(不能去除kaks等于0的点)](#24-铜绿假单胞菌kaks结果画图不能去除kaks等于0的点)
 - [3. 使用mega计算铜绿假单胞菌的dn/ds （铜绿假单胞菌的拷贝信息需要修正，不能用)](#3-使用mega计算铜绿假单胞菌的dnds-铜绿假单胞菌的拷贝信息需要修正不能用)
 - [4. 使用bp_pairwise_kaks计算铜绿假单胞菌的kaks(bp_pairwise的结果与mega和kaks_calculator不一致，可能是算法的原因)  （铜绿假单胞菌的拷贝信息需要修正，不能用)](#4-使用bp_pairwise_kaks计算铜绿假单胞菌的kaksbp_pairwise的结果与mega和kaks_calculator不一致可能是算法的原因--铜绿假单胞菌的拷贝信息需要修正不能用)
-- [5.重新修正的铜绿假单胞菌拷贝文件和kaks](#5重新修正的铜绿假单胞菌拷贝文件和kaks)
+- [5.重新修正的铜绿假单胞菌拷贝文件](#5重新修正的铜绿假单胞菌拷贝文件)
   - [5.1重新修正铜绿假单胞菌的拷贝蛋白序列](#51重新修正铜绿假单胞菌的拷贝蛋白序列)
   - [5.2重新修正铜绿假单胞菌的拷贝CDS序列](#52重新修正铜绿假单胞菌的拷贝cds序列)
   - [5.3使用mega计算铜绿假单胞菌的braz和braB的dn/ds](#53使用mega计算铜绿假单胞菌的braz和brab的dnds)
+  - [5.4提取临床环境的序列，非临床环境的序列](#54提取临床环境的序列非临床环境的序列)
+  - [5.5 使用mega计算铜绿假单胞菌临床环境的braB和braZ，非临床环境的braB和braZ的dN和dS](#55-使用mega计算铜绿假单胞菌临床环境的brab和braz非临床环境的brab和braz的dn和ds)
 - [6. 使用paraAT2和caculator2计算其他假单胞菌的kaks(待定)](#6-使用paraat2和caculator2计算其他假单胞菌的kaks待定)
   - [6.1分别提取branched在绿刺假单胞菌中的CDS序列](#61分别提取branched在绿刺假单胞菌中的cds序列)
   - [6.2分别提取branched在丁香假单胞菌中的CDS序列](#62分别提取branched在丁香假单胞菌中的cds序列)
@@ -31,39 +31,12 @@
   - [7.4 13个两个braZ拷贝的共线性分析（gbk转gff或者gff转gbk）](#74-13个两个braz拷贝的共线性分析gbk转gff或者gff转gbk)
   - [7.5 查看9个单拷贝铜绿假单胞菌的共线性](#75-查看9个单拷贝铜绿假单胞菌的共线性)
   - [7.6查看假单胞菌属的基因树两个clade的物种分别与braB和braZ的共线性](#76查看假单胞菌属的基因树两个clade的物种分别与brab和braz的共线性)
+  - [7.6查看假单胞菌属的基因树两个clade的物种分别与braZ上游基因PA1064的共线性](#76查看假单胞菌属的基因树两个clade的物种分别与braz上游基因pa1064的共线性)
 
 <!-- /TOC -->
 
-* 1.上一步主要是统计branched在不同菌株基因组中的拷贝数，可知铜绿假单胞菌等中具有两个拷贝    
-* 2.分别统计铜绿假单胞菌等中的两个拷贝的ka/ks
 
-
-# 1. kaks的文件准备 （铜绿假单胞菌的拷贝信息需要修正，不能用)
-* 1.在遗传学中，Ka/Ks表示的是两个蛋白编码基因的非同义替换率(Ka)和同义替换率(Ks)之间的比例。这个比例可以判断是否有选择压力作用于这个蛋白编码基因。
-* 2.如果有两个不同物种的同一个基因的序列，比如人和小鼠的p53基因，然后把这两个基因的序列进行比对，你会发现这两段序列有差异（进化！）。  
-再仔细观察，你会发现有些碱基的变化导致了编码氨基酸的变化（非同义替换），有些没有导致编码氨基酸的变化（同义替换）。  
-这是由密码子的简并性造成的，因为3个碱基决定1个氨基酸，所以64种碱基组合决定20种氨基酸，会有冗余出现。  
-* 3.一般情况下，第三个碱基变化会造成同义替换，而第一二个碱基的变化会造成非同义替换。  
-* 4.Ka和Ks的计算公式：  
-Ka=发生非同义替换的SNP数/非同义替换位点数  
-Ks=发生同义替换的SNP数/同义替换位点数
-其中非同义替换位点数就是会造成氨基酸变化的位点数的总和，比如编码丝氨酸（ser）的第一二位碱基。  
-而同义替换位点数就是不会造成氨基酸变化的位点数的总和，比如编码丝氨酸的第三位碱基。  
-* 5.计算Ka/Ks时，不考虑start codon和stop codon  
-* 6.转换（transition，嘌呤变嘌呤，嘧啶变嘧啶）发生的概率要高于颠换（transversion，嘌呤变嘧啶，嘧啶变嘌呤）发生的概率  
-* 7.ka/ks与进化的关系：如果一个基因没有受到自然选择的压力，那么非同义替换率和同义替换率是相同的。而一般情况下，非同义替换会造成氨基酸变化  
-改变蛋白质的构象和功能因此造成适应性的变化，从而带来自然选择的优势和劣势。而同义替换没有改变蛋白质的组成，不受自然选择的影响，因此ks反映  
-过程中的背景碱基替换率。ka/ks的比值说明了这个基因受到了何种选择
-* 8.Ka>>Ks或者Ka/Ks >> 1，基因受正选择(positive selection)  
-Ka＝Ks或者Ka/Ks=1，基因中性进化(neutral evolution)  
-Ka << Ks或者Ka/Ks << 1，基因受纯化选择(purify selection)  
-* 9.实际情况下Ka/Ks << 1，因为一般非同义替换带来的都是有害的性状，只有极少数情况下会造成进化上的优势  
-* 10.当Ka/Ks>>1时，基因受到强烈正选择，这样的基因即为近期正在快速进化的基因，对于物种的进化有着非常重要的意义
-* 11.计算ka和ks的步骤
-步骤一：假设比较的两条DNA序列之间的长度数为n,它们之间的替换数为m。计算同义(S)和非同义(N)位点的数量(S+N=n)以及同义(Sd)和非同义替换的数量  
-(Sd+Nd=m)
-步骤二:校正多个替换后,(Nd/N)和(Sd/S)分别代表ka和ks
-
+# 1. kaks的文件准备 （铜绿假单胞菌的拷贝信息需要修正，不能用)!!!!!
 ##  1.1 分别提取branched在铜绿假单胞菌中的两个拷贝蛋白序列
 ```BASH
 #提取铜绿假单胞菌的两个拷贝的蛋白名称(382*2=764)  （注意还有9个铜绿假单胞菌是单拷贝)
@@ -174,38 +147,6 @@ seqkit rename branched-chain/kaks/branched-chain_cluster2.seqkit.cds.fa >branche
 faops order branched-chain/kaks/branched-chain_cluster2.seqkit.rename.cds.fa branched-chain/kaks/branched-chain_cluster2.arrange.rename.tsv  branched-chain/kaks/branched-chain_copy2.cds.fa
 ```
 
-## 1.3 copy1准备列表文件，cds和protein
-```BASH
-#列表文件 branched-chain/branched-chain_cluster1.arrange.tsv 
-perl -alne 'print"$F[0]\n$F[1]" ' branched-chain/branched-chain_cluster1.arrange.tsv | 
-perl -alne 'BEGIN{%seen;$h;} $h=$_;$seen{$h}++;$name=$h."\_".$seen{$h};print"$name";' >branched-chain/branched-chain_cluster1.arrange.rename.tsv
-sed -i 's/_1$//g' branched-chain/branched-chain_cluster1.arrange.rename.tsv
-#protein序列  branched-chain/branched-chain_copy1.protein.fa
-seqkit duplicate -n 762  branched-chain/branched-chain_cluster1.fa >branched-chain/branched-chain_cluster1.seqkit.fa
-seqkit rename branched-chain/branched-chain_cluster1.seqkit.fa >branched-chain/branched-chain_cluster1.seqkit.rename.fa
-faops order branched-chain/branched-chain_cluster1.seqkit.rename.fa branched-chain/branched-chain_cluster1.arrange.rename.tsv  branched-chain/branched-chain_copy1.protein.fa
-#cds序列  branched-chain/branched-chain_copy1.cds.fa
-seqkit duplicate -n 762 branched-chain/branched-chain_cluster1.cds.fa  >branched-chain/branched-chain_cluster1.seqkit.cds.fa
-seqkit rename branched-chain/branched-chain_cluster1.seqkit.cds.fa >branched-chain/branched-chain_cluster1.seqkit.rename.cds.fa
-faops order branched-chain/branched-chain_cluster1.seqkit.rename.cds.fa branched-chain/branched-chain_cluster1.arrange.rename.tsv  branched-chain/branched-chain_copy1.cds.fa
-
-```
-## 1.4 铜绿假单胞菌copy2准备列表文件，cds和protein
-```bash
-#列表文件
-perl -alne 'print"$F[0]\n$F[1]" ' branched-chain/kaks/branched-chain_cluster2.arrange.tsv | 
-perl -alne 'BEGIN{%seen;$h;} $h=$_;$seen{$h}++;$name=$h."\_".$seen{$h};print"$name";' >branched-chain/kaks/branched-chain_cluster2.arrange.rename.tsv
-sed -i 's/_1$//g' branched-chain/kaks/branched-chain_cluster2.arrange.rename.tsv
-#protein序列  branched-chain/kaks/branched-chain_cluster2.fa
-seqkit duplicate -n 762  branched-chain/kaks/branched-chain_cluster2.fa >branched-chain/kaks/branched-chain_cluster2.seqkit.fa
-seqkit rename branched-chain/kaks/branched-chain_cluster2.seqkit.fa >branched-chain/kaks/branched-chain_cluster2.seqkit.rename.fa
-faops order branched-chain/kaks/branched-chain_cluster2.seqkit.rename.fa  branched-chain/kaks/branched-chain_cluster2.arrange.rename.tsv  branched-chain/kaks/branched-chain_copy2.protein.fa
-#cds序列  branched-chain/kaks/branched-chain_cluster2.cds.fa
-seqkit duplicate -n 762 branched-chain/branched-chain_cluster2.cds.fa  >branched-chain/kaks/branched-chain_cluster2.seqkit.cds.fa
-seqkit rename branched-chain/kaks/branched-chain_cluster2.seqkit.cds.fa >branched-chain/kaks/branched-chain_cluster2.seqkit.rename.cds.fa
-faops order branched-chain/kaks/branched-chain_cluster2.seqkit.rename.cds.fa branched-chain/kaks/branched-chain_cluster2.arrange.rename.tsv  branched-chain/kaks/branched-chain_copy2.cds.fa
-```
-
 # 2. 使用paraAT2和caculator2计算铜绿假单胞菌的kaks （铜绿假单胞菌的拷贝信息需要修正，不能用)
 ## 2.1 安装paraAT2
 ```bash
@@ -302,15 +243,6 @@ cat branched-chain/kaks/branched_copy1.kaks.picture.tsv  branched-chain/kaks/bra
 sed -i 's/-//g' branched-chain/kaks/branched.kaks.picture.tsv
 #使用plotr绘图
 plotr hist --xl Ka/Ks --yl Frequency -g 2 --bins 20 --xmm -0.1,1 --ymm 0,0.5 -p branched-chain/kaks/branched.kaks.picture.tsv
-#添加平均值+-标准误SEM信息   SEM是standard error of mean是平均数的抽样误差，反应平均数的抽样准确性 使用excel计算
-#copy1的ka(83560)  0.002215855+-0.003147
-cat branched-chain/kaks/branched_copy1.kaks | tsv-filter --str-ne 2:"NA" | cut -f 2 >branched-chain/kaks/branched_copy1_ka.tsv
-#copy1的ks(141026)  0.024234602+-0.028889
-cat branched-chain/kaks/branched_copy1.kaks | tsv-filter --str-ne 3:"NA" | cut -f 3 >branched-chain/kaks/branched_copy1_ks.tsv
-#copy2的ka(120258)  0.03124638+-0.096849
-cat branched-chain/kaks/branched_copy2.kaks | tsv-filter --str-ne 2:"NA" | cut -f 2 >branched-chain/kaks/branched_copy2_ka.tsv
-#copy2的ks(134142) 0.084684557+-0.230414
-cat branched-chain/kaks/branched_copy2.kaks | tsv-filter --str-ne 3:"NA" | cut -f 3 >branched-chain/kaks/branched_copy2_ks.tsv
 ```
 # 3. 使用mega计算铜绿假单胞菌的dn/ds （铜绿假单胞菌的拷贝信息需要修正，不能用)
 ```BASH
@@ -339,10 +271,9 @@ cat branched-chain/kaks/bp_pairwise.kaks.copy1.tsv bp_pairwise.kaks.copy2.tsv >b
 plotr hist --xl Ka/Ks --yl Frequency -g 2 --bins 20 --xmm -0.1,1 --ymm 0,1 -p branched-chain/kaks/bp_pairwise.kaks.picuture.tsv
 ```
 
-# 5.重新修正的铜绿假单胞菌拷贝文件和kaks
+# 5.重新修正的铜绿假单胞菌拷贝文件
 ## 5.1重新修正铜绿假单胞菌的拷贝蛋白序列
 ```bash
-
 cd ~/data/Pseudomonas
 #提取所有的铜绿假单胞菌的单双拷贝蛋白序列(773)
 mkdir -p ~/data/Pseudomonas/branched-chain/kaks/aeru
@@ -430,7 +361,7 @@ cd ~/data/Pseudomonas
 mkdir -p ~/data/Pseudomonas/branched-chain/kaks/aeru/mega
 #计算braB的dn/ds(64668)
 sed -i '1d' branched-chain/kaks/aeru/mega/pseudom_auer-braB_dN-dS.tsv
-perl -ne 'chomp;($id,$name)=(split/\t/,$_,2)[0,1];@data=(split/\t/,$name);$num=join"\n",@data;print"$num\n";'  branched-chain/kaks/aeru/mega/pseudom_auer-braB_dN-dS.tsv | sed 's/NA//g' | sed  '/^\s*$/d' | perl -alne '$num=$F[0];$name=A;print"$num\t$name";' | sed '1idnds\tfrequency' >branched-chain/kaks/aeru/mega/mega_braB_dnds.tsv
+perl -ne 'chomp;($id,$name)=(split/\t/,$_,2)[0,1];@data=(split/\t/,$name);$num=join"\n",@data;print"$num\n";'  branched-chain/kaks/aeru/mega/pseudom_auer-braB_dN-dS.tsv | sed 's/NA//g' | sed  '/^\s*$/d' | perl -alne '$num=$F[0];$name=braB;print"$num\t$name";' | sed '1idnds\tfrequency' >branched-chain/kaks/aeru/mega/mega_braB_dnds.tsv
 #计算braB的dn(70500)
 sed -i '1d' branched-chain/kaks/aeru/mega/pseudom_auer-braB_dN.tsv
 perl -ne 'chomp;($id,$name)=(split/\t/,$_,2)[0,1];@data=(split/\t/,$name);$num=join"\n",@data;print"$num\n";' branched-chain/kaks/aeru/mega/pseudom_auer-braB_dN.tsv  |
@@ -453,10 +384,10 @@ mean(data1)  # 0.02042794
 std.error(data1) # 0.0002058705
 
 
-#计算braZ的dn/ds
+#计算braZ的dn/ds(76720)
 sed -i '1d' branched-chain/kaks/aeru/mega/pseudom_auer-braZ_dN-dS.tsv
 perl -ne 'chomp;($id,$name)=(split/\t/,$_,2)[0,1];@data=(split/\t/,$name);$num=join"\n",@data;print"$num\n";' branched-chain/kaks/aeru/mega/pseudom_auer-braZ_dN-dS.tsv  |
-sed 's/NA//g' | sed  '/^\s*$/d' | perl -alne '$num=$F[0];$name=B;print"$num\t$name";'  >branched-chain/kaks/aeru/mega/mega_braZ_dnds.tsv
+sed 's/NA//g' | sed  '/^\s*$/d' | perl -alne '$num=$F[0];$name=braZ;print"$num\t$name";'  >branched-chain/kaks/aeru/mega/mega_braZ_dnds.tsv
 #计算braZ的dn(79003)
 sed -i '1d' branched-chain/kaks/aeru/mega/pseudom_auer-braZ_dN.tsv
 perl -ne 'chomp;($id,$name)=(split/\t/,$_,2)[0,1];@data=(split/\t/,$name);$num=join"\n",@data;print"$num\n";' branched-chain/kaks/aeru/mega/pseudom_auer-braZ_dN.tsv  |
@@ -478,13 +409,183 @@ data1<-data$V1
 mean(data1)  # 0.05826713
 std.error(data1) # 0.0004722907
 
-#合并braB和braZ
-sed -i 's/B/braZ/g' branched-chain/kaks/aeru/mega/mega_braZ_dnds.tsv
-sed -i 's/A/braB/g' branched-chain/kaks/aeru/mega/mega_braB_dnds.tsv
+#合并braB和braZ 141389
 cat branched-chain/kaks/aeru/mega/mega_braB_dnds.tsv branched-chain/kaks/aeru/mega/mega_braZ_dnds.tsv >branched-chain/kaks/aeru/mega/mega_picture.tsv
 #plotr画图
 plotr hist --xl dN/dS --yl Frequency -g 2 --bins 20 --xmm -0.1,1.0 --ymm 0,0.5 -p branched-chain/kaks/aeru/mega/mega_picture.tsv
+#查看braB和braZ的dnds为0的数量，方便判断矩形颜色
+ cat  branched-chain/kaks/aeru/mega/mega_picture.tsv | grep -v "dnds" | tsv-filter --le 1:0.1 | grep "braB" | wc -l #19659
+ cat branched-chain/kaks/aeru/mega/mega_picture.tsv | grep -v "dnds" | tsv-filter --le 1:0.1 | grep "braZ" | wc -l #59071
+
 ```
+
+
+## 5.4提取临床环境的序列，非临床环境的序列
+```bash
+cd ~/data/Pseudomonas
+mkdir -p branched-chain/kaks/biosample
+wc -l biosample/biosample_env_anno.tsv  #391
+#查看生境为临床的铜绿菌株数
+cat biosample/biosample_env_anno.tsv | grep "clinical" | wc -l #334
+#生境为临床的铜绿菌株蛋白 660
+cat branched-chain/branched-chain_minevalue.pfam.tsv | cut -f 1 | grep -f <(cat biosample/biosample_env_anno.tsv | grep "clinical" | cut -f 2) >branched-chain/kaks/biosample/biosample_clincal_pro.tsv
+#提取对应的cds序列名字661
+faops size branched-chain/kaks/aeru/branched-chain.CDS.fa | cut -f 1  | grep -f <(perl -alne 's/\_([W|N]P)/\_cds\_$1/;print"$_";' branched-chain/kaks/biosample/biosample_clincal_pro.tsv) >branched-chain/kaks/biosample/biosample_clincal_cds.tsv
+#簇1braB的序列数376
+wc -l branched-chain/kaks/aeru/branched-chain_cluster1.cds.tsv
+#簇2braZ的序列数398
+wc -l branched-chain/kaks/aeru/branched-chain_cluster2.cds.tsv
+#提取生境为临床的braB的cds序列 321
+cat branched-chain/kaks/aeru/branched-chain_cluster1.cds.tsv | grep -f branched-chain/kaks/biosample/biosample_clincal_cds.tsv | wc -l 
+faops some branched-chain/kaks/aeru/branched-chain.CDS.fa <(cat branched-chain/kaks/aeru/branched-chain_cluster1.cds.tsv | grep -f branched-chain/kaks/biosample/biosample_clincal_cds.tsv ) branched-chain/kaks/biosample/biosample_clincal_braB.fa #321
+#提取生境为临床的braZ的cds序列 340
+cat branched-chain/kaks/aeru/branched-chain_cluster2.cds.tsv | grep -f branched-chain/kaks/biosample/biosample_clincal_cds.tsv | wc -l 
+faops some branched-chain/kaks/aeru/branched-chain.CDS.fa <(cat branched-chain/kaks/aeru/branched-chain_cluster2.cds.tsv | grep -f branched-chain/kaks/biosample/biosample_clincal_cds.tsv ) branched-chain/kaks/biosample/biosample_clincal_braZ.fa #340
+
+#生境为非临床的铜绿菌株数 
+cat biosample/biosample_env_anno.tsv | grep -v "unknow" | grep -v "clinical" | wc -l #42
+#生境为非临床的铜绿蛋白
+cat branched-chain/branched-chain_minevalue.pfam.tsv | cut -f 1| grep -f <(cat biosample/biosample_env_anno.tsv | grep -v "unknow" | grep -v "clinical" | cut -f 2) >branched-chain/kaks/biosample/biosample_other_pro.tsv   #84
+#提取对应的cds序列名字84
+faops size branched-chain/kaks/aeru/branched-chain.CDS.fa | cut -f 1  | grep -f <(perl -alne 's/\_([W|N]P)/\_cds\_$1/;print"$_";' branched-chain/kaks/biosample/biosample_other_pro.tsv) >branched-chain/kaks/biosample/biosample_other_cds.tsv
+#簇1braB的序列数376
+wc -l branched-chain/kaks/aeru/branched-chain_cluster1.cds.tsv
+#簇2braZ的序列数398
+wc -l branched-chain/kaks/aeru/branched-chain_cluster2.cds.tsv
+#提取生境为非临床的braB的cds序列 41
+cat branched-chain/kaks/aeru/branched-chain_cluster1.cds.tsv | grep -f branched-chain/kaks/biosample/biosample_other_cds.tsv | wc -l 
+faops some branched-chain/kaks/aeru/branched-chain.CDS.fa <(cat branched-chain/kaks/aeru/branched-chain_cluster1.cds.tsv | grep -f branched-chain/kaks/biosample/biosample_other_cds.tsv ) branched-chain/kaks/biosample/biosample_other_braB.fa #41
+#提取生境为非临床的braZ的cds序列 43
+cat branched-chain/kaks/aeru/branched-chain_cluster2.cds.tsv | grep -f branched-chain/kaks/biosample/biosample_other_cds.tsv | wc -l 
+faops some branched-chain/kaks/aeru/branched-chain.CDS.fa <(cat branched-chain/kaks/aeru/branched-chain_cluster2.cds.tsv | grep -f branched-chain/kaks/biosample/biosample_other_cds.tsv ) branched-chain/kaks/biosample/biosample_other_braZ.fa #43
+```
+
+## 5.5 使用mega计算铜绿假单胞菌临床环境的braB和braZ，非临床环境的braB和braZ的dN和dS
+```bash
+cd ~/data/Pseudomonas
+mkdir -p branched-chain/kaks/biosample
+#生境为临床的
+#计算braB的dn/ds(47433)
+sed -i '1d' branched-chain/kaks/biosample/clinical_braB_dnds.tsv
+perl -ne 'chomp;($id,$name)=(split/\t/,$_,2)[0,1];@data=(split/\t/,$name);$num=join"\n",@data;print"$num\n";'  branched-chain/kaks/biosample/clinical_braB_dnds.tsv | sed 's/NA//g' | sed  '/^\s*$/d' | perl -alne '$num=$F[0];$name=braB;print"$num\t$name";' | sed '1idnds\tfrequency' >branched-chain/kaks/biosample/mega_clinical_braB_dnds.tsv
+
+#计算braZ的dn/ds(55652)
+sed -i '1d' branched-chain/kaks/biosample/clinical_braZ_dnds.tsv
+perl -ne 'chomp;($id,$name)=(split/\t/,$_,2)[0,1];@data=(split/\t/,$name);$num=join"\n",@data;print"$num\n";'  branched-chain/kaks/biosample/clinical_braZ_dnds.tsv | sed 's/NA//g' | sed  '/^\s*$/d' | perl -alne '$num=$F[0];$name=braZ;print"$num\t$name";' | sed '1idnds\tfrequency' >branched-chain/kaks/biosample/mega_clinical_braZ_dnds.tsv
+
+#合并braB和braZ 103085
+cat branched-chain/kaks/biosample/mega_clinical_braB_dnds.tsv  branched-chain/kaks/biosample/mega_clinical_braZ_dnds.tsv >branched-chain/kaks/biosample/mega_clinical.picture.tsv
+#plotr画图
+plotr hist --xl dN/dS --yl Frequency -g 2 --bins 20 --xmm -0.1,1.0 --ymm 0,0.5 -p branched-chain/kaks/biosample/mega_clinical.picture.tsv
+#查看braB和braZ的dnds为0的数量，方便判断矩形颜色
+ cat  branched-chain/kaks/biosample/mega_clinical.picture.tsv | grep -v "dnds" | tsv-filter --le 1:0.1 | grep "braB" | wc -l #14260
+ cat  branched-chain/kaks/biosample/mega_clinical.picture.tsv | grep -v "dnds" | tsv-filter --le 1:0.1 | grep "braZ" | wc -l #42609
+
+
+#计算braB的dn(51360)
+sed -i '1d' branched-chain/kaks/biosample/clinical_braB_dn.tsv
+perl -ne 'chomp;($id,$name)=(split/\t/,$_,2)[0,1];@data=(split/\t/,$name);$num=join"\n",@data;print"$num\n";' branched-chain/kaks/biosample/clinical_braB_dn.tsv | sed 's/NA//g' | sed  '/^\s*$/d' >branched-chain/kaks/biosample/mega_clinical_braB_dn.tsv
+#计算braB的ds(51360)
+sed -i '1d' branched-chain/kaks/biosample/clinical_braB_ds.tsv
+perl -ne 'chomp;($id,$name)=(split/\t/,$_,2)[0,1];@data=(split/\t/,$name);$num=join"\n",@data;print"$num\n";' branched-chain/kaks/biosample/clinical_braB_ds.tsv | sed 's/NA//g' | sed  '/^\s*$/d' >branched-chain/kaks/biosample/mega_clinical_braB_ds.tsv
+#查看braB的dn的平均值和平均值标准误差
+library(plotrix)
+setwd("~/data/Pseudomonas")
+data<-read.table("branched-chain/kaks/biosample/mega_clinical_braB_dn.tsv")
+data1<-data$V1
+mean(data1)  # 0.002160744
+std.error(data1) # 0.00001095158
+#查看braB的ds的平均值和平均值标准误差
+data<-read.table("branched-chain/kaks/biosample/mega_clinical_braB_ds.tsv")
+data1<-data$V1
+mean(data1)  # 0.01856531
+std.error(data1) #0.0002155396
+
+#计算braZ的dn(57630)
+sed -i '1d' branched-chain/kaks/biosample/clinical_braZ_dn.tsv
+perl -ne 'chomp;($id,$name)=(split/\t/,$_,2)[0,1];@data=(split/\t/,$name);$num=join"\n",@data;print"$num\n";' branched-chain/kaks/biosample/clinical_braZ_dn.tsv | sed 's/NA//g' | sed  '/^\s*$/d' >branched-chain/kaks/biosample/mega_clinical_braZ_dn.tsv
+#计算braZ的ds(57630)
+sed -i '1d' branched-chain/kaks/biosample/clinical_braZ_ds.tsv
+perl -ne 'chomp;($id,$name)=(split/\t/,$_,2)[0,1];@data=(split/\t/,$name);$num=join"\n",@data;print"$num\n";' branched-chain/kaks/biosample/clinical_braZ_ds.tsv | sed 's/NA//g' | sed  '/^\s*$/d' >branched-chain/kaks/biosample/mega_clinical_braZ_ds.tsv
+#查看braZ的dn的平均值和平均值标准误差
+library(plotrix)
+setwd("~/data/Pseudomonas")
+data<-read.table("branched-chain/kaks/biosample/mega_clinical_braZ_dn.tsv")
+data1<-data$V1
+mean(data1)  # 0.01098205
+std.error(data1) # 0.0001506622
+#查看braZ的ds的平均值和平均值标准误差
+data<-read.table("branched-chain/kaks/biosample/mega_clinical_braZ_ds.tsv")
+data1<-data$V1
+mean(data1)  # 0.05722712
+std.error(data1) #0.0005527106
+
+```
+
+
+```bash
+#生境为非临床的
+#计算braB的dn/ds(696)
+sed -i '1d' branched-chain/kaks/biosample/other_braB_dnds.tsv
+perl -ne 'chomp;($id,$name)=(split/\t/,$_,2)[0,1];@data=(split/\t/,$name);$num=join"\n",@data;print"$num\n";'  branched-chain/kaks/biosample/other_braB_dnds.tsv | sed 's/NA//g' | sed  '/^\s*$/d' | perl -alne '$num=$F[0];$name=braB;print"$num\t$name";' | sed '1idnds\tfrequency' >branched-chain/kaks/biosample/mega_other_braB_dnds.tsv
+
+#计算braZ的dn/ds(877)
+sed -i '1d' branched-chain/kaks/biosample/other_braZ_dnds.tsv
+perl -ne 'chomp;($id,$name)=(split/\t/,$_,2)[0,1];@data=(split/\t/,$name);$num=join"\n",@data;print"$num\n";'  branched-chain/kaks/biosample/other_braZ_dnds.tsv | sed 's/NA//g' | sed  '/^\s*$/d' | perl -alne '$num=$F[0];$name=braZ;print"$num\t$name";' >branched-chain/kaks/biosample/mega_other_braZ_dnds.tsv
+
+#合并braB和braZ 1574
+cat branched-chain/kaks/biosample/mega_other_braB_dnds.tsv  branched-chain/kaks/biosample/mega_other_braZ_dnds.tsv >branched-chain/kaks/biosample/mega_other.picture.tsv
+#查看braB和braZ的dnds为0的数量，方便判断矩形颜色
+ cat  branched-chain/kaks/biosample/mega_other.picture.tsv | grep -v "dnds" | tsv-filter --le 1:0.1 | grep "braB" | wc -l #212
+ cat  branched-chain/kaks/biosample/mega_other.picture.tsv | grep -v "dnds" | tsv-filter --le 1:0.1 | grep "braZ" | wc -l #710
+#plotr画图
+plotr hist --xl dN/dS --yl Frequency  -g 2 --bins 20 --xmm -0.1,1.0 --ymm 0,0.5 -p branched-chain/kaks/biosample/mega_other.picture.tsv
+
+
+#计算braB的dn(820)
+sed -i '1d' branched-chain/kaks/biosample/other_braB_dn.tsv
+perl -ne 'chomp;($id,$name)=(split/\t/,$_,2)[0,1];@data=(split/\t/,$name);$num=join"\n",@data;print"$num\n";' branched-chain/kaks/biosample/other_braB_dn.tsv | sed 's/NA//g' | sed  '/^\s*$/d' >branched-chain/kaks/biosample/mega_other_braB_dn.tsv
+#计算braB的ds(820)
+sed -i '1d' branched-chain/kaks/biosample/other_braB_ds.tsv
+perl -ne 'chomp;($id,$name)=(split/\t/,$_,2)[0,1];@data=(split/\t/,$name);$num=join"\n",@data;print"$num\n";' branched-chain/kaks/biosample/other_braB_ds.tsv | sed 's/NA//g' | sed  '/^\s*$/d' >branched-chain/kaks/biosample/mega_other_braB_ds.tsv
+#查看braB的dn的平均值和平均值标准误差
+library(plotrix)
+setwd("~/data/Pseudomonas")
+data<-read.table("branched-chain/kaks/biosample/mega_other_braB_dn.tsv")
+data1<-data$V1
+mean(data1)  # 0.003035082
+std.error(data1) # 0.0001411965
+#查看braB的ds的平均值和平均值标准误差
+data<-read.table("branched-chain/kaks/biosample/mega_other_braB_ds.tsv")
+data1<-data$V1
+mean(data1)  # 0.03932062
+std.error(data1) #0.003167266
+
+#计算braZ的dn(903)
+sed -i '1d' branched-chain/kaks/biosample/other_braZ_dn.tsv
+perl -ne 'chomp;($id,$name)=(split/\t/,$_,2)[0,1];@data=(split/\t/,$name);$num=join"\n",@data;print"$num\n";' branched-chain/kaks/biosample/other_braZ_dn.tsv | sed 's/NA//g' | sed  '/^\s*$/d' >branched-chain/kaks/biosample/mega_other_braZ_dn.tsv
+#计算braZ的ds(903)
+sed -i '1d' branched-chain/kaks/biosample/other_braZ_ds.tsv
+perl -ne 'chomp;($id,$name)=(split/\t/,$_,2)[0,1];@data=(split/\t/,$name);$num=join"\n",@data;print"$num\n";' branched-chain/kaks/biosample/other_braZ_ds.tsv | sed 's/NA//g' | sed  '/^\s*$/d' >branched-chain/kaks/biosample/mega_other_braZ_ds.tsv
+#查看braZ的dn的平均值和平均值标准误差
+library(plotrix)
+setwd("~/data/Pseudomonas")
+data<-read.table("branched-chain/kaks/biosample/mega_other_braZ_dn.tsv")
+data1<-data$V1
+mean(data1)  # 0.008649314
+std.error(data1) # 0.00100089
+#查看braZ的ds的平均值和平均值标准误差
+data<-read.table("branched-chain/kaks/biosample/mega_other_braZ_ds.tsv")
+data1<-data$V1
+mean(data1)  # 0.05772698
+std.error(data1) #0.003851761
+```
+
+
+
+
+
+
 
 # 6. 使用paraAT2和caculator2计算其他假单胞菌的kaks(待定)
 * Pseudomonas chlororaphis 绿刺假单胞菌，在农业和园艺中用作土壤接种剂的细菌,可以作为生物防治剂,通过生产吩嗪类抗生素来对抗某些真菌植物病原体
@@ -1014,6 +1115,67 @@ python  fetch_gbk.py -i branched-chain/collinearity/pseudomons_two_clade/clade2/
 python  fetch_gbk.py -i branched-chain/collinearity/pseudomons_two_clade/clade2/Pseudom_kna_GCF_009911755_1.gb -e 10000 -l brnQ -o branched-chain/collinearity/pseudomons_two_clade/clade2/Pseudom_kna_GCF_009911755_1
 python  fetch_gbk.py -i branched-chain/collinearity/pseudomons_two_clade/clade2/Pseudom_lal_GCF_008807375_1.gb -e 10000 -l brnQ -o branched-chain/collinearity/pseudomons_two_clade/clade2/Pseudom_lal_GCF_008807375_1
 ```
+
+
+## 7.6查看假单胞菌属的基因树两个clade的物种分别与braZ上游基因PA1064的共线性
+```bash
+cd ~/data/Pseudomonas
+mkdir -p branched-chain/collinearity/pseudomons_two_clade/PA1964
+#clade1的菌株名
+branched-chain/collinearity/pseudomons_two_clade/clade1/clade1_species.tsv
+#clade1菌株的gbff文件
+ls -lh branched-chain/collinearity/pseudomons_two_clade/clade1/*.gbff
+###注意clade1中的Pseudom_alcalig_GCF_001597285_1和Pseudom_oti_GCF_011397855_1没有gbff文件
+ls -lh branched-chain/collinearity/pseudomons_two_clade/clade1/*.gb
+
+#clade1的菌株名
+branched-chain/collinearity/pseudomons_two_clade/clade2/clade2_species.tsv
+#clade1菌株的gbff文件
+ls -lh branched-chain/collinearity/pseudomons_two_clade/clade2/*.gbff
+###注意clade1中的Pseudom_alcalig_GCF_001597285_1和Pseudom_oti_GCF_011397855_1没有gbff文件
+ls -lh branched-chain/collinearity/pseudomons_two_clade/clade2/*.gb
+
+#查看10个菌株中PA1964对应的名字
+Pseudom_aeru_PAO1                      PA1964        
+Pseudom_men_S5_2_GCF_000733715_2       DW68_RS10725   WP_016486587.1
+Pseudom_stu_GCF_019704535_1            PszF2a_RS10410   WP_003449774.1
+Pseudom_fluo_GCF_900215245_1           CPH89_RS24310   WP_073637695.1
+Pseudom_puti_NBRC_14164_GCF_000412675_1  PP4_RS14490   WP_016486587.1
+Pseudom_syr_GCF_016694755_2             JJQ97_RS13305  WP_003395611.1
+
+Pseudom_alcalig_GCF_001597285_1        A0T30_RS12715  WP_016486587.1
+Pseudom_citro_GCF_001586155_1          PcP3B5_RS11985  WP_061561347.1
+Pseudom_kna_GCF_009911755_1          GVI47_RS15020      WP_043252681.1
+Pseudom_lal_GCF_008807375_1          FXN65_RS10545    WP_003449774.1
+Pseudom_oti_GCF_011397855_1          PotMrB4_RS09930  WP_044409009.1
+
+#截取PAO1的gbk
+cd /mnt/d/pseudomonas_HGT/branched_easyfig/two_clade_50k
+python  fetch_gbk.py -i Pseudom_aeru_PAO1.gbff -e 50000 -l PA1964 -o PA1094
+
+#截取其他菌株gbff文件的gbk  
+python  fetch_gbk.py -i Pseudom_men_S5_2_GCF_000733715_2.gbff -e 50000 -l DW68_RS10725 -o PA1964
+python  fetch_gbk.py -i Pseudom_stu_GCF_019704535_1.gbff -e 50000 -l PszF2a_RS10410 -o PA1964
+python  fetch_gbk.py -i Pseudom_fluo_GCF_900215245_1.gbff -e 50000 -l  CPH89_RS24310 -o PA1964
+python  fetch_gbk.py -i Pseudom_puti_NBRC_14164_GCF_000412675_1.gbff -e 50000 -l PP4_RS14490 -o PA1964
+python  fetch_gbk.py -i Pseudom_syr_GCF_016694755_2.gbff -e 50000 -l JJQ97_RS13305 -o PA1964
+
+#截取其他菌株gb文件的gbk  
+python  fetch_gbk.py -i Pseudom_alcalig_GCF_001597285_1.gb -e 50000 -l A0T30_RS12715 -o PA1964
+python  fetch_gbk.py -i Pseudom_citro_GCF_001586155_1.gb -e 50000 -l PcP3B5_RS11985 -o PA1964
+python  fetch_gbk.py -i Pseudom_kna_GCF_009911755_1.gb -e 50000 -l  GVI47_RS15020 -o PA1964
+python  fetch_gbk.py -i Pseudom_lal_GCF_008807375_1.gb -e 50000 -l FXN65_RS10545 -o PA1964
+python  fetch_gbk.py -i Pseudom_oti_GCF_011397855_1.gb -e 50000 -l PotMrB4_RS09930 -o PA1964
+
+
+```
+
+
+
+
+
+
+
 
 * other
 ```bash
