@@ -18,7 +18,7 @@
   - [5.3使用mega计算铜绿假单胞菌的braz和braB的dn/ds](#53使用mega计算铜绿假单胞菌的braz和brab的dnds)
   - [5.4提取临床环境的序列，非临床环境的序列](#54提取临床环境的序列非临床环境的序列)
   - [5.5 使用mega计算铜绿假单胞菌临床环境的braB和braZ，非临床环境的braB和braZ的dN和dS](#55-使用mega计算铜绿假单胞菌临床环境的brab和braz非临床环境的brab和braz的dn和ds)
-- [6. 使用paraAT2和caculator2计算其他假单胞菌的kaks(待定)](#6-使用paraat2和caculator2计算其他假单胞菌的kaks待定)
+- [6. 使用mega计算其他假单胞菌的kaks](#6-使用mega计算其他假单胞菌的kaks)
   - [6.1分别提取branched在绿刺假单胞菌中的CDS序列](#61分别提取branched在绿刺假单胞菌中的cds序列)
   - [6.2分别提取branched在丁香假单胞菌中的CDS序列](#62分别提取branched在丁香假单胞菌中的cds序列)
   - [6.3分别提取branched在荧光假单胞菌中的CDS序列](#63分别提取branched在荧光假单胞菌中的cds序列)
@@ -43,7 +43,7 @@
 cd ~/data/Pseudomonas
 mkdir -p ~/data/Pseudomonas/branched-chain/kaks
 cat branched-chain/branched-chain_hmmscan_copy.pfam.tsv | tsv-filter --ge 3:2 | grep "Pseudom_aeru" | cut -f 1 >branched-chain/kaks/branched-chain.Pseudom_aeru.two.copy.tsv
-cat branched-chain/branched-chain_minevalue.tsv | grep -f branched-chain/kaks/branched-chain.Pseudom_aeru.two.copy.tsv |
+cat branched-chain/branched-chain_minevalue.pfam.tsv | grep -f branched-chain/kaks/branched-chain.Pseudom_aeru.two.copy.tsv |
 cut -f 1 >branched-chain/kaks/branched-chain.Pseudom_aeru.protein.tsv
 #提取铜绿假单胞菌中branced的两个拷贝蛋白序列(764)
 faops some PROTEINS/all.replace.fa branched-chain/kaks/branched-chain.Pseudom_aeru.protein.tsv branched-chain/kaks/branched-chain.Pseudom_aeru.protein.fa
@@ -82,7 +82,7 @@ rm -rf branched-chain/kaks/branched-chain_cluster2.msh branched-chain/kaks/branc
 ## 1.2提取branched在铜绿假单胞菌中的两个CDS    
 ```BASH
 #将branched-chain_minevalue.tsv结果改成replace文件格式(2140)
-cut -f 1 branched-chain/branched-chain_minevalue.tsv | tsv-join -d 1 -f branched-chain/branched.tigerfam.replace.tsv -k 2 --append-fields 1 \
+cut -f 1 branched-chain/branched-chain_minevalue.pfam.tsv | tsv-join -d 1 -f branched-chain/branched.tigerfam.replace.tsv -k 2 --append-fields 1 \
 >branched-chain/kaks/branched.WP.tsv
 #提取含有branched蛋白的所有菌株中的CDS名称(2142)
 faops size CDS/all.cds.fa | grep -f <(cat branched-chain/kaks/branched.WP.tsv | cut -f 2 ) >branched-chain/kaks/branched-chain.CDS.tsv
@@ -278,7 +278,7 @@ cd ~/data/Pseudomonas
 #提取所有的铜绿假单胞菌的单双拷贝蛋白序列(773)
 mkdir -p ~/data/Pseudomonas/branched-chain/kaks/aeru
 cat branched-chain/branched-chain_hmmscan_copy.pfam.tsv | grep "Pseudom_aeru" | cut -f 1 >branched-chain/kaks/aeru/branched-chain.Pseudom_aeru.two.copy.tsv
-faops some PROTEINS/all.replace.fa <(cat branched-chain/branched-chain_minevalue.tsv |grep -f branched-chain/kaks/aeru/branched-chain.Pseudom_aeru.two.copy.tsv | cut -f 1 ) branched-chain/kaks/aeru/branched-chain.Pseudom_aeru.protein.fa
+faops some PROTEINS/all.replace.fa <(cat branched-chain/branched-chain_minevalue.pfam.tsv |grep -f branched-chain/kaks/aeru/branched-chain.Pseudom_aeru.two.copy.tsv | cut -f 1 ) branched-chain/kaks/aeru/branched-chain.Pseudom_aeru.protein.fa
 #将PAO1中的braB和braZ分别作为簇1和簇2的参考序列
 faops some branched-chain/kaks/aeru/branched-chain.Pseudom_aeru.protein.fa <(faops size branched-chain/kaks/aeru/branched-chain.Pseudom_aeru.protein.fa | grep "PAO1" | grep -v "GCF" | cut -f 1 | head -n 1) branched-chain/kaks/aeru/branched-chain_refer1.fa
 faops some branched-chain/kaks/aeru/branched-chain.Pseudom_aeru.protein.fa <(faops size branched-chain/kaks/aeru/branched-chain.Pseudom_aeru.protein.fa | grep "PAO1" | grep -v "GCF" | cut -f 1 | tail -n 1) branched-chain/kaks/aeru/branched-chain_refer2.fa
@@ -316,14 +316,6 @@ blastp -query branched-chain/blast/cluster2.fa -out branched-chain/blast/cluster
 #统计braZ与braB之间相似性 (149250)
 blastp -query branched-chain/blast/cluster1.fa -out branched-chain/blast/cluster1_cluster2.tsv -db branched-chain/blast/cluster2 -outfmt 6 -evalue 1e-5
 
-#画图的数据格式
-type    identity 
-braB_braB  i1
-braB_braB  i2
-braB_braB  i3
-braZ_braZ  i1
-braZ_braZ  i2
-
 cat branched-chain/blast/cluster1_cluster1.tsv | perl -alne '$identity=(split/\t/,$_)[2];$name="braB_braB";print"$name\t$identity";' | sed '1itype\tidentity' >branched-chain/blast/braB_braB.tsv
 cat branched-chain/blast/cluster2_cluster2.tsv | perl -alne '$identity=(split/\t/,$_)[2];$name="braZ_braZ";print"$name\t$identity";' >branched-chain/blast/braZ_braZ.tsv
 cat branched-chain/blast/cluster1_cluster2.tsv | perl -alne '$identity=(split/\t/,$_)[2];$name="braB_braZ";print"$name\t$identity";' >branched-chain/blast/braB_braZ.tsv
@@ -339,7 +331,7 @@ ggsave('pse_aeru_identity.png', p,dpi = 480, width=8, height=6)
 ```BASH
 cd ~/data/Pseudomonas
 #将branched-chain_minevalue.tsv结果改成replace文件格式(2140)
-cut -f 1 branched-chain/branched-chain_minevalue.tsv | tsv-join -d 1 -f branched-chain/branched.tigerfam.replace.tsv -k 2 --append-fields 1 \
+cut -f 1 branched-chain/branched-chain_minevalue.pfam.tsv | tsv-join -d 1 -f branched-chain/branched.tigerfam.replace.tsv -k 2 --append-fields 1 \
 >branched-chain/kaks/aeru/branched.WP.tsv
 #提取含有branched蛋白的所有菌株中的CDS名称(2142)
 faops size CDS/all.cds.fa | grep -f <(cat branched-chain/kaks/aeru/branched.WP.tsv | cut -f 2 ) >branched-chain/kaks/aeru/branched-chain.CDS.tsv
@@ -581,13 +573,7 @@ mean(data1)  # 0.05772698
 std.error(data1) #0.003851761
 ```
 
-
-
-
-
-
-
-# 6. 使用paraAT2和caculator2计算其他假单胞菌的kaks(待定)
+# 6. 使用mega计算其他假单胞菌的kaks
 * Pseudomonas chlororaphis 绿刺假单胞菌，在农业和园艺中用作土壤接种剂的细菌,可以作为生物防治剂,通过生产吩嗪类抗生素来对抗某些真菌植物病原体
 * Pseudomonas putida 恶臭假单胞菌 生活在土壤中，多样化代谢可以用于生物修复，生物降解，生物防治
 * Pseudomonas syringae 丁香假单胞菌是一种具有极鞭毛的杆状革兰氏阴性细菌。作为一种植物病原体，可以感染多种物种
@@ -599,7 +585,7 @@ std.error(data1) #0.003851761
 #提取绿刺假单胞菌的单个拷贝的蛋白名称(59)
 cd ~/data/Pseudomonas
 mkdir -p ~/data/Pseudomonas/branched-chain/kaks/chl
-cat branched-chain/branched-chain_minevalue.tsv | grep -f <(cat branched-chain/branched-chain_hmmscan_copy.pfam.tsv | grep "Pseudom_chl" | cut -f 1 ) |  cut -f 1 >branched-chain/kaks/chl/branched-chain.Pseudom_chl.protein.tsv
+cat branched-chain/branched-chain_minevalue.pfam.tsv | grep -f <(cat branched-chain/branched-chain_hmmscan_copy.pfam.tsv | grep "Pseudom_chl" | cut -f 1 ) |  cut -f 1 >branched-chain/kaks/chl/branched-chain.Pseudom_chl.protein.tsv
 #提取绿刺假单胞菌中branced的cds名称和序列（59）
 faops size branched-chain/kaks/aeru/branched-chain.CDS.fa | cut -f 1  | grep -f <(perl -alne 's/\_([W|N]P)/\_cds\_$1/;print"$_";' branched-chain/kaks/chl/branched-chain.Pseudom_chl.protein.tsv) >branched-chain/kaks/chl/branched-chain_pseudom_chl.cds.tsv
 faops some branched-chain/kaks/aeru/branched-chain.CDS.fa branched-chain/kaks/chl/branched-chain_pseudom_chl.cds.tsv  branched-chain/kaks/chl/branched-chain_pseudom_chl.cds.fa
@@ -640,7 +626,7 @@ plotr hist --xl dN/dS --yl Frequency  --bins 20 --xmm -0.1,1.0 --ymm 0,1 -p bran
 #提取丁香假单胞菌的单个拷贝的蛋白名称(40)
 cd ~/data/Pseudomonas
 mkdir -p ~/data/Pseudomonas/branched-chain/kaks/syr
-cat branched-chain/branched-chain_minevalue.tsv | grep -f <(cat branched-chain/branched-chain_hmmscan_copy.pfam.tsv | grep "Pseudom_syr" | cut -f 1 ) |  cut -f 1 >branched-chain/kaks/syr/branched-chain.Pseudom_syr.protein.tsv
+cat branched-chain/branched-chain_minevalue.pfam.tsv | grep -f <(cat branched-chain/branched-chain_hmmscan_copy.pfam.tsv | grep "Pseudom_syr" | cut -f 1 ) |  cut -f 1 >branched-chain/kaks/syr/branched-chain.Pseudom_syr.protein.tsv
 #提取丁香假单胞菌中branced的cds名称和序列（40）
 faops size branched-chain/kaks/aeru/branched-chain.CDS.fa | cut -f 1  | grep -f <(perl -alne 's/\_([W|N]P)/\_cds\_$1/;print"$_";' branched-chain/kaks/syr/branched-chain.Pseudom_syr.protein.tsv) >branched-chain/kaks/syr/branched-chain_pseudom_syr.cds.tsv
 faops some branched-chain/kaks/aeru/branched-chain.CDS.fa branched-chain/kaks/syr/branched-chain_pseudom_syr.cds.tsv  branched-chain/kaks/syr/branched-chain_pseudom_syr.cds.fa
@@ -681,7 +667,7 @@ plotr hist --xl dN/dS --yl Frequency  --bins 20 --xmm -0.1,1.0 --ymm 0,1 -p bran
 #提取荧光假单胞菌的单个拷贝的蛋白名称(38)
 cd ~/data/Pseudomonas
 mkdir -p ~/data/Pseudomonas/branched-chain/kaks/flu
-cat branched-chain/branched-chain_minevalue.tsv | grep -f <(cat branched-chain/branched-chain_hmmscan_copy.pfam.tsv | grep "Pseudom_flu" | cut -f 1 ) |  cut -f 1 >branched-chain/kaks/flu/branched-chain.Pseudom_flu.protein.tsv
+cat branched-chain/branched-chain_minevalue.pfam.tsv | grep -f <(cat branched-chain/branched-chain_hmmscan_copy.pfam.tsv | grep "Pseudom_flu" | cut -f 1 ) |  cut -f 1 >branched-chain/kaks/flu/branched-chain.Pseudom_flu.protein.tsv
 #提取荧光假单胞菌中branced的cds名称和序列（38）
 faops size branched-chain/kaks/aeru/branched-chain.CDS.fa | cut -f 1  | grep -f <(perl -alne 's/\_([W|N]P)/\_cds\_$1/;print"$_";' branched-chain/kaks/flu/branched-chain.Pseudom_flu.protein.tsv) >branched-chain/kaks/flu/branched-chain_pseudom_flu.cds.tsv
 faops some branched-chain/kaks/aeru/branched-chain.CDS.fa branched-chain/kaks/flu/branched-chain_pseudom_flu.cds.tsv  branched-chain/kaks/flu/branched-chain_pseudom_flu.cds.fa
@@ -721,7 +707,7 @@ plotr hist --xl dN/dS --yl Frequency  --bins 20 --xmm -0.1,1.0 --ymm 0,1 -p bran
 #提取恶臭假单胞菌的单个拷贝的蛋白名称(49)
 cd ~/data/Pseudomonas
 mkdir -p ~/data/Pseudomonas/branched-chain/kaks/puti
-cat branched-chain/branched-chain_minevalue.tsv | grep -f <(cat branched-chain/branched-chain_hmmscan_copy.pfam.tsv | grep "Pseudom_puti" | cut -f 1 ) |  cut -f 1 >branched-chain/kaks/puti/branched-chain.Pseudom_puti.protein.tsv
+cat branched-chain/branched-chain_minevalue.pfam.tsv | grep -f <(cat branched-chain/branched-chain_hmmscan_copy.pfam.tsv | grep "Pseudom_puti" | cut -f 1 ) |  cut -f 1 >branched-chain/kaks/puti/branched-chain.Pseudom_puti.protein.tsv
 #提取恶臭假单胞菌中branced的cds名称和序列（49）
 faops size branched-chain/kaks/aeru/branched-chain.CDS.fa | cut -f 1  | grep -f <(perl -alne 's/\_([W|N]P)/\_cds\_$1/;print"$_";' branched-chain/kaks/puti/branched-chain.Pseudom_puti.protein.tsv) >branched-chain/kaks/puti/branched-chain_pseudom_puti.cds.tsv
 faops some branched-chain/kaks/aeru/branched-chain.CDS.fa branched-chain/kaks/puti/branched-chain_pseudom_puti.cds.tsv  branched-chain/kaks/puti/branched-chain_pseudom_puti.cds.fa
@@ -762,7 +748,7 @@ plotr hist --xl dN/dS --yl Frequency  --bins 20 --xmm -0.1,1.0 --ymm 0,1 -p bran
 #提取施式假单胞菌的单个拷贝的蛋白名称(30)
 cd ~/data/Pseudomonas
 mkdir -p ~/data/Pseudomonas/branched-chain/kaks/stu
-cat branched-chain/branched-chain_minevalue.tsv | grep -f <(cat branched-chain/branched-chain_hmmscan_copy.pfam.tsv | grep "Pseudom_stu" | cut -f 1 ) |  cut -f 1 >branched-chain/kaks/stu/branched-chain.Pseudom_stu.protein.tsv
+cat branched-chain/branched-chain_minevalue.pfam.tsv | grep -f <(cat branched-chain/branched-chain_hmmscan_copy.pfam.tsv | grep "Pseudom_stu" | cut -f 1 ) |  cut -f 1 >branched-chain/kaks/stu/branched-chain.Pseudom_stu.protein.tsv
 #提取恶臭假单胞菌中branced的cds名称和序列（30）
 faops size branched-chain/kaks/aeru/branched-chain.CDS.fa | cut -f 1  | grep -f <(perl -alne 's/\_([W|N]P)/\_cds\_$1/;print"$_";' branched-chain/kaks/stu/branched-chain.Pseudom_stu.protein.tsv) >branched-chain/kaks/stu/branched-chain_pseudom_stu.cds.tsv
 faops some branched-chain/kaks/aeru/branched-chain.CDS.fa branched-chain/kaks/stu/branched-chain_pseudom_stu.cds.tsv  branched-chain/kaks/stu/branched-chain_pseudom_stu.cds.fa
@@ -965,7 +951,7 @@ python  gff_to_gbk.py Pseudom_aeru_PA1R_GCF_000496645_1.gff  Pseudom_aeru_PA1R_G
 cd ~/data/Pseudomonas
 #提取所有的铜绿假单胞菌的单拷贝蛋白序列(9)
 cat branched-chain/branched-chain_hmmscan_copy.pfam.tsv | tsv-filter --lt 3:2 | grep "Pseudom_aeru" | cut -f 1 >branched-chain/kaks/aeru/branched-chain.Pseudom_aeru.single.copy.tsv
-faops some PROTEINS/all.replace.fa <(cat branched-chain/branched-chain_minevalue.tsv |grep -f branched-chain/kaks/aeru/branched-chain.Pseudom_aeru.single.copy.tsv | cut -f 1 ) branched-chain/kaks/aeru/branched-chain.Pseudom_aeru.single.copy.fa
+faops some PROTEINS/all.replace.fa <(cat branched-chain/branched-chain_minevalue.pfam.tsv|grep -f branched-chain/kaks/aeru/branched-chain.Pseudom_aeru.single.copy.tsv | cut -f 1 ) branched-chain/kaks/aeru/branched-chain.Pseudom_aeru.single.copy.fa
 #提取上述菌株的gbk文件
 mkdir -p branched-chain/collinearity/single_pse_aeru
 for name in $(cat branched-chain/kaks/aeru/branched-chain.Pseudom_aeru.single.copy.tsv)
