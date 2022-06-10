@@ -526,7 +526,7 @@ faops size branched-chain/tree/branched-chain.Pseudom_aeru.protein.fa | wc -l
 #比对
 mafft --auto   branched-chain/tree/branched-chain.Pseudom_aeru.protein.fa > branched-chain/tree/branched-chain.Pseudom_aeru.aln.mafft.fa
 #使用iqtree2建树（超算上)773
-bsub -q mpi -n 24 -J "iq" ./iqtree2 -s branched-chain.Pseudom_aeru.aln.mafft.fa  -m MFP  --prefix branched-chain.Pseudom_aeru -T 20 -b 100
+bsub -q mpi -n 24 -J "iq" ./iqtree2 -s branched-chain.Pseudom_aeru.aln.mafft.fa  -m MFP  --prefix branched-chain.Pseudom_aeru -T 20 -B 1000 -bnni
 #改名
 mv branched-chain.Pseudom_aeru.treefile branched-chain.Pseudom_aeru.newick
 
