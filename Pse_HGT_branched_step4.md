@@ -3,9 +3,8 @@
 - [1.数据信息](#1数据信息)
   - [1.1选择基因表达量数据](#11选择基因表达量数据)
   - [1.2名词解释](#12名词解释)
-- [2.数据下载和获取](#2数据下载和获取)
-  - [2.1 编辑soft文件，保留其中的距离矩阵，删除其中含有表达量为null的菌株(由于GDS.####.soft文件时处理过的，且处理方式不均一，目前舍弃)](#21-编辑soft文件保留其中的距离矩阵删除其中含有表达量为null的菌株由于gdssoft文件时处理过的且处理方式不均一目前舍弃)
-  - [2.2下载cel文件，比如GSE8408_RAW.tar，并用RMA标准化或mas5标准化](#22下载cel文件比如gse8408_rawtar并用rma标准化或mas5标准化)
+- [2.数据下载和获取（手动下载15个数据集)](#2数据下载和获取手动下载15个数据集)
+  - [2.1处理原始数据，比如GSE8408_RAW.tar，并用RMA标准化或mas5标准化（举例)](#21处理原始数据比如gse8408_rawtar并用rma标准化或mas5标准化举例)
   - [2.3批量化处理cel文件](#23批量化处理cel文件)
 - [3.利用WGCNA包进行分析](#3利用wgcna包进行分析)
   - [3.1载入表达量数据](#31载入表达量数据)
@@ -16,24 +15,21 @@
   - [3.6层级聚类树展示各个模块](#36层级聚类树展示各个模块)
   - [3.7绘制模块之间相关性状图](#37绘制模块之间相关性状图)
   - [3.8可视化基因网络](#38可视化基因网络)
-  - [3.8导出网络用于Cytoscape](#38导出网络用于cytoscape)
+  - [3.9导出网络用于Cytoscape](#39导出网络用于cytoscape)
 - [4.直接使用R脚本运行命令（批量化)](#4直接使用r脚本运行命令批量化)
-  - [4.1拆分条件后两两组合](#41拆分条件后两两组合)
+  - [4.1拆分条件后两两组合（不能用！！！！！！）](#41拆分条件后两两组合不能用)
   - [4.2拆分条件后三三组合](#42拆分条件后三三组合)
 - [5.统计基因频率](#5统计基因频率)
-  - [5.1拆分条件后两两组合(条件拆分后两两组合，共有1600个组合，共1524个有结果文件)](#51拆分条件后两两组合条件拆分后两两组合共有1600个组合共1524个有结果文件)
+  - [5.1拆分条件后两两组合(条件拆分后两两组合，共有1600个组合，共1524个有结果文件) （不能用！！！！！！）](#51拆分条件后两两组合条件拆分后两两组合共有1600个组合共1524个有结果文件-不能用)
   - [5.2拆分条件后三三组合(条件拆分后三三组合，共有64000个组合，共56663个有结果文件)](#52拆分条件后三三组合条件拆分后三三组合共有64000个组合共56663个有结果文件)
-- [6.KEGG和GO分析](#6kegg和go分析)
-  - [6.1使用david对gene_id进行转换(方法一)](#61使用david对gene_id进行转换方法一)
-  - [6.2使用bir函数转换id](#62使用bir函数转换id)
-  - [6.3下载注释数据库](#63下载注释数据库)
-    - [6.3.1GO注释库](#631go注释库)
-    - [6.3.2KEGG注释库](#632kegg注释库)
-    - [6.3.3eggNOG注释库](#633eggnog注释库)
-  - [6.4构建非模式物种的OrgDb](#64构建非模式物种的orgdb)
-  - [6.5进行GO和KEGG富集分析ORA（Over-Representation Analysis）](#65进行go和kegg富集分析oraover-representation-analysis)
-  - [6.6进行GO和KEGG富集分析(GSEA（Gene Set Enrichment Analysis）)](#66进行go和kegg富集分析gseagene-set-enrichment-analysis)
-  - [6.7GO富集分析结果可视化](#67go富集分析结果可视化)
+- [6.KEGG和GO分析(不能用!!!!!!)](#6kegg和go分析不能用)
+  - [6.1使用david对gene_id进行转换(方法一) (不能用!!!!!!)](#61使用david对gene_id进行转换方法一-不能用)
+  - [6.2下载注释数据库 (不能用!!!!!!)](#62下载注释数据库-不能用)
+    - [6.2.1GO注释库 (不能用!!!!!!)](#621go注释库-不能用)
+    - [6.2.2KEGG注释库 (不能用!!!!!!)](#622kegg注释库-不能用)
+  - [6.3构建非模式物种的OrgDb  (不能用!!!!!!)](#63构建非模式物种的orgdb--不能用)
+  - [6.4进行GO和KEGG富集分析  (不能用!!!!!!)](#64进行go和kegg富集分析--不能用)
+  - [6.5GO富集分析结果可视化  (不能用!!!!!!)](#65go富集分析结果可视化--不能用)
 - [7.使用mclust进行聚类分析](#7使用mclust进行聚类分析)
   - [7.1mclust使用举例](#71mclust使用举例)
   - [7.2三三组合的结果文件划分bins为100然后进行mclust分析](#72三三组合的结果文件划分bins为100然后进行mclust分析)
@@ -145,20 +141,8 @@ DO enrichment analysis？
 看目标基因是否在某个疾病或某一类疾病当中富集
 
 
-
-
-
-# 2.数据下载和获取
-## 2.1 编辑soft文件，保留其中的距离矩阵，删除其中含有表达量为null的菌株(由于GDS.####.soft文件时处理过的，且处理方式不均一，目前舍弃)
-```bash
-for filename in *.soft
-do
-base=$(basename $filename .soft)
-echo $base
-cat $base.soft| grep -v "=" | grep -v "!" | grep -v "null" >$base.expression.tsv
-done
-```
-## 2.2下载cel文件，比如GSE8408_RAW.tar，并用RMA标准化或mas5标准化
+# 2.数据下载和获取（手动下载15个数据集)
+## 2.1处理原始数据，比如GSE8408_RAW.tar，并用RMA标准化或mas5标准化（举例)
 ```r
 BiocManager::install("affy")
 BiocManager::install("paeg1a.db")
@@ -193,15 +177,14 @@ for filename in *.tar
 do
 base=$(basename $filename .tar)
 echo $base
-Rscript rawdata_normalize.R  GSE2430_RAW $base
+Rscript rawdata_normalize.R $base
 done
-
 ```
 
 # 3.利用WGCNA包进行分析
 ## 3.1载入表达量数据
 ```R
-#超算安装R包 R CMD INSTALL WGCNA_1.69-81.tar.gz
+#安装R包
 install.packages("BiocManager")
 BiocManager::install("WGCNA")
 BiocManager::install("reshape2")
@@ -222,7 +205,7 @@ names(dataExpr)
 #查看数据维度 5891   10
 dim(dataExpr)
 
-#得到的datExpr一定是基因名在列，样本名在行，一定不能搞混，要不然后面的所有分析都是错的
+#得到的datExpr一定是基因名在列，样本名在行
 #去除第一列即标识符的这一列，并且将矩阵数据转置，并且转换为数据框
 dataExpr <- as.data.frame(t(dataExpr))
 #查看数据的前五列，前五行
@@ -251,7 +234,7 @@ powers = c(c(1:10), seq(from = 12, to=30, by=2))
 sft = pickSoftThreshold(dataExpr, powerVector=powers,
                         networkType=type, verbose=5)
 #一般选择函数估测的阈值(powerEstimate)作为最优值
-#挑选软阈值时存在一个很大的问题！！！！比如样本GSE10030.GSE18594.soft，由于其R2<-0.8，会将其误判为R2>+0.8,从而并不能将power定为NA，并使用经验值
+#挑选软阈值时存在一个很大的问题！！！！比如样本GSE10030.GSE18594.soft，由于其R2<-0.8，会将其误判为R2>+0.8,从而并不能将power定为NA
 #此外当R2为负值时，连通度非常大，根本不约等于100左右
 data1<-data.frame(sft$fitIndices[,1],-sign(sft$fitIndices[,3])*sft$fitIndices[,2])
 if(min(abs(data1[,2]-0.9)>0.1)){
@@ -296,7 +279,6 @@ text(sft$fitIndices[,1], sft$fitIndices[,5], labels=powers,
      cex=cex1, col="red")
 dev.off()
 ```
-
 
 ## 3.5一步法网络构建和模块识别
 * 该步骤把输入的表达矩阵的几千个基因组归类成了几十个模块。其中module grey包含的是未被分配的基因，后续研究中可以不关注该module。大体思路：计算基因间的邻接性，根据邻接性计算基因间的相似性，然后推出基因间的相异性系数，并根据此得到基因间的系统聚类树。然后按照混合动态剪切树的标准。
@@ -369,7 +351,7 @@ TOMplot(plotTOM, net$dendrograms, moduleColors,
         main = "Network heatmap plot, all genes")
 ```
 
-## 3.8导出网络用于Cytoscape
+## 3.9导出网络用于Cytoscape
 ```r
 probes = colnames(dataExpr)
 dimnames(TOM) <- list(probes, probes)
@@ -383,11 +365,12 @@ cyt = exportNetworkToCytoscape(TOM,
 ```
 
 # 4.直接使用R脚本运行命令（批量化)
-## 4.1拆分条件后两两组合
+## 4.1拆分条件后两两组合（不能用！！！！！！）
 ```bash
 cd /mnt/d/WGCNA/rma_WGCNA/
 #最后共生成16个RMA和16个MAS5文件
-#将16个数据集拆分条件并进行两两组合
+#将16个数据集拆分为40个条件
+#对40个条件进行两两组合
 
 #先对文件行列转置，方便后面提取指定行
 for filename in *.txt
@@ -427,7 +410,7 @@ done
 done
 #去除重复组合的
 #cat combine.tsv | tr "." "\t" |tsv-filter --ff-lt 1:3 | cut -f 2,4 >combine_uniq.tsv
-#不去出重复组合的
+#去除重复组合的
 cat combine.tsv | tr "." "\t" | cut -f 2,4 >combine_uniq.tsv
 #拼接文件
 for i in {1..1600}
@@ -446,19 +429,13 @@ echo $base
 Rscript WGCNA.R $base.soft
 done
 
-#批量提交命令  超算一次最多只能提交40个任务
-for filename in *.soft
-do
-base=$(basename $filename .soft)
-echo $base
-bsub -q serial -n 20 -J "DIA"  Rscript WGCNA.R $base.soft
-done
 ```
 ## 4.2拆分条件后三三组合
 ```bash
 cd /mnt/d/WGCNA/rma_WGCNA/
 #最后共生成16个RMA和16个MAS5文件
-#将16个数据集拆分条件并进行三三组合
+#手动将16个数据集拆分为40个条件，放在在目录sample_conditon2下
+#对40个条件进行三三组合
 
 #先对文件行列转置，方便后面提取指定行
 for filename in *.txt
@@ -502,7 +479,7 @@ done
 done
 done
 
-#.替换为换行符，不好去除重复的
+#.替换为换行符
 cat combine.tsv | tr "." "\t" | cut -f 2,4,6 >combine_uniq.tsv
 
 #拼接文件
@@ -523,13 +500,13 @@ echo $base
 Rscript WGCNA.R $base.soft
 done
 
-#批量提交命令  超算一次最多只能提交40个任务
+#批量提交命令 
 #把上述批量化命令写入bash脚本，然后用超算运行
-
+#超算安装R包 R CMD INSTALL WGCNA_1.69-81.tar.gz
 ```
 
 # 5.统计基因频率
-## 5.1拆分条件后两两组合(条件拆分后两两组合，共有1600个组合，共1524个有结果文件)
+## 5.1拆分条件后两两组合(条件拆分后两两组合，共有1600个组合，共1524个有结果文件) （不能用！！！！！！）
 ```bash
 cd /mnt/d/WGCNA/rma_WGCNA/condition_two_combine/result
 for filename in whole/*.soft.nodes.txt
@@ -699,11 +676,6 @@ cat PA1590.select.txt | grep -v "grey" | cut -f 1 | tsv-summarize -g 1 --count |
 cat PA1590.select.txt | grep -v "grey" | cut -f 1 | tsv-summarize -g 1 --count | tsv-filter --ge 2:650 | wc -l  #234
 cat PA1971.select.txt | grep -v "grey" | cut -f 1 | tsv-summarize -g 1 --count | grep "PA1971" # PA1590_braB_at  1386
 cat PA1971.select.txt | grep -v "grey" | cut -f 1 | tsv-summarize -g 1 --count | tsv-filter --ge 2:725 | wc -l  #242
-#提取和braB以及Braz共表达的高频基因
-cd /mnt/d/WGCNA/rawdata/rma
-cat PA1590.select.txt | grep -v "grey" | cut -f 1 | tsv-summarize -g 1 --count | tsv-filter --ge 2:650 | cut -f 1 >/mnt/d/braB_two_neighber_high_fre.tsv
-cat PA1971.select.txt | grep -v "grey" | cut -f 1 | tsv-summarize -g 1 --count | tsv-filter --ge 2:725 | cut -f 1 >/mnt/d/braZ_two_neighber_high_fre.tsv
-cat /mnt/d/braB_two_neighber_high_fre.tsv | grep -f /mnt/d/braZ_two_neighber_high_fre.tsv | wc -l  #44
 ```
 
 ## 5.2拆分条件后三三组合(条件拆分后三三组合，共有64000个组合，共56663个有结果文件)
@@ -777,8 +749,6 @@ echo  "$f"
 cat select/$f.select.txt |perl -alne '($gene,$num,$name)=(split/\t/,$_)[0,1,2];$name=~s/\r?\n//g;$name=~s/\s+//g;print"$gene"."\t"."$num"."\t"."\/"."$name"."\/";' | grep -f other/color_three_$f.tsv | sed 's/\///g' > tem &&
 mv tem select/$f.select.txt
 done
-
-
 
 #查看颜色为4（共332种）
 for filename in select/*.select.txt
@@ -896,7 +866,9 @@ braZ=$(cat select/$base.select.txt | grep "PA1971"| cut -f 3)
 cat select/$base.select.txt| grep "$braB" >> PA1590.select.txt
 cat select/$base.select.txt | grep "$braZ" >> PA1971.select.txt
 done
-
+```
+* 不能用
+```bash
 #划分区间统计基因出现的次数
 cat PA1590.select.txt | grep -v "grey" | tsv-summarize  -g 1 --count >braB_whole_number.tsv
 cat braB_whole_number.tsv | tsv-summarize -g 2 --count | tsv-sort -k1,1n >braB_per_gene_num.tsv
@@ -906,7 +878,6 @@ j=$[$i+100]
 num=$(cat braB_per_gene_num.tsv | tsv-filter --lt 1:$j| tsv-filter --ge 1:$i| tsv-summarize --sum 2)
 echo -e "$num\t$i\t$j" 
 done >braB_bins_100.tsv
-
 
 cat PA1971.select.txt | grep -v "grey" | tsv-summarize  -g 1 --count >braZ_whole_number.tsv
 cat braZ_whole_number.tsv | tsv-summarize -g 2 --count | tsv-sort -k1,1n >braZ_per_gene_num.tsv
@@ -941,10 +912,10 @@ cat PA1590.select.txt | grep -v "grey" | cut -f 1 | tsv-summarize -g 1 --count |
 cat PA1971.select.txt | grep -v "grey" | cut -f 1 | tsv-summarize -g 1 --count | grep "PA1971"  #PA1971_braZ_at  50052
 cat PA1971.select.txt | grep -v "grey" | cut -f 1 | tsv-summarize -g 1 --count | tsv-filter --ge 2:23500 | wc -l  #252
 ```
-# 6.KEGG和GO分析
-## 6.1使用david对gene_id进行转换(方法一)
-*  PA号和locus_tag :本分析中基因由PA号代替，而PA号是一种locus_tag,locus_tag其实是一个定位的标签，指向所提交基因组信息的BioProject与BioSample组合
-```R
+
+# 6.KEGG和GO分析(不能用!!!!!!)
+## 6.1使用david对gene_id进行转换(方法一) (不能用!!!!!!)
+```bash
 #GO和KEGG前需要对gene_id转换成pfam(locus tag)
 打开david---shortcut to david tools---gene id conversion
 upload---step1(选择文件并上传)---step2(locus tag)---step3(gene list)---step4(submit list)
@@ -962,46 +933,9 @@ wget https://david.ncifcrf.gov/data/download/conv_FBD558AE3C581650714720192.txt 
 cat braB_Pfam_id.tsv | tsv-select -f 1,4 |grep -v "From" | perl -alne '($name,$gene)=(split/\s+/,$_,2)[0,1];$gene=~/(.+)(\()(.*?)\)$/;$id=$3;print"$name\t$id";' | sed '1iPA\tgene'  >braB_gene_id.tsv
 cat braZ_Pfam_id.tsv | tsv-select -f 1,4 |grep -v "From" | perl -alne '($name,$gene)=(split/\s+/,$_,2)[0,1];$gene=~/(.+)(\()(.*?)\)$/;$id=$3;print"$name\t$id";'  | sed '1iPA\tgene' >braZ_gene_id.tsv
 ```
-## 6.2使用bir函数转换id
-```r
-# 防止在做GO分析的时候出现报错，需要将symbolID转换成ENTREZID：用clusterProfiler的bitr函数就可以转换ID,基于org包，通过select（）筛选
-bitr(geneID, fromType, toType, OrgDb, drop = TRUE)
-# org序列的R包
-1  org.Ag.eg.db  Anopheles  
-2  org.At.tair.db  Arabidopsis  
-3  org.Bt.eg.db  Bovine 
-4  org.Ce.eg.db  Worm  
-5  org.Cf.eg.db  Canine  
-6  org.Dm.eg.db  Fly  
-7  org.Dr.eg.db  Zebrafish  
-8  org.EcK12.eg.db  E coli strain K12  
-9  org.EcSakai.eg.db  E coli strain Sakai  
-10  org.Gg.eg.db  Chicken  
-11  org.Hs.eg.db  Human 
-12  org.Mm.eg.db  Mouse 
-13  org.Mmu.eg.db  Rhesus 
-14  org.Pf.plasmo.db  Malaria  
-15  org.Pt.eg.db  Chimp  
-16  org.Rn.eg.db  Rat  
-17  org.Sc.sgd.db  Yeast  
-18  org.Ss.eg.db  Pig  
-19  org.Xl.eg.db  Xenopus  
-# keytypes ：哪些类型可以使用函数select或keys以及keytype参数
- keytypes(org.Hs.eg.db)
- [1] "ACCNUM"       "ALIAS"        "ENSEMBL"      "ENSEMBLPROT"  "ENSEMBLTRANS"
- [6] "ENTREZID"     "ENZYME"       "EVIDENCE"     "EVIDENCEALL"  "GENENAME"    
-[11] "GO"           "GOALL"        "IPI"          "MAP"          "OMIM"        
-[16] "ONTOLOGY"     "ONTOLOGYALL"  "PATH"         "PFAM"         "PMID"        
-[21] "PROSITE"      "REFSEQ"       "SYMBOL"       "UCSCKG"       "UNIGENE"     
-[26] "UNIPROT"  
-# 将Entrez ID 转换成SYMBOL
-ens2ent2<-select(org.Hs.eg.db, #.db是这个芯片数据对应的注释包，换成其他物种的也一样。
-                keys=EntrezID,columns=c("SYMBOL","ENSEMBL","GENENAME"), #clolumns参数是你要转换的ID类型是什么，这里选择三个。
-                keytype="ENTREZID" )#函数里面的keytype与keys参数是对应的，keys是你输入的那些数据，keytype是指这些数据是属于什么类型的数据。
-```
 
-## 6.3下载注释数据库
-### 6.3.1GO注释库
+## 6.2下载注释数据库 (不能用!!!!!!)
+### 6.2.1GO注释库 (不能用!!!!!!)
 * GOC（Gene Ontology Consortium）提供了41种不同模型生物的GAF格式的注释信息网址[GO的gaf文件](http://current.geneontology.org/products/pages/downloads.html)
 * [GO的注释文件](http://geneontology.org/docs/download-ontology)
 * GO官网提供了几种常见物种对应的GO注释信息，文件格式为GAF
@@ -1012,7 +946,8 @@ ens2ent2<-select(org.Hs.eg.db, #.db是这个芯片数据对应的注释包，换
 * gaf文件内容:第一列是DB基因标识的来源数据库,第二列是DB object ID是数据库对应的唯一标识符,第三列是db object symbol是对应的基因名，第四列是qualifier，第五列是GO ID,第六列是DB：Reference，注释的证据来源，一般为文献参考,第十一列是基因symbol ID，第十二是DB object type蛋白产物,第十三列是物种的taxonomic标识符，使用数字编码来代表某个物种。注释参考数据库是PseudoCAP
 * 对于非模式生物或者无参考基因组的项目，经常需要进行基因的功能注释，而GO注释是基因功能注释的重要部分。有很多软件能够获得GO注释的信息，例如interproscan、eggnog-mapper和blas2go等。
 * 利用interproscan获得非模式生物的GO注释信息，一般需要将注释信息整理成gene2go，go2gene以及wego的格式，有时也要提取GO Level2的GOID进行分析
-```r
+```bash
+cd WGCNA/KEGG_GO/database
 #铜绿的gaf文件
  wget http://current.geneontology.org/annotations/pseudocap.gaf.gz
  gunzip pseudocap.gaf.gz
@@ -1042,14 +977,15 @@ cat GO_PA_descri.tsv | sed -f GO_sed.script >GO_PA_replace.tsv
 tsv-select -f  2,1,4 GO_PA_replace.tsv >go2gene.tsv
 cut -f 2,3,4 GO_PA_replace.tsv >go2name.tsv
 ```
-### 6.3.2KEGG注释库
+### 6.2.2KEGG注释库 (不能用!!!!!!)
  * KEGG API是一个连接KEGG各类数据库的应用程序，主要以URL形式进行访问[kegg](https://www.kegg.jp/kegg/rest/keggapi.html)
  * 查看kegg中的铜绿假单胞菌的信息[铜绿信息](https://www.kegg.jp/kegg-bin/show_organism?org=pae)
  * [铜绿标识符](https://www.kegg.jp/entry/gn:T00035)
  * [铜绿假单胞菌的数据库](https://www.genome.jp/dbget-bin/get_linkdb?genome+T00035)
  * [KEGG的ID转换](https://www.genome.jp/kegg/mapper/convert_id.html)
 
-```r
+```bash
+cd WGCNA/KEGG_GO/database
 #直接把连接网址放在浏览器，下载kegg注释的json文件
 https://www.genome.jp/kegg-bin/download_htext?htext=ko00001&format=json&filedir=
 https://www.genome.jp/kegg-bin/download_htext?htext=br08610&format=htext&filedir=
@@ -1093,9 +1029,7 @@ cat KO_id_PA_id_Pse.tsv | sed -f KO_sed.script >KO_PA_replace.tsv
 
 tsv-select -f  2,1 KO_PA_replace.tsv >ko2gene.tsv
 cut -f 2,3 KO_PA_replace.tsv | cut -d "|" -f 1 | cut  -d "[" -f 1 >ko2name.tsv
-```
 
- ```r
  #下载kegg物种列表
 wget -c "http://rest.kegg.jp/list/organism" -O species.txt
 grep "Pseudomonas aeruginosa" species.txt >Pse_KEGG_info.tsv
@@ -1106,25 +1040,9 @@ wget https://www.genome.jp/dbget-bin/get_linkdb?-t+genes+gn:T00035 -O ./Pse_KO.t
 wget https://www.genome.jp/dbget-bin/get_linkdb?-t+genes+gn:T00035 -O ./Pse_pathway.tsv
 #查看物种对应的gene号(5697)
 wget https://www.genome.jp/dbget-bin/get_linkdb?-t+genes+gn:T00035 -O ./Pse_gene_id_kegg.tsv
- ```
+```
 
- ### 6.3.3eggNOG注释库
-* eggNOG-Mapper基因功能注释
- 1. 具体功能描述信息
- 2. Gene Onotoloy注释信息
- 3. KEGG 注释信息
- 4. PFAM 注释信息
-* [eggNOG的铜绿的注释文件](http://eggnog5.embl.de/download/eggnog_5.0/per_tax_level/136841/)
-1. members文件：记录OG编号及对应的蛋白序列登录号。编写程序可以从0号文件中提取目标类的蛋白序列数据。
-2. annotations文件：记录OG编号的描述信息及所属大类信息。
-3. hmms文件：已经构建好的hmm数据库文件。
-4. raw_algs文件：多序列比对文件
-5. trimmed_algs文件：截短后的多序列比对文件
-6. tress文件：统发育树文件。
-7. stats文件：统计同源基因类的个数。
-
- 
-## 6.4构建非模式物种的OrgDb
+## 6.3构建非模式物种的OrgDb  (不能用!!!!!!)
 * 要进行GO或者KEGG富集分析，就需要知道每个基因对应什么样的GO/KEGG分类，OrgDb就是存储不同数据库基因ID之间对应关系，以及基因与GO等注释的对应关系的 R 软件包.如果自己研究的物种不在[OrgDb库](http://bioconductor.org/packages/release)之列，很大可能就需要自己构建OrgDb，然后用clusterProfiler分析
 * 非模式生物要想找到自己的注释包，又分成两类;一类是在AnnotationHub（https://bioconductor.org/packages/release/bioc/html/AnnotationHub.html）中存在的.另一类是在AnnotationHub也不存在相应物种，就需要用AnnotationForge（ https://bioconductor.org/packages/release/bioc/html/AnnotationForge.html ）来自己构建
 * 如果说一个data.frame中的元素是factor，你想转化成numeric，你会怎么做？比如d[1,1]是factor。正确答案是 先as.character(x) 再as.numeric(x)。如果直接as.numeric,就不是以前的数字了，原来as.data.frame()有一个参数stringsAsFactors。如果stringAsFactor=F，就不会把字符转换为factor 这样以来，原来看起来是数字变成了character，原来是character的还是character
@@ -1154,7 +1072,7 @@ Pse.OrgDb <- hub[["AH87086"]]
 Pse.OrgDb
 ```
 
-## 6.5进行GO和KEGG富集分析ORA（Over-Representation Analysis）
+## 6.4进行GO和KEGG富集分析  (不能用!!!!!!)
 ```r
 # 安装包
 BiocManager::install("clusterProfiler")  #用来做富集分析
@@ -1196,57 +1114,10 @@ enricher_KO <- enricher(gene_list,TERM2GENE = ko2gene,TERM2NAME = ko2name,pvalue
 #pAdjustMethod指定多重假设检验矫正的方法，有“ holm”, “hochberg”, “hommel”, “bonferroni”, “BH”, “BY”, “fdr”, “none”中的一种；
 #cufoff指定对应的阈值；
 #readable=TRUE代表将基因ID转换为gene symbol。
-
-#标准KEGG富集分析
-ego <- enrichKEGG(
-          gene = gene,
-          keyType = "kegg",
-          organism  = 'hsa',
-          pvalueCutoff  = 0.05,
-          pAdjustMethod  = "BH",
-          qvalueCutoff  = 0.05
-)
-
-#标准GO富集分析
-ego <- enrichGO(
-          gene  = gene$entrzID,
-          keyType = "ENTREZID", 
-          OrgDb   = Pse.OrgDb,
-          ont     = "CC",
-          pvalueCutoff  = 0.01,
-          qvalueCutoff  = 0.05,
-          readable      = TRUE)
 ```
 
-## 6.6进行GO和KEGG富集分析(GSEA（Gene Set Enrichment Analysis）)
-```R
-#通过导入外部注释文件富集分析
-GSEA_GO_MA <- GSEA(gene,TERM2GENE = go2gene,TERM2NAME = go2name)
-GSEA_KEGG <- GSEA(gene,TERM2GENE = go2gene,TERM2NAME = go2name)
 
-#GO标准富集分析
-ego <- gseGO(
-      geneList  = geneList,
-      OrgDb  = org.Hs.eg.db,
-      ont  = "CC",
-      nPerm  = 1000,  #置换检验的置换次数
-      minGSSize  = 100,
-      maxGSSize  = 500,
-      pvalueCutoff = 0.05,
-      verbose  = FALSE)
-#KEGG标准富集分析
-kk <- gseKEGG(
-  geneList  = gene,
-  keyType  = 'kegg',
-  organism = 'hsa',
-  nPerm  = 1000,
-  minGSSize = 10,
-  maxGSSize = 500,
-  pvalueCutoff = 0.05,
-  pAdjustMethod  = "BH"
-)
-```
-## 6.7GO富集分析结果可视化
+## 6.5GO富集分析结果可视化  (不能用!!!!!!)
 ```r
 #barplot #默认展示显著富集的top10个，即p.adjust最小的10个，聚类条形图
 GO_MF_1<-barplot(enricher_GO_MF, showCategory = 10) 
