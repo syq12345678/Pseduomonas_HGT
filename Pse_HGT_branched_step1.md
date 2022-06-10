@@ -349,10 +349,10 @@ cut -f 2 branched-chain/diamond/branched-chain_result2.tsv | sort -n | uniq | wc
 #diamond使用默认的参数时和上述参数设置为50,50的结果和上述参数设置为30,30的结果相同
 
 #查看hmmer结果和diamond结果的交集1492
-cat branched-chain/branched-chain_minevalue.tsv | cut -f 1 | grep -f <(cut -f 1 branched-chain/diamond/branched-chain_result2.tsv | sort -n | uniq)
+cat branched-chain/branched-chain_minevalue.pfam.tsv | cut -f 1 | grep -f <(cut -f 1 branched-chain/diamond/branched-chain_result2.tsv | sort -n | uniq)
 
 #查看hmmer结果和blastp结果的交集2140
-cat branched-chain/branched-chain_minevalue.tsv | cut -f 1 | grep -f <(cut -f 1 branched-chain/blastp/branched-chain_result2.tsv | sort -n | uniq)
+cat branched-chain/branched-chain_minevalue.pfam.tsv | cut -f 1 | grep -f <(cut -f 1 branched-chain/blastp/branched-chain_result2.tsv | sort -n | uniq)
 
 #diamond软件可能在建库上存在一定的问题，目前已经测试过非diamond版本的原因
 ```
@@ -520,7 +520,7 @@ source ~/.bashrc
 cd ~/data/Pseudomonas
 #提取所有的铜绿假单胞菌的单双拷贝蛋白序列(773)
 mkdir -p ~/data/Pseudomonas/branched-chain/tree
-faops some PROTEINS/all.replace.fa <(cat branched-chain/branched-chain_minevalue.tsv |grep -f <(cat branched-chain/branched-chain_hmmscan_copy.pfam.tsv | grep "Pseudom_aeru" | cut -f 1) | cut -f 1 ) branched-chain/tree/branched-chain.Pseudom_aeru.protein.fa
+faops some PROTEINS/all.replace.fa <(cat branched-chain/branched-chain_minevalue.pfam.tsv |grep -f <(cat branched-chain/branched-chain_hmmscan_copy.pfam.tsv | grep "Pseudom_aeru" | cut -f 1) | cut -f 1 ) branched-chain/tree/branched-chain.Pseudom_aeru.protein.fa
 #查看773
 faops size branched-chain/tree/branched-chain.Pseudom_aeru.protein.fa | wc -l
 #比对
@@ -536,13 +536,13 @@ mv branched-chain.Pseudom_aeru.treefile branched-chain.Pseudom_aeru.newick
 ```bash
 cd ~/data/Pseudomonas
 #外类群菌株名(恶臭，丁香，荧光)
-cat branched-chain/branched-chain_minevalue.tsv | cut -f 1 | tsv-join -d 1 -f PROTEINS/all.strain.tsv -k 1 --append-fields 2 | cut -f 2 | sort -n | uniq | grep "Pseudom_puti"            #恶臭Pseudom_puti_GCF_000691565_1
-cat branched-chain/branched-chain_minevalue.tsv | cut -f 1 | tsv-join -d 1 -f PROTEINS/all.strain.tsv -k 1 --append-fields 2 | cut -f 2 | sort -n | uniq |  grep "Pseudom_syr"            #丁香 Pseudom_syr_GCF_004323795_1  
-cat branched-chain/branched-chain_minevalue.tsv | cut -f 1 | tsv-join -d 1 -f PROTEINS/all.strain.tsv -k 1 --append-fields 2 | cut -f 2 | sort -n | uniq |  grep "Pseudom_flu"            #荧光 Pseudom_fluo_GCF_000730425_1 
+cat branched-chain/branched-chain_minevalue.pfam.tsv | cut -f 1 | tsv-join -d 1 -f PROTEINS/all.strain.tsv -k 1 --append-fields 2 | cut -f 2 | sort -n | uniq | grep "Pseudom_puti"            #恶臭Pseudom_puti_GCF_000691565_1
+cat branched-chain/branched-chain_minevalue.pfam.tsv | cut -f 1 | tsv-join -d 1 -f PROTEINS/all.strain.tsv -k 1 --append-fields 2 | cut -f 2 | sort -n | uniq |  grep "Pseudom_syr"            #丁香 Pseudom_syr_GCF_004323795_1  
+cat branched-chain/branched-chain_minevalue.pfam.tsv | cut -f 1 | tsv-join -d 1 -f PROTEINS/all.strain.tsv -k 1 --append-fields 2 | cut -f 2 | sort -n | uniq |  grep "Pseudom_flu"            #荧光 Pseudom_fluo_GCF_000730425_1 
 echo -e "Pseudom_puti_GCF_000691565_1\nPseudom_syr_GCF_004323795_1\nPseudom_fluo_GCF_000730425_1" >branched-chain/tree/branched-chain.Pseudom_aeru.bac120.outgroup.tsv
 faops some PROTEINS/bac120.trim.fa branched-chain/tree/branched-chain.Pseudom_aeru.bac120.outgroup.tsv branched-chain/tree/branched-chain.Pseudom_aeru.bac120.outgroup.fa
 #提取铜绿假单胞菌的物种的菌株名字 #391
-cat branched-chain/branched-chain_minevalue.tsv | grep "Pseudom_aeru" | cut -f 1 | tsv-join -d 1 -f PROTEINS/all.strain.tsv -k 1 --append-fields 2 | cut -f 2 | sort -n | uniq >branched-chain/tree/branched-chain.Pseudom_aeru.bac120.species.tsv
+cat branched-chain/branched-chain_minevalue.pfam.tsv | grep "Pseudom_aeru" | cut -f 1 | tsv-join -d 1 -f PROTEINS/all.strain.tsv -k 1 --append-fields 2 | cut -f 2 | sort -n | uniq >branched-chain/tree/branched-chain.Pseudom_aeru.bac120.species.tsv
 #提取上述菌株名相应的bac120序列 #391
 faops some PROTEINS/bac120.trim.fa branched-chain/tree/branched-chain.Pseudom_aeru.bac120.species.tsv  branched-chain/tree/branched-chain.Pseudom_aeru.bac120.species.fa
 #合并铜绿假单胞菌序列和外类群 #394
@@ -565,7 +565,7 @@ Vibrio cholerae
 cat  strains.taxon.tsv | grep -f <(echo -e "Shewanella baltica\nVibrio cholerae") | cut -f 1 
 echo -e 'She_balt_GCF_003030925_1\nVi_cho_GCF_008369605_1' >branched-chain/tree/branched-chain.Pseudomonas.bac120.outgroup.tsv
 #提取外类群菌株对应的GCF_WP名字
-cat branched-chain/branched-chain_minevalue.tsv | grep -f branched-chain/tree/branched-chain.Pseudomonas.bac120.outgroup.tsv | cut -f 1 >branched-chain/tree/branched-chain.Pseudomonas.protein.outgroup.tsv
+cat branched-chain/branched-chain_minevalue.pfam.tsv | grep -f branched-chain/tree/branched-chain.Pseudomonas.bac120.outgroup.tsv | cut -f 1 >branched-chain/tree/branched-chain.Pseudomonas.protein.outgroup.tsv
 She_balt_GCF_003030925_1_WP_006084009
 Vi_cho_GCF_008369605_1_WP_000815020
 #提取外类群序列
@@ -574,9 +574,9 @@ faops some PROTEINS/all.replace.fa branched-chain/tree/branched-chain.Pseudomona
 #提取假单胞菌属的的（模式菌株+代表菌株)的菌株名字#49
 cat  representative.tsv | tsv-join -d 1 -f strains.taxon.tsv -k 1 --append-fields 4 | tsv-select -f 2,1 | nwr append stdin -r genus | tsv-filter --str-in-fld 3:"Pseudomonas" | sort -n | uniq >branched-chain/tree/branched-chain.Pseudomonas.protein.tsv
 #提取上述菌株名相应的braz或braB蛋白(50) #多出一个蛋白是因为PAO1里面有两个拷贝braB和braZ   #多出了一个Pseudom_aeru_PAO1_GCF_013001005_1舍弃
-faops some PROTEINS/all.replace.fa <(cat branched-chain/branched-chain_minevalue.tsv | grep -f <(cut -f 2 branched-chain/tree/branched-chain.Pseudomonas.protein.tsv) | cut -f 1| grep -v "Pseudom_aeru_PAO1_GCF_013001005_1") branched-chain/tree/branched-chain.Pseudomonas.protein.fa
+faops some PROTEINS/all.replace.fa <(cat branched-chain/branched-chain_minevalue.pfam.tsv | grep -f <(cut -f 2 branched-chain/tree/branched-chain.Pseudomonas.protein.tsv) | cut -f 1| grep -v "Pseudom_aeru_PAO1_GCF_013001005_1") branched-chain/tree/branched-chain.Pseudomonas.protein.fa
 #验证蛋白对应的菌株数(49)  
-cat branched-chain/branched-chain_minevalue.tsv |  grep -v "Pseudom_aeru_PAO1_GCF_013001005_1" | grep -f <(cut -f 2 branched-chain/tree/branched-chain.Pseudomonas.protein.tsv) | cut -f 1 | tsv-join -d 1 -f PROTEINS/all.strain.tsv -k 1 --append-fields 2 | cut -f 2 | sort -n | uniq | wc -l
+cat branched-chain/branched-chain_minevalue.pfam.tsv |  grep -v "Pseudom_aeru_PAO1_GCF_013001005_1" | grep -f <(cut -f 2 branched-chain/tree/branched-chain.Pseudomonas.protein.tsv) | cut -f 1 | tsv-join -d 1 -f PROTEINS/all.strain.tsv -k 1 --append-fields 2 | cut -f 2 | sort -n | uniq | wc -l
 #将外类群合并到铜绿序列中(52)
 cat branched-chain/tree/branched-chain.Pseudomonas.protein.outgroup.fa >>branched-chain/tree/branched-chain.Pseudomonas.protein.fa
 #比对(52)
@@ -591,7 +591,7 @@ mv  branched-chain.Pseudomonas.protein.treefile   branched-chain.Pseudomonas.pro
 ```bash
 cd ~/data/Pseudomonas
 #提取假单胞菌属的的（模式菌株+代表菌株)的菌株名字 #49
-cat branched-chain/branched-chain_minevalue.tsv| grep -v "Pseudom_aeru_PAO1_GCF_013001005_1" | grep -f <(cut -f 2 branched-chain/tree/branched-chain.Pseudomonas.protein.tsv) | cut -f 1 | tsv-join -d 1 -f PROTEINS/all.strain.tsv -k 1 --append-fields 2 | cut -f 2 | sort -n | uniq >branched-chain/tree/branched-chain.Pseudomonas.bac120.species.tsv
+cat branched-chain/branched-chain_minevalue.pfam.tsv| grep -v "Pseudom_aeru_PAO1_GCF_013001005_1" | grep -f <(cut -f 2 branched-chain/tree/branched-chain.Pseudomonas.protein.tsv) | cut -f 1 | tsv-join -d 1 -f PROTEINS/all.strain.tsv -k 1 --append-fields 2 | cut -f 2 | sort -n | uniq >branched-chain/tree/branched-chain.Pseudomonas.bac120.species.tsv
 #在假单胞菌属的物种中加上外类群 #51
 cat branched-chain/tree/branched-chain.Pseudomonas.bac120.outgroup.tsv >>branched-chain/tree/branched-chain.Pseudomonas.bac120.species.tsv
 #提取上述菌株名相应的bac120序列 #51
@@ -619,21 +619,21 @@ Listeria monocytogenes  Lis_mono_EGD_e  Firmicutes      Bacilli
 Mycobacterium tuberculosis      My_tube_H37Rv   Actinobacteria  Actinomycetia
 Staphylococcus aureus   Sta_aure_aureus_NCTC_8325       Firmicutes      Bacilli
 #提取外类群菌株的名字
-cat branched-chain/branched-chain_minevalue.tsv | grep -f <(cat   representative.tsv  | tsv-join -d 1 -f strains.taxon.tsv -k 1 --append-fields 4 | tsv-select -f 2,1 | nwr append stdin -r phylum -r class | grep -v "Gammaproteobacteria" | cut -f 2) | cut -f 1 |tsv-join -d 1 -f PROTEINS/all.strain.tsv -k 1 --append-fields 2 | cut -f 2 >branched-chain/tree/branched-chain.Gammaproteobacteria.outgroup.tsv
+cat branched-chain/branched-chain_minevalue.pfam.tsv | grep -f <(cat   representative.tsv  | tsv-join -d 1 -f strains.taxon.tsv -k 1 --append-fields 4 | tsv-select -f 2,1 | nwr append stdin -r phylum -r class | grep -v "Gammaproteobacteria" | cut -f 2) | cut -f 1 |tsv-join -d 1 -f PROTEINS/all.strain.tsv -k 1 --append-fields 2 | cut -f 2 >branched-chain/tree/branched-chain.Gammaproteobacteria.outgroup.tsv
 #共有6个3种菌株名字,需要去除支原体，最后只剩下两个外类群菌株
 Bac_subti_subtilis_168
 Sta_aure_aureus_NCTC_8325
 ##添加外类群蛋白序列名称
-cat branched-chain/branched-chain_minevalue.tsv | grep -f <(cat branched-chain/tree/branched-chain.Gammaproteobacteria.outgroup.tsv |  grep -v "Chl_tracho_D_UW_3_CX" ) |cut -f 1 |sort -n | uniq  
+cat branched-chain/branched-chain_minevalue.pfam.tsv | grep -f <(cat branched-chain/tree/branched-chain.Gammaproteobacteria.outgroup.tsv |  grep -v "Chl_tracho_D_UW_3_CX" ) |cut -f 1 |sort -n | uniq  
 Bac_subti_subtilis_168_NP_390546
 Sta_aure_aureus_NCTC_8325_YP_498750
 #提取变形菌纲的的（模式菌株+代表菌株)的菌株名字(#541个)
 cat  representative.tsv | tsv-join -d 1 -f strains.taxon.tsv -k 1 --append-fields 4 | tsv-select -f 2,1 | nwr append stdin -r class | tsv-filter --str-in-fld 3:"Gammaproteobacteria" | sort -n | uniq >branched-chain/tree/branched-chain.Gammaproteobacteria.strain.tsv
 #提取上述菌株名相应的braz或braB蛋白名字(435)
-cat branched-chain/branched-chain_minevalue.tsv | grep -f <(cut -f 2 branched-chain/tree/branched-chain.Gammaproteobacteria.strain.tsv) | cut -f 1 >branched-chain/tree/branched-chain.Gammaproteobacteria.protein.tsv
+cat branched-chain/branched-chain_minevalue.pfam.tsv | grep -f <(cut -f 2 branched-chain/tree/branched-chain.Gammaproteobacteria.strain.tsv) | cut -f 1 >branched-chain/tree/branched-chain.Gammaproteobacteria.protein.tsv
 #加上外类群437
 echo -e 'Bac_subti_subtilis_168_NP_390546\nSta_aure_aureus_NCTC_8325_YP_498750' >>branched-chain/tree/branched-chain.Gammaproteobacteria.protein.tsv
-faops some PROTEINS/all.replace.fa <(cat branched-chain/branched-chain_minevalue.tsv | grep -f <(cut -f 2 branched-chain/tree/branched-chain.Gammaproteobacteria.protein.tsv) | cut -f 1) branched-chain/tree/branched-chain.Gammaproteobacteria.protein.fa
+faops some PROTEINS/all.replace.fa <(cat branched-chain/branched-chain_minevalue.pfam.tsv | grep -f <(cut -f 2 branched-chain/tree/branched-chain.Gammaproteobacteria.protein.tsv) | cut -f 1) branched-chain/tree/branched-chain.Gammaproteobacteria.protein.fa
 #比对(437)
 mafft --auto  branched-chain/tree/branched-chain.Gammaproteobacteria.protein.fa > branched-chain/tree/branched-chain.Gammaproteobacteria.protein.aln.mafft.fa
 #建树
@@ -647,9 +647,9 @@ mv branched-chain.Gammaproteobacteria.protein.treefile branched-chain.Gammaprote
 ```bash
 cd ~/data/Pseudomonas
 #含有braB和braZ的变形菌纲的（模式菌株+代表菌株)的菌株名字 #364
-cat branched-chain/branched-chain_minevalue.tsv | grep -f <(cut -f 2 branched-chain/tree/branched-chain.Gammaproteobacteria.strain.tsv) | cut -f 1 | tsv-join -d 1 -f PROTEINS/all.strain.tsv -k 1 --append-fields 2 | cut -f 2 | sort -n | uniq >branched-chain/tree/branched-chain.Gammaproteobacteria.bac120.tsv
+cat branched-chain/branched-chain_minevalue.pfam.tsv | grep -f <(cut -f 2 branched-chain/tree/branched-chain.Gammaproteobacteria.strain.tsv) | cut -f 1 | tsv-join -d 1 -f PROTEINS/all.strain.tsv -k 1 --append-fields 2 | cut -f 2 | sort -n | uniq >branched-chain/tree/branched-chain.Gammaproteobacteria.bac120.tsv
 #验证braB和braZ在变形菌纲的数目#364
-cat branched-chain/branched-chain_minevalue.tsv | grep -f representative.tsv | tsv-join -d 1 -f PROTEINS/all.strain.tsv -k 1 --append-fields 2 | cut -f 4 | tsv-join -d 1 -f strains.taxon.tsv -k 1 --append-fields 4 | tsv-select -f 2,1 | nwr append stdin -r class | tsv-filter --str-in-fld 3:"Gammaproteobacteria" | sort -n | uniq | wc -l
+cat branched-chain/branched-chain_minevalue.pfam.tsv | grep -f representative.tsv | tsv-join -d 1 -f PROTEINS/all.strain.tsv -k 1 --append-fields 2 | cut -f 4 | tsv-join -d 1 -f strains.taxon.tsv -k 1 --append-fields 4 | tsv-select -f 2,1 | nwr append stdin -r class | tsv-filter --str-in-fld 3:"Gammaproteobacteria" | sort -n | uniq | wc -l
 #加上外类群名字366
 echo -e 'Bac_subti_subtilis_168_NP_390546\nSta_aure_aureus_NCTC_8325_YP_498750' >>branched-chain/tree/branched-chain.Gammaproteobacteria.bac120.tsv
 #提取上述菌株名相应的bac120序列 #366
