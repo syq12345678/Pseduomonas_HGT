@@ -30,17 +30,16 @@
   - [6.3构建非模式物种的OrgDb  (不能用!!!!!!)](#63构建非模式物种的orgdb--不能用)
   - [6.4进行GO和KEGG富集分析  (不能用!!!!!!)](#64进行go和kegg富集分析--不能用)
   - [6.5GO富集分析结果可视化  (不能用!!!!!!)](#65go富集分析结果可视化--不能用)
-- [7.使用mclust进行聚类分析](#7使用mclust进行聚类分析)
-  - [7.1mclust使用举例](#71mclust使用举例)
-  - [7.2三三组合的结果文件划分bins为100然后进行mclust分析](#72三三组合的结果文件划分bins为100然后进行mclust分析)
-  - [7.3 mclust计算均值和平方差](#73-mclust计算均值和平方差)
-  - [7.4ggplot正态分布直方密度图](#74ggplot正态分布直方密度图)
-- [8.eggnog在线注释](#8eggnog在线注释)
-  - [8.1绘制三三组合的两个sigma和三个sigma的braB和braZ的韦恩图](#81绘制三三组合的两个sigma和三个sigma的brab和braz的韦恩图)
-  - [8.2下载注释文件](#82下载注释文件)
-  - [8.3改变注释文件的格式](#83改变注释文件的格式)
+- [7.使用mclust确定分别和braB或braZ共表达的基因](#7使用mclust确定分别和brab或braz共表达的基因)
+  - [7.1三三组合的结果文件划分bins为100然后进行mclust分析（不能用!!!!!!)](#71三三组合的结果文件划分bins为100然后进行mclust分析不能用)
+  - [7.3 mclust计算均值和平方差(不能用!!!!!!!)](#73-mclust计算均值和平方差不能用)
+  - [7.4ggplot绘制分别和braB或braZ所有共表达基因频次的正态分布直方密度图](#74ggplot绘制分别和brab或braz所有共表达基因频次的正态分布直方密度图)
+- [8.提取频次大于mean+3sigma的基因作为braB或braZ共表达的基因，并使用eggnog在线注释](#8提取频次大于mean3sigma的基因作为brab或braz共表达的基因并使用eggnog在线注释)
+  - [8.1绘制和braB或braZ共表达的基因频次大于mean+2个sigma和基因频次大于mean+3个sigma的韦恩图](#81绘制和brab或braz共表达的基因频次大于mean2个sigma和基因频次大于mean3个sigma的韦恩图)
+  - [8.2使用eggnog注释PAO1菌株中的序列得到GO注释结果](#82使用eggnog注释pao1菌株中的序列得到go注释结果)
+  - [8.3处理初始文件](#83处理初始文件)
   - [8.4GO富集分析](#84go富集分析)
-  - [8.5KEGG富集分析](#85kegg富集分析)
+  - [8.5KEGG富集分析(不能用！！！！！！)](#85kegg富集分析不能用)
 - [9.绘制三三组合的braZ和braB的基因表达谱](#9绘制三三组合的braz和brab的基因表达谱)
   - [9.1绘制braB的基因表达谱](#91绘制brab的基因表达谱)
   - [9.2绘制braZ的基因表达谱](#92绘制braz的基因表达谱)
@@ -1229,69 +1228,27 @@ print(KEGG_5)
 dev.off()
 ```
 
-# 7.使用mclust进行聚类分析
-## 7.1mclust使用举例
-* mclust(Model-based clustering) 能够基于高斯有限混合模型进行聚类，分类以及密度估计(density estimation)。对于具有各种协方差结构的高斯混合模型，它提供了根据EM算法的参数预测函数。它也提供了根据模型进行模拟的函数。还提供了一类函数，整合了基于模型的层次聚类，混合估计的EM算法，用于聚类、密度估计和判别分析中综合性策略的贝叶斯信息判别标准。最后还有一类函数能够对聚类，分类和密度估计结果中的拟合模型进行可视化展示
-*  Mclust假设观测数据是一个或多个混合高斯分布的抽样结果，Mclust就需要根据现有数据去推断最优可能的模型参数，以及是由 q几组分布抽样而成。mclust一共提供了14种模型（见下表），可以用mclustModelNames可以查看mclust提供的所有模型
-*  继续回到之前的问题，Mclust如何确定模型和确定分组数目。之前我们调用Mclust时，除了必须设置的输入参数，没有修改其他参数。其实Mclust可以设置的参数不少，和问题直接相关的是如下两个参数  G: 分组数，默认情况下是1:9  modelNames: 待拟合的模型，默认使用所有14种  。也就是，Mclust默认得到14种模型1到9组的分析结果，然后根据一定的标准选择最终的模型和分组数
-*  Mclust提供了两种方法用于评估不同模型在不同分组下的可能性。BIC( Bayesian Information Criterion ): 贝叶斯信息判别标准和ICL( integrated complete-data likelihood ): 综合完全数据可能性
-* Mclust默认用的就是BIC，因此我们可以用plot.Mclust绘制其中BIC变化曲线
+# 7.使用mclust确定分别和braB或braZ共表达的基因
+
+## 7.1三三组合的结果文件划分bins为100然后进行mclust分析（不能用!!!!!!)
 ```r
-# 安装
-install.packages("mclust")
-# 加载
-library(mclust)
-#加载数据集
-install.packages("gclus")
-data("wine", package = "gclus")
-dim(wine)
-# 第一列和聚类无关
-#使用Mclust做聚类分析. Mclust主要功能就是分析当前的提供的数据是由什么统计模型
-X <- data.matrix(wine[,-1])
-mod <- Mclust(X)
-#直接在交互行输入mod会得到如下信息
-'Mclust' model object: (VVE,3) 
-Available components: 
- [1] "call"           "data"           "modelName"     
- [4] "n"              "d"              "G"             
- [7] "BIC"            "bic"            "loglik"        
-[10] "df"             "hypvol"         "parameters"    
-[13] "z"              "classification" "uncertainty" 
-#第一行告诉我们mclust以WE模型将数据分为3类。第3行开始，它告诉我们'Mclust'的输出结果中包含了如下内容，我们可以通过$来提取。举个例子，我们提取Mclust的聚类结果和已知结果进行比较
-table(wine$Class, mod$classification)
-# 如下是输出信息
-     1  2  3
-  1 59  0  0
-  2  0 69  2
-  3  0  0 48
-# adjustedRandIndex:评估聚类效果
-adjustedRandIndex(wine$Class, mod$classification)
-#从结果中，我们发现仅有2例没有正确聚类，说明Mclust的效果很好。但是随之而来的问题是，Mclust如何挑选模型以及它为什么认为聚成3类比较合适呢？我们可以根据什么信息进行模型选择呢？ -----------  BIC变化曲线
-#Mclust默认用的就是BIC，因此我们可以用plot.Mclust绘制其中BIC变化曲线
-plot.Mclust(mod, what = "BIC", ylim = range(mod$BIC[,-(1:2)], na.rm = TRUE), legendArgs = list(x = "bottomleft", cex =0.7))
-#Mclucst会选择其中BIC最大的模型和分组作为最终的结果
-#此外我们可以用MclustBIC和MclustICL分别进行计算
-par(mfrow=c(1,2))
-BIC <- mclustBIC(X)
-ICL <- mclustICL(X)
-#从中选择最佳的模型分组和模型作为输入
-mod2 <- Mclust(X, G = 3, modelNames = "VVE", x=BIC)
-```
-## 7.2三三组合的结果文件划分bins为100然后进行mclust分析
-```r
-cut -f 1,3 braB_bins_100.tsv | perl -alne '($num,$bin)=(split/\s+/,$_)[0,1];@data=($bin)x$num;print join("\n",@data);' | sed '/^$/d'  >braB_bins_mclust.tsv
-#braB_bins_100  377行
-#braZ_bins_100  377行
+cd /mnt/d/WGCNA/rma_WGCNA/condition_three_combine/result
+#cut -f 1,3 braB_bins_100.tsv | perl -alne '($num,$bin)=(split/\s+/,$_)[0,1];@data=($bin)x$num;print join("\n",@data);' | sed '/^$/d'  >braB_bins_mclust.tsv
+cut -f 2 braB_whole_number.tsv | sed '1iratio' >braB_density_ggplot.tsv
 
 ###braB选择G和模型这两个参数
+setwd("D:/WGCNA/rma_WGCNA/condition_three_combine/result/")
 library(mclust)
-ratio<-read.table("braZ_density_ggplot.tsv",header=T)
+data<-read.table("braB_density_ggplot.tsv",header=T)
 attach(ratio)
 #mclust分析
-BIC <- mclustBIC(ratio$ratio)
-ICL <- mclustICL(ratio$ratio)
+BIC <- mclustBIC(data$ratio)
+ICL <- mclustICL(data$ratio)
 write.table(BIC, "BIC.tmp.tsv", row.names = FALSE, col.names = TRUE, sep = "\t")
 write.table(ICL, "ICL.tmp.tsv", row.names = FALSE, col.names = TRUE, sep = "\t")
+```
+```bash
+cd /mnt/d/WGCNA/rma_WGCNA/condition_three_combine/result
 #将BIC和ICL合并
 cat BIC.tmp.tsv | perl -n -e 'chomp;
 @a = split/\t/, $_;if($_ =~ /"/){$i = 1;next;}else{
@@ -1301,52 +1258,45 @@ cat ICL.tmp.tsv | perl -n -e 'chomp;
 @a = split/\t/, $_;if($_ =~ /"/){$i = 1;next;}else{
 print "$i\t$a[0]\tICLE\n"; print "$i\t$a[1]\tICLV\n";
 $i++;}' | tsv-filter --str-ne 2:NA > ICL2.tmp.tsv
-cat ICL2.tmp.tsv BIC2.tmp.tsv | sed '1inum\tgrade\tmethod' > braZ_mclust_model.tsv
+cat ICL2.tmp.tsv BIC2.tmp.tsv | sed '1inum\tgrade\tmethod' > braB_mclust_model.tsv
 rm *.tmp.*
+```
+```r
 #使用BIC和ICL画图
+setwd("D:/WGCNA/rma_WGCNA/condition_three_combine/result/")
 library(readr)
 library(ggplot2)
-num <- read_tsv("braZ_mclust_model.tsv", show_col_types = FALSE)
+num <- read_tsv("braB_mclust_model.tsv", show_col_types = FALSE)
 p <- ggplot()+
 geom_line(data = num, aes(x = num, y = grade, group = method, color = method)) +
 scale_x_continuous(breaks = seq(0,9,1))
-ggsave(p, file = "braZ_mclust.pdf", width = 5, height = 4)
+ggsave(p, file = "braB_mclust.pdf", width = 5, height = 4)
 ```
 
-## 7.3 mclust计算均值和平方差
+## 7.3 mclust计算均值和平方差(不能用!!!!!!!)
 ```r
 #检验是否符合正态分布
-#1.绘制QQ图  ：qqnorm()可以绘制QQ图。通过绘制的图是否呈现一直线判断是否符合正态分布。另外还有一个qqline()函数，在QQ图中绘制一条直线，QQ图中的点越接近这条直线，表示数据越接近正态分布。
-qqnorm(ratio$ratio)  qqline(ratio$ratio)
-#2.夏皮罗检验shapiro.test()函数 p-value反应服从正态分布的概率，值越小越小的概率符合，通常0.05做标准，大于0.05则表示符合正态分布
-nortest1<-shapiro.test(ratio$ratio) #缺失值应该在3至5000之间
-#3.ks检验
-ks.test(ratio$ratio,rnorm(5900,mean = mean(ratio$ratio), sd = sd(ratio$ratio)))
-#ks >0.05，说明数据符合正太分布
-#以data的平均值为平均值，以data的方差为方差模拟一个新的正态分布数据，和data做比较，看data符合不符合正态分布。
-
 ###braB选择1个峰
-ratio<-read.table("braB_bins_mclust.tsv",header=T)
+library(mclust)
+setwd("D:/WGCNA/rma_WGCNA/condition_three_combine/result/")
+ratio<-read.table("braB_density_ggplot.tsv",header=T)
 dens <- densityMclust(ratio,G=1)
 summary(dens, parameters = TRUE)
 br <- seq(min(ratio$ratio), max(ratio$ratio), length =339)
-#hist(ratio$ratio,breaks=br)
 x <- seq(min(ratio$ratio)-diff(range(ratio$ratio))/10,max(ratio$ratio)+diff(range(ratio$ratio))/10, length = 500)
 cdens <-predict(dens, x, what = "cdens")
 cdens <- t(apply(cdens, 1, function(d) d*dens$parameters$pro))
 plot(dens, what = "density", data = ratio$ratio, breaks = br)
+#hist(ratio$ratio,breaks=br)
 ###matplot(x, cdens, type = "l", lwd = 1, add = TRUE, lty = 1)
 #平均值和方差
 Means:
-[1] 20121.66
+[1] 20070.71
 Variances:
-[1] 3509466
-sd
-[1] 1873.36
-1873.36 x 3 +20121.66=25741.74
+[1] 3510982
 
 ###braZ选择1个峰
-ratio<-read.table("braZ_bins_mclust.tsv",header=T)
+ratio<-read.table("braZ_density_ggplot.tsv",header=T)
 dens <- densityMclust(ratio,G=1)
 summary(dens, parameters = TRUE)
 br <- seq(min(ratio$ratio), max(ratio$ratio), length =339)
@@ -1356,30 +1306,38 @@ cdens <- t(apply(cdens, 1, function(d) d*dens$parameters$pro))
 plot(dens, what = "density", data = ratio$ratio, breaks = br)
 #平均值和方差
 Means:
-[1] 20483.46
+[1] 20432.97
 Variances:
-[1] 3320404
-sd
-[1] 1822.20
-1822.20 x 3 +20483.46=25950.06
+[1] 3318882
 ```
 
-## 7.4ggplot正态分布直方密度图
+## 7.4ggplot绘制分别和braB或braZ所有共表达基因频次的正态分布直方密度图
+```bash
+#准备绘图文件
+cd /mnt/d/WGCNA/rma_WGCNA/condition_three_combine/result
+cut -f 2 braB_whole_number.tsv >braB_density_ggplot.tsv
+cut -f 2 braZ_whole_number.tsv >braZ_density_ggplot.tsv
+```
 ```r
 #绘制braB的正态密度分布直方图
-cut -f 2 braB_whole_number.tsv >braB_density_ggplot.tsv
-library(ggplot2)
 setwd("D:/WGCNA/rma_WGCNA/condition_three_combine/result")
+library(ggplot2)
+library(showtext)#用showtext包输入需要的字体
+font_add('Arial','/Library/Fonts/Arial.ttf')
+showtext_auto()
+library(patchwork)
 ratio<-read.table("braB_density_ggplot.tsv",header=T)
 set.seed(1000)
 df <- data.frame(ratio)
 #geom_density会为数据集提供一条密度曲线，而不是正态分布,而stat_function(fun = dnorm, args = list(mean = mean(df$ratio), sd = sd(df$ratio)))提供正态分布密度曲线
 #geom_histogram  stat="bin"直方图类型  position="stack" 位置  ...其他geom类函数的参数  binwidth #直方图的图距    bins=NULL直方个数
 #...count...参数画计数直方图     ...density...频率分布直方图  alpha=0.9透明度
-data_mean=mean(df$ratio) #20070.71
-data_sd=sd(df$ratio) #1873.92
-three_sd_plus=mean(df$ratio)+data_sd*3  #25692.47
-three_sd_minus=mean(df$ratio)-data_sd*3 #14448.95
+data_mean=mean(df$ratio) 
+data_mean  #20070.71
+data_sd=sd(df$ratio) 
+data_sd   #1873.92
+three_sd_plus=mean(df$ratio)+data_sd*3  
+three_sd_plus    #25692.47
 
 p1<-ggplot(df, aes(x = ratio)) +geom_histogram(aes(y =..density..),breaks = seq(min(df$ratio), max(df$ratio), length =100),colour ="#C6DBEF", fill ="#08519C", size = 0.1,alpha=0.8) + #使用density代替y轴
 stat_function(fun = dnorm, args = list(mean = data_mean, sd = data_sd,color ="black", size = 1))+  #直方图上加密度曲线，也可以用geom_density()
@@ -1394,9 +1352,9 @@ theme(panel.border = element_blank(),panel.grid.major = element_blank(),panel.gr
 theme(text=element_text(size=16,family="Arial",face="bold"))
 
 #绘制braZ的正态密度分布直方图
-cut -f 2 braZ_whole_number.tsv >braZ_density_ggplot.tsv
+setwd("D:/WGCNA/rma_WGCNA/condition_three_combine/result")
 library(ggplot2)
-library(showtext)#ggplot作图显示字体错误时需要用showtext包输入需要的字体
+library(showtext)#用showtext包输入需要的字体
 font_add('Arial','/Library/Fonts/Arial.ttf')
 showtext_auto()
 library(patchwork)
@@ -1405,10 +1363,12 @@ set.seed(1000)
 df1 <- data.frame(ratio1)
 #geom_density会为数据集提供一条密度曲线，而不是正态分布,而stat_function(fun = dnorm, args = list(mean = mean(df$ratio), sd = sd(df$ratio)))提供正态分布密度曲线
 #添加均值线和三个标准差线
-data_mean1=mean(df1$ratio) #20432.97
-data_sd1=sd(df1$ratio) #1821.934
-three_sd_plus1=mean(df1$ratio)+data_sd1*3  # 25898.77
-three_sd_minus1=mean(df1$ratio)-data_sd1*3 #14967.16
+data_mean1=mean(df1$ratio) 
+data_mean1   #20432.97
+data_sd1=sd(df1$ratio) 
+data_sd1    #1821.934
+three_sd_plus1=mean(df1$ratio)+data_sd1*3 
+three_sd_plus1  # 25898.77
 
 p2<-ggplot(df1, aes(x = ratio)) +geom_histogram(aes(y =..density..),breaks = seq(min(df1$ratio), max(df1$ratio), length =100),colour ="#C6DBEF", fill ="#08519C", size = 0.1,alpha=0.8) + #使用density代替y轴
 stat_function(fun = dnorm, args = list(mean = data_mean1, sd = data_sd1,color ="black", size = 1))+  #直方图上加密度曲线，也可以用geom_density()
@@ -1421,23 +1381,25 @@ labs(x="frequency",y = "density")+
 theme_bw()+
 theme(panel.border = element_blank(),panel.grid.major = element_blank(),panel.grid.minor = element_blank(),axis.line = element_line(colour = "black"))+
 theme(text=element_text(size=16,family="Arial",face="bold"))
+
+#将两个图合并在一起
 p3<-p1+p2
 ggsave(file="braB_braZ_density_picture.pdf",plot=p3,width=20,height=8)
 ```
 
-# 8.eggnog在线注释
-* 使用eggnog,即使用gene对应的序列去数据库里查功能，非PA号查询功能
-## 8.1绘制三三组合的两个sigma和三个sigma的braB和braZ的韦恩图
+# 8.提取频次大于mean+3sigma的基因作为braB或braZ共表达的基因，并使用eggnog在线注释
+
+## 8.1绘制和braB或braZ共表达的基因频次大于mean+2个sigma和基因频次大于mean+3个sigma的韦恩图
 ```r
+#确定分别和braB或braZ共表达的基因
 #three sigma   braB 25693  braZ 25899
 #two sigma     braB  23819   braZ  24077
 #分别提取和braB,braZ共表达的高频基因
 cd /mnt/d/WGCNA/rma_WGCNA/condition_three_combine/result
-cat PA1590.select.txt | grep -v "grey" | cut -f 1 | tsv-summarize -g 1 --count | tsv-filter --ge 2:25693 | cut -f 1 >/mnt/d/braB_three_sigma_neighber_high_fre.tsv
-cat PA1971.select.txt | grep -v "grey" | cut -f 1 | tsv-summarize -g 1 --count | tsv-filter --ge 2:25899 | cut -f 1 >/mnt/d/braZ_three_sigma_neighber_high_fre.tsv
-
-cat PA1590.select.txt | grep -v "grey" | cut -f 1 | tsv-summarize -g 1 --count | tsv-filter --ge 2:23819 | cut -f 1 >/mnt/d/braB_two_sigma_neighber_high_fre.tsv
-cat PA1971.select.txt | grep -v "grey" | cut -f 1 | tsv-summarize -g 1 --count | tsv-filter --ge 2:24077 | cut -f 1 >/mnt/d/braZ_two_sigma_neighber_high_fre.tsv
+cat PA1590.select.txt | grep -v "grey" | cut -f 1 | tsv-summarize -g 1 --count | tsv-filter --ge 2:25693 | cut -f 1 >/mnt/d/WGCNA/venn/braB_three_sigma_neighber_high_fre.tsv
+cat PA1971.select.txt | grep -v "grey" | cut -f 1 | tsv-summarize -g 1 --count | tsv-filter --ge 2:25899 | cut -f 1 >/mnt/d/WGCNA/venn/braZ_three_sigma_neighber_high_fre.tsv
+cat PA1590.select.txt | grep -v "grey" | cut -f 1 | tsv-summarize -g 1 --count | tsv-filter --ge 2:23819 | cut -f 1 >/mnt/d/WGCNA/venn/braB_two_sigma_neighber_high_fre.tsv
+cat PA1971.select.txt | grep -v "grey" | cut -f 1 | tsv-summarize -g 1 --count | tsv-filter --ge 2:24077 | cut -f 1 >/mnt/d/WGCNA/venn/braZ_two_sigma_neighber_high_fre.tsv
 
 #将braB_neighber_high_fre.tsv的gene id转换locus_tag id
 cd /mnt/d/WGCNA/venn
@@ -1447,21 +1409,15 @@ cat  braZ_three_sigma_neighber_high_fre.tsv | grep "PA" | perl -alne '$_=~/PA(.*
 cat  braB_two_sigma_neighber_high_fre.tsv | grep "PA" | perl -alne '$_=~/PA(.*?)\_/;$name=$1;print"PA$name"' >braB_two_Pfam_id.tsv
 cat  braZ_two_sigma_neighber_high_fre.tsv | grep "PA" | perl -alne '$_=~/PA(.*?)\_/;$name=$1;print"PA$name"' >braZ_two_Pfam_id.tsv
 
-#绘制3个sigma的braB和braZ的韦恩图
+#绘制mean+3个sigma的韦恩图
 cd /mnt/d/WGCNA/venn
 plotr venn braB_three_Pfam_id.tsv braZ_three_Pfam_id.tsv
 
 ```
 
-## 8.2下载注释文件
+## 8.2使用eggnog注释PAO1菌株中的序列得到GO注释结果
 ```bash
-
 cd /mnt/d/WGCNA/eggnog/
-#braB_three_Pfam_id.tsv braZ_three_Pfam_id.tsv 不用更改
-#提取2个sigma中共享的,braB独有的,braZ独有的
-cat braB_two_Pfam_id.tsv | grep -f braZ_two_Pfam_id.tsv  >two_sigma_share_pfam_id.tsv
-cat braB_two_Pfam_id.tsv | grep -v -f two_sigma_share_pfam_id.tsv >braB_two_special_pfam_id.tsv
-cat braZ_two_Pfam_id.tsv | grep -v -f two_sigma_share_pfam_id.tsv >braZ_two_special_pfam_id.tsv
 #提取PAO1的gbk文件中相应locus_tag id对应的氨基酸序列 
 python fetch_faa.py PAO1.gbff PAO1.fa
 perl -alne '$_=~s/\,(.*)//g;print"$_";' PAO1.fa >PAO1_replace.fa
@@ -1472,9 +1428,10 @@ sed -i 's/#//g' PAO1_eggnog.tsv
 #利用R语言将注释结果整理成clusterProfiler包的enricher函数需要的输入格式
 ```
 
-## 8.3改变注释文件的格式
+## 8.3处理初始文件
 * 读取注释文件并处理，得到背景文件。clusterprofiler要求的背景文件term2gene需要两列，第一列为goid,第二列为geneid。从eggnog下载处理后的文件，每个基因对应多个goid，要对其进行处理
 ```r
+setwd("D:/WGCNA/eggnog/")
 library(stringr)
 library(dplyr)
 library(clusterProfiler)
@@ -1504,10 +1461,51 @@ head(go2term)
 #将GOid转换为GoOnt
 go2ont<-go2ont(term2gene$GO)
 head(go2ont)
-#每个基因都会对应有一个或多个GO term（也就是GO功能）。Gene Ontology分为分子功能，生物过程和细胞组成三个部分。蛋白质或者基因可以通过ID对应或者序列注释的方法找到与之对应的GO号，而GO号可对应到Term，即功能类别或者细胞定位。这也是GO富集的一个基础。
+#每个基因都会对应有一个或多个GO term（也就是GO功能）。Gene Ontology分为分子功能，生物过程和细胞组成三个部分。蛋白质或者基因可以通过ID对应或者序列注释的方法找到与之对应的GO号，而GO号可对应到Term，即功能类别或者细胞定位。这也是GO富集的一个基础。                              
+```
+## 8.4GO富集分析
+```r
+#pvalue(pval): 统计学差异显著性检验指标。
+#qvalue(p-adjusted): 校正后的p值（qvalue=padj=FDR=Corrected p-Value=p-adjusted），是对p值进行了多重假设检验，能更好地控制假阳性率。校正后的p值不同的几种表现形式，都是基于BH的方法进行多重假设检验得到的。校正后的p值不同的展现形式是因为不同的分析软件产生的。
+#读取基因列表
+gene_ins<-read.table("braB_three_Pfam_id.tsv",sep="\t",header=F)
+gene_list<-gene_ins$V1
+df<-go2term
+#df$ont<-go2ont$Ontology
+#df<-split(df,with(df,ont))
+#用ggplot画气泡图，结果看起来和clusterprofiler画的差不多，不一样的地方在于clusterproliler的x轴默认的gene ratio,而ggplot用的是count
+GO<-enricher(gene=gene_list,pvalueCutoff =0.05,qvalueCutoff=1,pAdjustMethod = "none",TERM2GENE =term2gene,TERM2NAME=df,minGSSize=0,maxGSSize=400)
+head(GO@result)
+GO_input<-GO@result[1:20,]
+GO_input<-na.omit(GO_input)
+#结果添加BP,CC,MF分类信息
+df1<-go2ont(GO_input$ID)
+GO_input$ont<-df1$Ontology
+GO_input$Description<-factor(GO_input$Description,levels = rev(GO_input$Description))
+#输出注释结果table
+write.table(GO_input, "braB_GO_table.tsv", row.names = FALSE, col.names = TRUE, sep = "\t")
 
+#reorder使纵轴按照go term 和count排序
+library(ggplot2)
+GO_plot<-ggplot(GO_input,aes(x = Count ,y =reorder(Description,Count),shape=ont))+ 
+  geom_point(aes(size=Count,color=p.adjust))+
+  scale_colour_gradient(low="blue",high="red")+
+  labs(
+       color=expression(p.adjust),
+       size=" Count Number",
+       x="Gene Count"
+      )+
+  theme_bw()+
+  theme(
+    axis.text.y = element_text(size = rel(1.8)),
+    axis.title.x = element_text(size=rel(1.8)),
+    axis.title.y = element_blank()
+  )+ scale_size(range=c(5, 10))
+ggsave(file="braB_GO_ggplot.pdf",plot=GO_plot,width=14,height=12)
+```
 
-
+## 8.5KEGG富集分析(不能用！！！！！！)
+```r
 #####处理KEGG注释文件
 library(stringr)
 library(dplyr)
@@ -1558,72 +1556,10 @@ pathway2gene1 <- gene_to_ko %>% left_join(ko2pathway, by = "Ko") %>% dplyr::sele
 pathway2gene<-pathway2gene1[, c(2,1)]
 pathway2name  
 head(pathway2gene)    
-head(pathway2name)                                    
+head(pathway2name)      
 ```
-## 8.4GO富集分析
 ```r
-#pvalue(pval): 统计学差异显著性检验指标。
-#qvalue(p-adjusted): 校正后的p值（qvalue=padj=FDR=Corrected p-Value=p-adjusted），是对p值进行了多重假设检验，能更好地控制假阳性率。校正后的p值不同的几种表现形式，都是基于BH的方法进行多重假设检验得到的。校正后的p值不同的展现形式是因为不同的分析软件产生的。
-
-#读取基因列表，感兴趣的基因存为一列
-gene_ins<-read.table("braZ_three_Pfam_id.tsv",sep="\t",header=F)
-gene_list<-gene_ins$V1
-##对BP MF CC分类
-df<-go2term
-df$ont<-go2ont$Ontology
-df<-split(df,with(df,ont))
-#在GOterm后添加ont信息
-GO_BP<-enricher(gene=gene_list,pvalueCutoff =0.05,qvalueCutoff=1,pAdjustMethod = "none",TERM2GENE =term2gene,TERM2NAME=df$BP,minGSSize=0,maxGSSize=400)
-GO_CC<-enricher(gene=gene_list,pvalueCutoff =0.05,qvalueCutoff=1,pAdjustMethod = "none",TERM2GENE =term2gene,TERM2NAME=df$CC,minGSSize=0,maxGSSize=400)
-GO_MF<-enricher(gene=gene_list,pvalueCutoff =0.05,qvalueCutoff=1,pAdjustMethod = "none",TERM2GENE =term2gene,TERM2NAME=df$MF,minGSSize=0,maxGSSize=400)
-p_BP<-dotplot(GO_BP)
-P_CC<-dotplot(GO_CC)
-p_MF<-dotplot(GO_MF)
-plotc <- p_BP/P_CC/p_MF
-pdf(file = "braB_BP_CC_MF.pdf",width =8,height = 16)
-print(plotc)
-dev.off()
-#使用ggplot来画气泡图
-#我们再用ggplot画气泡图，结果看起来和clusterprofiler画的差不多，不一样的地方在于clusterproliler的x轴默认的gene ratio,而ggplot我们用的是count
-GO<-enricher(gene=gene_list,pvalueCutoff =0.05,qvalueCutoff=1,pAdjustMethod = "none",TERM2GENE =term2gene,TERM2NAME=df,minGSSize=0,maxGSSize=400)
-head(GO@result)
-GO_input<-GO@result[1:20,]
-GO_input<-na.omit(GO_input)
-df1<-go2ont(GO_input$ID)
-GO_input$ont<-df1$Ontology
-#使画出go term的顺序与输入的一致
-GO_input$Description<-factor(GO_input$Description,levels = rev(GO_input$Description))
-#reorder使纵轴按照go term 和count排序
-library(ggplot2)
-ggplot(GO_input,aes(x = Count ,y =reorder(Description,Count),shape=ont))+ 
-  geom_point(aes(size=Count,color=p.adjust))+
-  scale_colour_gradient(low="blue",high="red")+
-  labs(
-       color=expression(p.adjust),
-       size=" Count Number",
-       x="Gene Count"
-      )+
-  theme_bw()+
-  theme(
-    axis.text.y = element_text(size = rel(1.8)),
-    axis.title.x = element_text(size=rel(1.8)),
-    axis.title.y = element_blank()
-  )+ scale_size(range=c(5, 10))
-​
-
-##画图
-GO_1<-barplot(GO,showCategory=10)
-pdf(file = "braB_two_sigma_GO_1.pdf",width =12,height = 9)
-print(GO_1)
-dev.off()
-GO_2<-dotplot(GO,showCategory=10)
-pdf(file = "braB_two_sigma_GO_2.pdf",width =12,height = 9)
-print(GO_2)
-dev.off()
-```
-
-## 8.5KEGG富集分析
-```r
+###绘图
 gene_ins<-read.table("braB_Pfam_id.tsv",sep="\t",header=T)
 gene_list<-gene_ins$id
 KEGG<-enricher(gene=gene_list,TERM2GENE = pathway2gene,TERM2NAME = pathway2name,pvalueCutoff =1,qvalueCutoff=1,pAdjustMethod = "BH",minGSSize=0,maxGSSize=400)
