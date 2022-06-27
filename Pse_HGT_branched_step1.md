@@ -359,7 +359,7 @@ cat branched-chain/branched-chain_minevalue.pfam.tsv | cut -f 1 | grep -f <(cut 
 
 ## 2.5 统计diamond比对和hmmer比对时不同species中BCAA个数
 ```bash
-#统计diamond抓取的braB个数
+#统计diamond抓取的braB个数 
 cat branched-chain/diamond/branched-chain_result2.tsv | tsv-filter --eq 3:100 |cut -f 1 | sort -n | uniq |
 tsv-join -d 1 \
 -f PROTEINS/all.strain.tsv -k 1 \
@@ -518,15 +518,23 @@ echo 'export PATH="~/iqtree-2.1.3-Linux/bin:$PATH"'>>~/.bashrc
 source ~/.bashrc
 
 cd ~/data/Pseudomonas
-#提取所有的铜绿假单胞菌的单双拷贝蛋白序列(773)
 mkdir -p ~/data/Pseudomonas/branched-chain/tree
-faops some PROTEINS/all.replace.fa <(cat branched-chain/branched-chain_minevalue.pfam.tsv |grep -f <(cat branched-chain/branched-chain_hmmscan_copy.pfam.tsv | grep "Pseudom_aeru" | cut -f 1) | cut -f 1 ) branched-chain/tree/branched-chain.Pseudom_aeru.protein.fa
-#查看773
+#提取所有的铜绿假单胞菌的单双拷贝蛋白序列名称(773)
+cat branched-chain/branched-chain_minevalue.pfam.tsv |grep -f <(cat branched-chain/branched-chain_hmmscan_copy.pfam.tsv | grep "Pseudom_aeru" | cut -f 1) | cut -f 1 >branched-chain/tree/branched-chain_pseudom_aeru.protein.tsv 
+#添加外类群
+#She_balt_GCF_003030925_1_WP_006084009
+#Vi_cho_GCF_008369605_1_WP_000815020
+echo -e 'She_balt_GCF_003030925_1_WP_006084009\nVi_cho_GCF_008369605_1_WP_000815020' >>branched-chain/tree/branched-chain_pseudom_aeru.protein.tsv
+#提取所有的铜绿假单胞菌的单双拷贝蛋白序列775
+faops some PROTEINS/all.replace.fa branched-chain/tree/branched-chain_pseudom_aeru.protein.tsv  branched-chain/tree/branched-chain.Pseudom_aeru.protein.fa
+#查看775
 faops size branched-chain/tree/branched-chain.Pseudom_aeru.protein.fa | wc -l
 #比对
 mafft --auto   branched-chain/tree/branched-chain.Pseudom_aeru.protein.fa > branched-chain/tree/branched-chain.Pseudom_aeru.aln.mafft.fa
-#使用iqtree2建树（超算上)773
-bsub -q mpi -n 24 -J "iq" ./iqtree2 -s branched-chain.Pseudom_aeru.aln.mafft.fa  -m MFP  --prefix branched-chain.Pseudom_aeru -T 20 -B 1000 -bnni
+# Trim poorly aligned regions with `TrimAl`
+trimal -in branched-chain/tree/branched-chain.Pseudom_aeru.aln.mafft.fa -out branched-chain/tree/branched-chain.Pseudom_aeru.trim.fa -automated1
+#使用iqtree2建树（超算上)775
+bsub -q mpi -n 24 -J "iq" ./iqtree2 -s branched-chain.Pseudom_aeru.trim.fa  -m MFP  --prefix branched-chain.Pseudom_aeru -T 20 -B 1000 -bnni
 #改名
 mv branched-chain.Pseudom_aeru.treefile branched-chain.Pseudom_aeru.newick
 
@@ -540,17 +548,18 @@ cat branched-chain/branched-chain_minevalue.pfam.tsv | cut -f 1 | tsv-join -d 1 
 cat branched-chain/branched-chain_minevalue.pfam.tsv | cut -f 1 | tsv-join -d 1 -f PROTEINS/all.strain.tsv -k 1 --append-fields 2 | cut -f 2 | sort -n | uniq |  grep "Pseudom_syr"            #丁香 Pseudom_syr_GCF_004323795_1  
 cat branched-chain/branched-chain_minevalue.pfam.tsv | cut -f 1 | tsv-join -d 1 -f PROTEINS/all.strain.tsv -k 1 --append-fields 2 | cut -f 2 | sort -n | uniq |  grep "Pseudom_flu"            #荧光 Pseudom_fluo_GCF_000730425_1 
 echo -e "Pseudom_puti_GCF_000691565_1\nPseudom_syr_GCF_004323795_1\nPseudom_fluo_GCF_000730425_1" >branched-chain/tree/branched-chain.Pseudom_aeru.bac120.outgroup.tsv
-faops some PROTEINS/bac120.trim.fa branched-chain/tree/branched-chain.Pseudom_aeru.bac120.outgroup.tsv branched-chain/tree/branched-chain.Pseudom_aeru.bac120.outgroup.fa
 #提取铜绿假单胞菌的物种的菌株名字 #391
 cat branched-chain/branched-chain_minevalue.pfam.tsv | grep "Pseudom_aeru" | cut -f 1 | tsv-join -d 1 -f PROTEINS/all.strain.tsv -k 1 --append-fields 2 | cut -f 2 | sort -n | uniq >branched-chain/tree/branched-chain.Pseudom_aeru.bac120.species.tsv
-#提取上述菌株名相应的bac120序列 #391
-faops some PROTEINS/bac120.trim.fa branched-chain/tree/branched-chain.Pseudom_aeru.bac120.species.tsv  branched-chain/tree/branched-chain.Pseudom_aeru.bac120.species.fa
-#合并铜绿假单胞菌序列和外类群 #394
-cat branched-chain/tree/branched-chain.Pseudom_aeru.bac120.outgroup.fa >>branched-chain/tree/branched-chain.Pseudom_aeru.bac120.species.fa
+#合并铜绿假单胞菌的物种菌株名和外类群名 #394
+cat  branched-chain/tree/branched-chain.Pseudom_aeru.bac120.outgroup.tsv >>branched-chain/tree/branched-chain.Pseudom_aeru.bac120.species.tsv
+#提取上述菌株名相应的bac120序列 #394
+faops some PROTEINS/bac120.aln.fa branched-chain/tree/branched-chain.Pseudom_aeru.bac120.species.tsv  branched-chain/tree/branched-chain.Pseudom_aeru.bac120.species.fa
 #mafft比对 3 个参数都设置为最不消耗时间的类型，适合于 ~10,000 到 ~50,000 条序列的比对。 mafft --retree 1 --maxiterate 0 --nofft
 mafft --auto branched-chain/tree/branched-chain.Pseudom_aeru.bac120.species.fa >branched-chain/tree/branched-chain.Pseudom_aeru.bac120.aln.mafft.fa
+# Trim poorly aligned regions with `TrimAl`
+trimal -in branched-chain/tree/branched-chain.Pseudom_aeru.bac120.aln.mafft.fa -out branched-chain/tree/branched-chain.Pseudom_aeru.bac120.trim.fa -automated1
 #使用iqtree2建树（超算上)#394
-bsub -q mpi -n 24 -J "iq" ./iqtree2 -s branched-chain.Pseudom_aeru.bac120.aln.mafft.fa  -m MFP  --prefix branched-chain.Pseudom_aeru.120.aln -T 20 -B 1000 --bnni  -o Pseudom_puti_GCF_000691565_1,Pseudom_syr_GCF_004323795_1,Pseudom_fluo_GCF_000730425_1
+bsub -q mpi -n 24 -J "iq" ./iqtree2 -s branched-chain.Pseudom_aeru.bac120.trim.fa  -m MFP  --prefix branched-chain.Pseudom_aeru.bac120 -T 20 -B 1000 --bnni  -o Pseudom_puti_GCF_000691565_1,Pseudom_syr_GCF_004323795_1,Pseudom_fluo_GCF_000730425_1
 #改名
 mv branched-chain.Pseudom_aeru.bac120.aln.treefile branched-chain.Pseudom_aeru.bac120.newick
 ```
@@ -566,8 +575,8 @@ cat  strains.taxon.tsv | grep -f <(echo -e "Shewanella baltica\nVibrio cholerae"
 echo -e 'She_balt_GCF_003030925_1\nVi_cho_GCF_008369605_1' >branched-chain/tree/branched-chain.Pseudomonas.bac120.outgroup.tsv
 #提取外类群菌株对应的GCF_WP名字
 cat branched-chain/branched-chain_minevalue.pfam.tsv | grep -f branched-chain/tree/branched-chain.Pseudomonas.bac120.outgroup.tsv | cut -f 1 >branched-chain/tree/branched-chain.Pseudomonas.protein.outgroup.tsv
-She_balt_GCF_003030925_1_WP_006084009
-Vi_cho_GCF_008369605_1_WP_000815020
+#She_balt_GCF_003030925_1_WP_006084009
+#Vi_cho_GCF_008369605_1_WP_000815020
 #提取外类群序列
 faops some PROTEINS/all.replace.fa branched-chain/tree/branched-chain.Pseudomonas.protein.outgroup.tsv branched-chain/tree/branched-chain.Pseudomonas.protein.outgroup.fa
 
@@ -581,8 +590,10 @@ cat branched-chain/branched-chain_minevalue.pfam.tsv |  grep -v "Pseudom_aeru_PA
 cat branched-chain/tree/branched-chain.Pseudomonas.protein.outgroup.fa >>branched-chain/tree/branched-chain.Pseudomonas.protein.fa
 #比对(52)
 mafft --auto  branched-chain/tree/branched-chain.Pseudomonas.protein.fa >branched-chain/tree/branched-chain.Pseudomonas.protein.aln.fa
+# Trim poorly aligned regions with `TrimAl`
+trimal -in branched-chain/tree/branched-chain.Pseudomonas.protein.aln.fa -out branched-chain/tree/branched-chain.Pseudomonas.protein.trim.fa -automated1
 #建树
-bsub -q mpi -n 24 -J "iq" ./iqtree2 -s branched-chain.Pseudomonas.protein.aln.fa -m MFP  --prefix branched-chain.Pseudomonas.protein -T 20 -B 1000 --bnni   -o  She_balt_GCF_003030925_1_WP_006084009,Vi_cho_GCF_008369605_1_WP_000815020
+bsub -q mpi -n 24 -J "iq" ./iqtree2 -s branched-chain.Pseudomonas.protein.trim.fa -m MFP  --prefix branched-chain.Pseudomonas.protein -T 20 -B 1000 --bnni   -o  She_balt_GCF_003030925_1_WP_006084009,Vi_cho_GCF_008369605_1_WP_000815020
 #改名
 mv  branched-chain.Pseudomonas.protein.treefile   branched-chain.Pseudomonas.protein.aln.newick
 ```
@@ -598,12 +609,13 @@ cat branched-chain/tree/branched-chain.Pseudomonas.bac120.outgroup.tsv >>branche
 faops some PROTEINS/bac120.trim.fa branched-chain/tree/branched-chain.Pseudomonas.bac120.species.tsv branched-chain/tree/branched-chain.Pseudomonas.bac120.species.fa
 #比对(51)
 mafft --auto  branched-chain/tree/branched-chain.Pseudomonas.bac120.species.fa >branched-chain/tree/branched-chain.Pseudomonas.bac120.aln.mafft.fa
+# Trim poorly aligned regions with `TrimAl`
+trimal -in branched-chain/tree/branched-chain.Pseudomonas.bac120.aln.mafft.fa -out branched-chain/tree/branched-chain.Pseudomonas.bac120.trim.fa -automated1
 #建树
-bsub -q mpi -n 24 -J "iq" ./iqtree2 -s branched-chain.Pseudomonas.bac120.aln.mafft.fa -m MFP  --prefix branched-chain.Pseudomonas.bac120 -T 20 -B 1000 --bnni  -o  She_balt_GCF_003030925_1,Vi_cho_GCF_008369605_1
+bsub -q mpi -n 24 -J "iq" ./iqtree2 -s branched-chain.Pseudomonas.bac120.trim.fa -m MFP  --prefix branched-chain.Pseudomonas.bac120 -T 20 -B 1000 --bnni  -o  She_balt_GCF_003030925_1,Vi_cho_GCF_008369605_1
 #改名
 mv branched-chain.Pseudomonas.bac120.treefile branched-chain.Pseudomonas.bac120.newick
 ```
-
 
 ## 3.5gamma变形菌纲内(模式菌株15+代表菌株533 共有548)建立基因树 (需要外类群) (OK)
 ```bash
@@ -621,12 +633,12 @@ Staphylococcus aureus   Sta_aure_aureus_NCTC_8325       Firmicutes      Bacilli
 #提取外类群菌株的名字
 cat branched-chain/branched-chain_minevalue.pfam.tsv | grep -f <(cat   representative.tsv  | tsv-join -d 1 -f strains.taxon.tsv -k 1 --append-fields 4 | tsv-select -f 2,1 | nwr append stdin -r phylum -r class | grep -v "Gammaproteobacteria" | cut -f 2) | cut -f 1 |tsv-join -d 1 -f PROTEINS/all.strain.tsv -k 1 --append-fields 2 | cut -f 2 >branched-chain/tree/branched-chain.Gammaproteobacteria.outgroup.tsv
 #共有6个3种菌株名字,需要去除支原体，最后只剩下两个外类群菌株
-Bac_subti_subtilis_168
-Sta_aure_aureus_NCTC_8325
+#Bac_subti_subtilis_168
+#Sta_aure_aureus_NCTC_8325
 ##添加外类群蛋白序列名称
 cat branched-chain/branched-chain_minevalue.pfam.tsv | grep -f <(cat branched-chain/tree/branched-chain.Gammaproteobacteria.outgroup.tsv |  grep -v "Chl_tracho_D_UW_3_CX" ) |cut -f 1 |sort -n | uniq  
-Bac_subti_subtilis_168_NP_390546
-Sta_aure_aureus_NCTC_8325_YP_498750
+#Bac_subti_subtilis_168_NP_390546
+#Sta_aure_aureus_NCTC_8325_YP_498750
 #提取变形菌纲的的（模式菌株+代表菌株)的菌株名字(#541个)
 cat  representative.tsv | tsv-join -d 1 -f strains.taxon.tsv -k 1 --append-fields 4 | tsv-select -f 2,1 | nwr append stdin -r class | tsv-filter --str-in-fld 3:"Gammaproteobacteria" | sort -n | uniq >branched-chain/tree/branched-chain.Gammaproteobacteria.strain.tsv
 #提取上述菌株名相应的braz或braB蛋白名字(435)
@@ -636,8 +648,10 @@ echo -e 'Bac_subti_subtilis_168_NP_390546\nSta_aure_aureus_NCTC_8325_YP_498750' 
 faops some PROTEINS/all.replace.fa <(cat branched-chain/branched-chain_minevalue.pfam.tsv | grep -f <(cut -f 2 branched-chain/tree/branched-chain.Gammaproteobacteria.protein.tsv) | cut -f 1) branched-chain/tree/branched-chain.Gammaproteobacteria.protein.fa
 #比对(437)
 mafft --auto  branched-chain/tree/branched-chain.Gammaproteobacteria.protein.fa > branched-chain/tree/branched-chain.Gammaproteobacteria.protein.aln.mafft.fa
+# Trim poorly aligned regions with `TrimAl`
+trimal -in branched-chain/tree/branched-chain.Gammaproteobacteria.protein.aln.mafft.fa -out branched-chain/tree/branched-chain.Gammaproteobacteria.protein.trim.fa -automated1
 #建树
-bsub -q mpi -n 24 -J "iq" ./iqtree2 -s branched-chain.Gammaproteobacteria.protein.aln.mafft.fa -m MFP  --prefix branched-chain.Gammaproteobacteria.protein  -T 20 -B 1000 -bnni -o Bac_subti_subtilis_168_NP_390546,Sta_aure_aureus_NCTC_8325_YP_498750
+bsub -q mpi -n 24 -J "iq" ./iqtree2 -s branched-chain.Gammaproteobacteria.protein.trim.fa  -m MFP  --prefix branched-chain.Gammaproteobacteria.protein  -T 20 -B 1000 -bnni -o Bac_subti_subtilis_168_NP_390546,Sta_aure_aureus_NCTC_8325_YP_498750
 #改名
 mv branched-chain.Gammaproteobacteria.protein.treefile branched-chain.Gammaproteobacteria.protein.newick
 ```
@@ -651,12 +665,14 @@ cat branched-chain/branched-chain_minevalue.pfam.tsv | grep -f <(cut -f 2 branch
 #验证braB和braZ在变形菌纲的数目#364
 cat branched-chain/branched-chain_minevalue.pfam.tsv | grep -f representative.tsv | tsv-join -d 1 -f PROTEINS/all.strain.tsv -k 1 --append-fields 2 | cut -f 4 | tsv-join -d 1 -f strains.taxon.tsv -k 1 --append-fields 4 | tsv-select -f 2,1 | nwr append stdin -r class | tsv-filter --str-in-fld 3:"Gammaproteobacteria" | sort -n | uniq | wc -l
 #加上外类群名字366
-echo -e 'Bac_subti_subtilis_168_NP_390546\nSta_aure_aureus_NCTC_8325_YP_498750' >>branched-chain/tree/branched-chain.Gammaproteobacteria.bac120.tsv
+echo -e 'Bac_subti_subtilis_168\nSta_aure_aureus_NCTC_8325' >>branched-chain/tree/branched-chain.Gammaproteobacteria.bac120.tsv
 #提取上述菌株名相应的bac120序列 #366
 faops some PROTEINS/bac120.trim.fa branched-chain/tree/branched-chain.Gammaproteobacteria.bac120.tsv branched-chain/tree/branched-chain.Gammaproteobacteria.bac120.fa
 mafft --auto branched-chain/tree/branched-chain.Gammaproteobacteria.bac120.fa >branched-chain/tree/branched-chain.Gammaproteobacteria.bac120.mafft.aln.fa
+# Trim poorly aligned regions with `TrimAl`
+trimal -in branched-chain/tree/branched-chain.Gammaproteobacteria.bac120.mafft.aln.fa -out branched-chain/tree/branched-chain.Gammaproteobacteria.bac120.trim.fa -automated1
 #建树
-bsub -q mpi -n 24 -J "iq" ./iqtree2 -s branched-chain.Gammaproteobacteria.bac120.mafft.aln.fa -m MFP  --prefix branched-chain.Gammaproteobacteria.bac120 -T 20  -B 1000 --bnni -o  Bac_subti_subtilis_168,Sta_aure_aureus_NCTC_8325
+bsub -q mpi -n 24 -J "iq" ./iqtree2 -s branched-chain.Gammaproteobacteria.bac120.trim.fa -m MFP  --prefix branched-chain.Gammaproteobacteria.bac120 -T 20  -B 1000 --bnni -o  Bac_subti_subtilis_168,Sta_aure_aureus_NCTC_8325
 #改名
 mv branched-chain.Gammaproteobacteria.bac120.treefile branched-chain.Gammaproteobacteria.bac120.newick
 
