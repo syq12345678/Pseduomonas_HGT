@@ -40,19 +40,21 @@
   - [8.3处理初始文件](#83处理初始文件)
   - [8.4GO富集分析](#84go富集分析)
   - [8.5KEGG富集分析(不能用！！！！！！)](#85kegg富集分析不能用)
-- [9.绘制三三组合的braZ和braB的基因表达谱](#9绘制三三组合的braz和brab的基因表达谱)
+- [9.绘制三三组合的braZ和braB的基因表达谱(不能用！！！！！！)](#9绘制三三组合的braz和brab的基因表达谱不能用)
   - [9.1绘制braB的基因表达谱](#91绘制brab的基因表达谱)
-  - [9.2绘制braZ的基因表达谱](#92绘制braz的基因表达谱)
+  - [9.2绘制braZ的基因表达谱(不能用！！！！！！)](#92绘制braz的基因表达谱不能用)
 - [10.绘制40个条件的braZ和braB的基因表达谱](#10绘制40个条件的braz和brab的基因表达谱)
   - [10.1绘制braB的基因表达谱](#101绘制brab的基因表达谱)
   - [10.2绘制braZ的基因表达谱](#102绘制braz的基因表达谱)
-  - [10.3以14,13,13分为低中高组合](#103以141313分为低中高组合)
+  - [10.3以14,13,13分为低中高组合 (不能用！！！！！！)](#103以141313分为低中高组合-不能用)
   - [10.4plotr绘制40个条件的braZ和braB的密度分布图](#104plotr绘制40个条件的braz和brab的密度分布图)
 - [11.绘制40个条件中braB和braZ的基因表达量热图](#11绘制40个条件中brab和braz的基因表达量热图)
-  - [11.1绘制40个条件中braB和braZ的平均基因表达量热图，不聚类](#111绘制40个条件中brab和braz的平均基因表达量热图不聚类)
-  - [11.2绘制40个条件中braB和braZ和相关基因的平均基因表达量热图，对条件进行聚类，基因不聚类,对基因标准化](#112绘制40个条件中brab和braz和相关基因的平均基因表达量热图对条件进行聚类基因不聚类对基因标准化)
-  - [11.3使两个热图的条件顺序一致](#113使两个热图的条件顺序一致)
-  - [11.3将热图的样本条件改成样本号码](#113将热图的样本条件改成样本号码)
+  - [11.1准备40个条件中braB和braZ的平均基因表达量热图文件](#111准备40个条件中brab和braz的平均基因表达量热图文件)
+  - [11.2准备40个条件中braB和braZ和相关基因的平均基因表达量热图文件（对条件进行聚类，基因不聚类,对基因标准化）](#112准备40个条件中brab和braz和相关基因的平均基因表达量热图文件对条件进行聚类基因不聚类对基因标准化)
+  - [11.3 将50个基因区分为braB_cor和braZ_cor,手动创建分类文件braB_braZ_cor_class.tsv](#113-将50个基因区分为brab_cor和braz_cor手动创建分类文件brab_braz_cor_classtsv)
+  - [11.4使两个热图的条件顺序一致  condition_order.tsv](#114使两个热图的条件顺序一致--condition_ordertsv)
+  - [11.5绘制40个条件中braB和braZ的平均基因表达量热图](#115绘制40个条件中brab和braz的平均基因表达量热图)
+  - [11.6 绘制40个条件中braB和braZ的平均基因表达量热图](#116-绘制40个条件中brab和braz的平均基因表达量热图)
 
 <!-- /TOC -->
 
@@ -865,11 +867,13 @@ braZ=$(cat select/$base.select.txt | grep "PA1971"| cut -f 3)
 cat select/$base.select.txt| grep "$braB" >> PA1590.select.txt
 cat select/$base.select.txt | grep "$braZ" >> PA1971.select.txt
 done
+
+cat PA1590.select.txt | grep -v "grey" | tsv-summarize  -g 1 --count >braB_whole_number.tsv
+cat PA1971.select.txt | grep -v "grey" | tsv-summarize  -g 1 --count >braZ_whole_number.tsv
 ```
 * 不能用
 ```bash
 #划分区间统计基因出现的次数
-cat PA1590.select.txt | grep -v "grey" | tsv-summarize  -g 1 --count >braB_whole_number.tsv
 cat braB_whole_number.tsv | tsv-summarize -g 2 --count | tsv-sort -k1,1n >braB_per_gene_num.tsv
 for i in $(seq 12500 100 50100)
 do
@@ -878,7 +882,7 @@ num=$(cat braB_per_gene_num.tsv | tsv-filter --lt 1:$j| tsv-filter --ge 1:$i| ts
 echo -e "$num\t$i\t$j" 
 done >braB_bins_100.tsv
 
-cat PA1971.select.txt | grep -v "grey" | tsv-summarize  -g 1 --count >braZ_whole_number.tsv
+
 cat braZ_whole_number.tsv | tsv-summarize -g 2 --count | tsv-sort -k1,1n >braZ_per_gene_num.tsv
 for i in $(seq 12500 100 50100)
 do
@@ -1340,21 +1344,24 @@ three_sd_plus=mean(df$ratio)+data_sd*3
 three_sd_plus    #25692.47
 
 p1<-ggplot(df, aes(x = ratio)) +geom_histogram(aes(y =..density..),breaks = seq(min(df$ratio), max(df$ratio), length =100),colour ="#C6DBEF", fill ="#08519C", size = 0.1,alpha=0.8) + #使用density代替y轴
-stat_function(fun = dnorm, args = list(mean = data_mean, sd = data_sd,color ="black", size = 1))+  #直方图上加密度曲线，也可以用geom_density()
+stat_function(fun = dnorm, args = list(mean = data_mean, sd = data_sd,color ="black", size = 1))+
+geom_density(color = "black", size = 1)+  #直方图上加密度曲线，也可以用geom_density()
 geom_vline(aes(xintercept=data_mean), color="red", linetype="dashed", size=1)+ #添加均值线和两个标准差线
 geom_vline(aes(xintercept=three_sd_plus), color="red", linetype="dashed", size=1)+
-annotate(geom="text",fontface="bold",color="black",x=three_sd_plus,y=0.00015,label="25692.47",size=5)+   
+annotate(geom="text",fontface="bold",family="Arial",color="black",x=three_sd_plus,y=0.00015,label="25692.47",size=9)+   
  #通过annotate函数添加注释，将geom变量设置为"text"和"rect"分别代表文字与矩形，并且可以调整位置，大小颜色
-annotate(geom="text",fontface="bold",color="black",x=40000,y=0.000220,label="μ+3σ=20070.71+5621.76",size=7)+
+annotate(geom="text",fontface="bold",family="Arial",color="black",x=40000,y=0.000220,label="μ+3σ=20070.71+5621.76",size=9)+
 labs(x="frequency",y = "density")+
 theme_bw()+
 theme(panel.border = element_blank(),panel.grid.major = element_blank(),panel.grid.minor = element_blank(),axis.line = element_line(colour = "black"))+
-theme(text=element_text(size=16,family="Arial",face="bold"))
+theme(axis.text=element_text(size=24,family="Arial",face = "bold"),axis.title=element_text(size=24,family="Arial",face="bold"))
+ggsave(file="braB_density_picture.pdf",plot=p1,width=10,height=8)
 
 #绘制braZ的正态密度分布直方图
 setwd("D:/WGCNA/rma_WGCNA/condition_three_combine/result")
 library(ggplot2)
 library(showtext)#用showtext包输入需要的字体
+options(scipen = 200)
 font_add('Arial','/Library/Fonts/Arial.ttf')
 showtext_auto()
 library(patchwork)
@@ -1373,14 +1380,16 @@ three_sd_plus1  # 25898.77
 p2<-ggplot(df1, aes(x = ratio)) +geom_histogram(aes(y =..density..),breaks = seq(min(df1$ratio), max(df1$ratio), length =100),colour ="#C6DBEF", fill ="#08519C", size = 0.1,alpha=0.8) + #使用density代替y轴
 stat_function(fun = dnorm, args = list(mean = data_mean1, sd = data_sd1,color ="black", size = 1))+  #直方图上加密度曲线，也可以用geom_density()
 geom_vline(aes(xintercept=data_mean1), color="red", linetype="dashed", size=1)+ #添加均值线和两个标准差线
+geom_density(color = "black", size = 1)+  #直方图上加密度曲线，也可以用geom_density()
 geom_vline(aes(xintercept=three_sd_plus1), color="red", linetype="dashed", size=1)+
-annotate(geom="text",fontface="bold",color="black",x=three_sd_plus,y=0.00015,label="25898.77",size=5)+   
- #通过annotate函数添加注释，将geom变量设置为"text"和"rect"分别代表文字与矩形，并且可以调整位置，大小颜色
-annotate(geom="text",fontface="bold",color="black",x=40000,y=0.000225,label="μ+3σ=20432.97+5465.803",size=7)+
+annotate(geom="text",fontface="bold",family="Arial",color="black",x=three_sd_plus,y=0.00015,label="25692.47",size=9)+   
+#通过annotate函数添加注释，将geom变量设置为"text"和"rect"分别代表文字与矩形，并且可以调整位置，大小颜色
+annotate(geom="text",fontface="bold",family="Arial",color="black",x=40000,y=0.000220,label="μ+3σ=20070.71+5621.76",size=9)+
 labs(x="frequency",y = "density")+
 theme_bw()+
 theme(panel.border = element_blank(),panel.grid.major = element_blank(),panel.grid.minor = element_blank(),axis.line = element_line(colour = "black"))+
-theme(text=element_text(size=16,family="Arial",face="bold"))
+theme(axis.text=element_text(size=24,family="Arial",face = "bold"),axis.title=element_text(size=24,family="Arial",face="bold"))
+ggsave(file="braZ_density_picture.pdf",plot=p2,width=10,height=8)
 
 #将两个图合并在一起
 p3<-p1+p2
@@ -1574,7 +1583,7 @@ dev.off()
 ```
 
 
-# 9.绘制三三组合的braZ和braB的基因表达谱
+# 9.绘制三三组合的braZ和braB的基因表达谱(不能用！！！！！！)
 ## 9.1绘制braB的基因表达谱
 ```bash
 #数量是56663
@@ -1587,12 +1596,13 @@ done
 
 #提取三三组合braB的表达量 56663
 cd /mnt/d/WGCNA/rma_WGCNA/condition_three_combine/img
-for f in $(cat three_condition_combine_whole_expression.tsv)
+for f in $(cat ./../result/three_condition_combine_whole_expression.tsv)
 do
 gene=$(cat $f.soft | grep "braB")
-echo -e "$f\t$gene" >>three_condition_combine_braB_expression.tsv
+echo -e "$f\t$gene" >>./../result/three_condition_combine_braB_expression.tsv
 done
 #计算每一行的平均基因表达量,注意不同组合的样本量不同，所以会存在缺失值 (已经转置该文件并用excel计算前几个样本验证过计算无错误)
+cd /mnt/d/WGCNA/rma_WGCNA/condition_three_combine/result
 cat three_condition_combine_braB_expression.tsv | perl -MStatistics::Descriptive -alne '($gene,$exp)=(split/\t/,$_,3)[0,2];@data=(split/\t/,$exp);$stat = Statistics::Descriptive::Full->new();$stat->add_data(@data);$mean = $stat->mean();$mean=sprintf"%.2f",$mean;print"$gene\t$mean";' >three_condition_combine_braB_mean_expression.tsv
 
 #查看56663个组合中braB的基因表达量最大值和最小值
@@ -1601,6 +1611,7 @@ cat three_condition_combine_braB_mean_expression.tsv |cut -f 2 | sort -n | uniq 
 
 #使用mclust绘制braB基因表达量的mclust模型图
 library(mclust)
+setwd("D:/WGNCA/rma_WGCNA/condition_three_combine/result")
 ratio<-read.table("three_condition_combine_braB_mean_expression.tsv",header=F)
 #mclust分析
 BIC <- mclustBIC(ratio$V2)
@@ -1629,6 +1640,8 @@ ggsave(p, file = "braB_expr_mclust.pdf", width = 5, height = 4)
 
 
 #绘制braB的基因表达密度图
+library(mclust)
+setwd("D:/WGNCA/rma_WGCNA/condition_three_combine/result")
 data<-read.table("three_condition_combine_braB_mean_expression.tsv",header=F)
 braB<-data$V2
 dens <- densityMclust(braB)
@@ -1641,19 +1654,18 @@ plot(dens, what = "density", data = data$V2, breaks = br)
 matplot(x, cdens, type = "l", lwd = 1, add = TRUE, lty = 1)
 ```
 
-## 9.2绘制braZ的基因表达谱
+## 9.2绘制braZ的基因表达谱(不能用！！！！！！)
 ```r
 #提取三三组合braZ的表达量
 cd /mnt/d/WGCNA/rma_WGCNA/condition_three_combine/img
-for f in $(cat three_condition_combine_whole_expression.tsv)
+for f in $(cat ./../result/three_condition_combine_whole_expression.tsv)
 do
 gene=$(cat $f.soft | grep "braZ")
-echo -e "$f\t$gene" >>three_condition_combine_braZ_expression.tsv
+echo -e "$f\t$gene" >>./../result/three_condition_combine_braZ_expression.tsv
 done
 #计算每一行的平均基因表达量
+cd /mnt/d/WGCNA/rma_WGCNA/condition_three_combine/result
 cat three_condition_combine_braZ_expression.tsv | perl -MStatistics::Descriptive -alne '($gene,$exp)=(split/\t/,$_,3)[0,2];@data=(split/\t/,$exp);$stat = Statistics::Descriptive::Full->new();$stat->add_data(@data);$mean = $stat->mean();$mean=sprintf"%.2f",$mean;print"$gene\t$mean";' >three_condition_combine_braZ_mean_expression.tsv
-
-
 #查看56663个组合中braB的基因表达量最大值和最小值
 cat three_condition_combine_braZ_mean_expression.tsv |cut -f 2 | sort -n | uniq | head  #最小值1.65
 cat three_condition_combine_braZ_mean_expression.tsv |cut -f 2 | sort -n | uniq | tail  #最大值7.08
@@ -1686,7 +1698,6 @@ geom_line(data = num, aes(x = num, y = grade, group = method, color = method)) +
 scale_x_continuous(breaks = seq(0,9,1))
 ggsave(p, file = "braZ_expr_mclust.pdf", width = 5, height = 4)
 
-
 #绘制braB的基因表达密度图
 data<-read.table("three_condition_combine_braZ_mean_expression.tsv",header=F)
 braZ<-data$V2
@@ -1699,7 +1710,6 @@ cdens <- t(apply(cdens, 1, function(d) d*dens$parameters$pro))
 plot(dens, what = "density", data = braZ, breaks = br)
 matplot(x, cdens, type = "l", lwd = 1, add = TRUE, lty = 1)
 ```
-
 # 10.绘制40个条件的braZ和braB的基因表达谱
 ## 10.1绘制braB的基因表达谱
 ```bash
@@ -1709,9 +1719,10 @@ for filename  in *.condition.txt
 do
 base=$(basename $filename .condition.txt)
 gene=$(cat $base.condition.txt | grep "braB")
-echo -e "$base\t$gene" >>braB_forty_condition_expression.tsv
+echo -e "$base\t$gene" >>/mnt/d/WGCNA/expression/forty_condition_expr/braB_forty_condition_expression.tsv
 done
 #计算每一行的平均基因表达量,注意不同组合的样本量不同，所以会存在缺失值 (已经转置该文件并用excel计算前几个样本验证过计算无错误)
+cd /mnt/d/WGCNA/expression/forty_condition_expr
 cat braB_forty_condition_expression.tsv | perl -MStatistics::Descriptive -alne '($gene,$exp)=(split/\t/,$_,3)[0,2];@data=(split/\t/,$exp);$stat = Statistics::Descriptive::Full->new();$stat->add_data(@data);$mean = $stat->mean();$mean=sprintf"%.2f",$mean;print"$gene\t$mean";' >braB_forty_condition_mean_expression.tsv
 
 #查看56663个组合中braB的基因表达量最大值和最小值
@@ -1768,11 +1779,11 @@ for filename  in *.condition.txt
 do
 base=$(basename $filename .condition.txt)
 gene=$(cat $base.condition.txt | grep "braZ")
-echo -e "$base\t$gene" >>braZ_forty_condition_expression.tsv
+echo -e "$base\t$gene" >>/mnt/d/WGCNA/expression/forty_condition_expr/braZ_forty_condition_expression.tsv
 done
 #计算每一行的平均基因表达量,注意不同组合的样本量不同，所以会存在缺失值 (已经转置该文件并用excel计算前几个样本验证过计算无错误)
+cd /mnt/d/WGCNA/expression/forty_condition_expr
 cat braZ_forty_condition_expression.tsv | perl -MStatistics::Descriptive -alne '($gene,$exp)=(split/\t/,$_,3)[0,2];@data=(split/\t/,$exp);$stat = Statistics::Descriptive::Full->new();$stat->add_data(@data);$mean = $stat->mean();$mean=sprintf"%.2f",$mean;print"$gene\t$mean";' >braZ_forty_condition_mean_expression.tsv
-
 #查看56663个组合中braB的基因表达量最大值和最小值
 cat braZ_forty_condition_mean_expression.tsv |cut -f 2 | sort -n | uniq | head  #最小值1.65
 cat braZ_forty_condition_mean_expression.tsv |cut -f 2 | sort -n | uniq | tail  #最大值7.08
@@ -1818,8 +1829,9 @@ plot(dens, what = "density", data = data$V2, breaks = br)
 matplot(x, cdens, type = "l", lwd = 1, add = TRUE, lty = 1)
 ```
 
-## 10.3以14,13,13分为低中高组合
-```r
+## 10.3以14,13,13分为低中高组合 (不能用！！！！！！)
+```bash
+cd /mnt/d/WGCNA/expression/forty_condition_expr
 cat braB_forty_condition_mean_expression.tsv |sort -k 2 -n | head -n 14 | tail -n 1  #6.90
 cat braB_forty_condition_mean_expression.tsv |sort -k 2 -n | head -n 27 | tail -n 1  #7.56
 cat braB_forty_condition_mean_expression.tsv |sort -k 2 -n | head -n 40 | tail -n 1  #10.20
@@ -1835,7 +1847,8 @@ cat braB_forty_condition_mean_expression.tsv |sort -k 2 -n | head -n 40 | tail -
 cat braZ_forty_condition_mean_expression.tsv |sort -k 2 -n | head -n 14 | cut -f 1 >braZ_low.tsv
 cat braZ_forty_condition_mean_expression.tsv |sort -k 2 -n | head -n 27 | tail -n 13 |cut -f 1 >braZ_mid.tsv
 cat braZ_forty_condition_mean_expression.tsv |sort -k 2 -n | head -n 40 | tail -n 13 |cut -f 1 >braZ_high.tsv
-
+```
+```r
 #绘制韦恩图
 library(VennDiagram)
 library(RColorBrewer)
@@ -1861,8 +1874,6 @@ cd /mnt/d/WGCNA/expression/forty_condition_expr
 cat braB_forty_condition_mean_expression.tsv | perl -alne '$exp=(split/\t/,$_,2)[1];print"A\t$exp"' | sed '1iconditon\texp' >braB_density_picture.tsv
 #绘制频数图，非频率图
 plotr hist braB_density_picture.tsv --xl braB --bins 20 --col 2
-
-
 #准备braZ画图文件
 cat braZ_forty_condition_mean_expression.tsv | perl -alne '$exp=(split/\t/,$_,2)[1];print"A\t$exp"' | sed '1iconditon\texp' >braZ_density_picture.tsv
 #绘制频数图，非频率图
@@ -1870,28 +1881,18 @@ plotr hist braZ_density_picture.tsv --xl braZ --bins 20 --col 2
 ```
 
 # 11.绘制40个条件中braB和braZ的基因表达量热图
-
-## 11.1绘制40个条件中braB和braZ的平均基因表达量热图，不聚类
-```r
+## 11.1准备40个条件中braB和braZ的平均基因表达量热图文件
+```bash
 #提取40个条件里braB和braZ的平均基因表达量
-braB_forty_condition_mean_expression.tsv
-braZ_forty_condition_mean_expression.tsv
+cd /mnt/d/WGCNA/expression/forty_condition_expr
+cp braB_forty_condition_mean_expression.tsv ./../raw_expr_heatmap
+cp braZ_forty_condition_mean_expression.tsv ./../raw_expr_heatmap
 cd /mnt/d/WGCNA/expression/raw_expr_heatmap
 cat braB_forty_condition_mean_expression.tsv | tsv-join -d 1 -f  braZ_forty_condition_mean_expression.tsv -k 1 --append-fields 2 | tsv-join -d 1 -f condition_detail.tsv -k 2 --append-fields 1 >detail_braB_braZ_men_expr.tsv
-tsv-select -f 4,2,3 detail_braB_braZ_men_expr.tsv | sed '1icondition\tbraB\tbraZ' >detail_braB_braZ_mean_heatmap.tsv
-#绘制热图
-library(pheatmap)
-data<-read.table("detail_braB_braZ_mean_heatmap.tsv",header=T,row.names=1, sep="\t", quote="")
-#将数据转换为数据框格式
-data<-as.data.frame(data)
-#pheatmap对数据进行z-score仅用参数scale="row"即对行进行标准化
-#热图对行不进行聚类，对列不进行聚类
-pheatmap(data,display_numbers = TRUE,scale="column",cluster_row = FALSE,cluster_cols = FALSE,border_color = "black",cellwidth = 30,cellheight = 10)
-
+tsv-select -f 1,2,3 detail_braB_braZ_men_expr.tsv | sed '1icondition\tbraB\tbraZ' >braB_braZ_detail_mean_heatmap.tsv  #40
 ```
-
-## 11.2绘制40个条件中braB和braZ和相关基因的平均基因表达量热图，对条件进行聚类，基因不聚类,对基因标准化
-```r
+## 11.2准备40个条件中braB和braZ和相关基因的平均基因表达量热图文件（对条件进行聚类，基因不聚类,对基因标准化）
+```bash
 #提取以下50个基因的基因表达量
 for filename  in *.condition.txt
 do
@@ -1912,14 +1913,19 @@ done
 
 #计算每一行的平均基因表达量
 cat braB_braZ_cor_condition_expr.tsv | perl -MStatistics::Descriptive -alne '($condi,$gene,$exp)=(split/\t/,$_,3)[0,1,2];@data=(split/\t/,$exp);$stat = Statistics::Descriptive::Full->new();$stat->add_data(@data);$mean = $stat->mean();$mean=sprintf"%.2f",$mean;print"$condi\t$gene\t$mean";' >braB_braZ_cor_condition_mean_expr.tsv
+sed -i '1icondi\tgene\tmean' braB_braZ_cor_condition_mean_expr.tsv
 #拼接条件详细信息
-cat braB_braZ_cor_condition_mean_expr.tsv | tsv-join -d 1 -f condition_detail.tsv -k 2 --append-fields 1 | tsv-select -f 4,2,3 | sed '1icondi\tgene\texpr' >braB_braZ_cor_detail_mean_expr.tsv
+#cat braB_braZ_cor_condition_mean_expr.tsv | tsv-join -d 1 -f condition_detail.tsv -k 2 --append-fields 1 | tsv-select -f 4,2,3 | sed '1icondi\tgene\texpr' >braB_braZ_cor_detail_mean_expr.tsv  #2000
+```
 
-#手动去除第一个列名
+## 11.3 将50个基因区分为braB_cor和braZ_cor,手动创建分类文件braB_braZ_cor_class.tsv
+```r
 #读入数据并且将长数据变为短数据
 setwd("D:/WGCNA/expression/raw_expr_heatmap")
 library(pheatmap)
+library(ComplexHeatmap)
 library(tidyr) #gather宽转长  spread长转宽
+library(cowplot)
 data1<-read.table("braB_braZ_cor_detail_mean_expr.tsv",header=T)
 #关键的参数是key和value，指定后就可以根据相应的key和value进行长到宽的转换
 data1<-spread(data1,key="gene",value="expr")
@@ -1928,64 +1934,56 @@ rownames(data1)=data1[,1]
 data1<-data1[,-1]
 data1<-as.matrix(data1)
 #载入分类信息
-class<-read.table("brab_braZ_cor_class.tsv",header=T)
+#手动去除第一个列名
+class<-read.table("braB_braZ_cor_class.tsv",header=T)
 #type<-class$V2
 #top = HeatmapAnnotation(df=data.frame(type))
 #聚类方法为average,只对基因聚类，分成两个簇,不展示行名,顶部分组信息
-annotation1 = HeatmapAnnotation(df = data.frame(type = c(rep("braB",21), rep("braZ", 29))))
-pheatmap(data1,scale="column",show_rownames = FALSE,cluster_row = FALSE,cluster_cols = TRUE,border_color = "black",cellwidth = 10,cellheight = 10,clustering_method = "average",cutree_cols =2, annotation_col = class)
+#annotation1 = HeatmapAnnotation(df = data.frame(type = c(rep("braB",21), rep("braZ", 29))))
+#pheatmap(data1,scale="column",show_rownames = FALSE,cluster_row = FALSE,cluster_cols = TRUE,border_color = "black",cellwidth = 10,cellheight = 10,clustering_method = "average",cutree_cols =2, annotation_col = class)
 ```
 
-## 11.3使两个热图的条件顺序一致
+## 11.4使两个热图的条件顺序一致  condition_order.tsv  
 ```r
 setwd("D:/WGCNA/expression/raw_expr_heatmap")
 library(pheatmap)
 library(tidyr)
- library(cowplot)
-data1<-read.table("braB_braZ_cor_detail_mean_expr.tsv",header=T)
-#关键的参数是key和value，指定后就可以根据相应的key和value进行长到宽的转换
-data1<-spread(data1,key="gene",value="expr")
-write.table(data1,file="condition_order.tsv",sep="\t")
-#将数据矩阵化，去除sample这个单词
-rownames(data1)=data1[,1]
-data1<-data1[,-1]
-data1<-as.matrix(data1)
-#载入分类信息
-class<-read.table("brab_braZ_cor_class.tsv",header=T)
-#聚类方法为average,只对基因聚类，分成两个簇,不展示行名,顶部分组信息
-#annotation1 = HeatmapAnnotation(df = data.frame(type = c(rep("braB",21), rep("braZ", 29))))  
-pheatmap(data1,scale="column",show_rownames = T,show_colnames = T,cluster_row = F,cluster_cols = TRUE,border_color = "black",cellwidth = 10,cellheight = 10,clustering_method = "average",cutree_cols =2, annotation_col = class)
-
-#更改braB和braZ条件的顺序
-cat condition_order.tsv | cut -f 2 | grep -v "PA0378_at" | sed 's/"//g' >braB_braZ_condition_order.tsv
-cat braB_braZ_condition_order.tsv | tsv-join -d 1 -f detail_braB_braZ_men_expr.tsv -k 4  --append-fields 2,3 |sed '1icondition\tbraB\tbraZ' >detail_braB_braZ_mean_heatmap.tsv
-#读入文件
-data<-read.table("detail_braB_braZ_mean_heatmap.tsv",header=T,row.names=1, sep="\t", quote="")
-#将数据转换为数据框格式
-data<-as.data.frame(data)
-#pheatmap对数据进行z-score仅用参数scale="row"即对行进行标准化
-#热图对行不进行聚类，对列不进行聚类
-pheatmap(data,display_numbers = TRUE,cluster_row = FALSE,cluster_cols = FALSE,border_color = "black",cellwidth = 30,cellheight = 10)
-```
-
-## 11.3将热图的样本条件改成样本号码
-```r
-#将样本条件改为数据集号braB_braZ_condition_order.tsv
-sed -i '1icondi\tgene\tmean' braB_braZ_cor_condition_mean_expr.tsv
-setwd("D:/WGCNA/expression/raw_expr_heatmap")
-library(pheatmap)
-library(tidyr)
- library(cowplot)
+library(cowplot)
 data1<-read.table("braB_braZ_cor_condition_mean_expr.tsv",header=T)
 #关键的参数是key和value，指定后就可以根据相应的key和value进行长到宽的转换
 data1<-spread(data1,key="gene",value="mean")
 write.table(data1,file="condition_order.tsv",sep="\t")
+```
+```bash
+#更改braB和braZ条件的顺序
+cat condition_order.tsv | cut -f 2 | grep -v "PA0378_at" | sed 's/"//g' >braB_braZ_condition_order.tsv
+```
+
+
+## 11.5绘制40个条件中braB和braZ的平均基因表达量热图
+```bash
+#去除基因名PA号后面的内容
+cat braB_braZ_cor_condition_mean_expr.tsv | perl -alne '($one,$two,$thr)=(split/\t/,$_)[0,1,2];$two=~s/\_.*$//g;print"$one\t$two\t$thr";' >temp
+mv temp braB_braZ_cor_condition_mean_expr.tsv
+```
+
+```r
+setwd("D:/WGCNA/expression/raw_expr_heatmap")
+library(pheatmap)
+library(tidyr)
+library(cowplot)
+library(showtext)#用showtext包输入需要的字体
+font_add('Arial','/Library/Fonts/Arial.ttf')
+showtext_auto()
+data1<-read.table("braB_braZ_cor_condition_mean_expr.tsv",header=T)
+#关键的参数是key和value，指定后就可以根据相应的key和value进行长到宽的转换
+data1<-spread(data1,key="gene",value="mean")
 #将数据矩阵化，去除sample这个单词
 rownames(data1)=data1[,1]
 data1<-data1[,-1]
 data1<-as.matrix(data1)
 #载入分类信息
-type<-read.table("brab_braZ_cor_class.tsv",header=T)
+type<-read.table("braB_braZ_cor_class.tsv",header=T)
 #聚类方法为average,只对基因聚类，分成两个簇,不展示行名,顶部分组信息
 #annotation1 = HeatmapAnnotation(df = data.frame(type = c(rep("braB",21), rep("braZ", 29))))  
 y<-pheatmap(data1,scale="column",show_rownames = T,show_colnames = T,cluster_row = F,cluster_cols = TRUE,border_color = "black",cellwidth = 10,cellheight = 10,clustering_method = "average",cutree_cols =2, annotation_col =type, fontfamily= "Arial",fontface="bold",fontsize=12,color = colorRampPalette(colors = c("#4DAF4A","#FFFFFF","#386CB0"))(100))
@@ -1998,13 +1996,19 @@ save_pheatmap_pdf <- function(y, filename, width=7, height=7) {
    dev.off()
 }
 save_pheatmap_pdf(y, "braB_braZ_cor_condi.pdf")
+```
 
-
-#更改braB和braZ条件的顺序
-cat condition_order.tsv | cut -f 2 | grep -v "PA0378_at" | sed 's/"//g' >braB_braZ_condition_order.tsv
-cat braB_braZ_condition_order.tsv | tsv-join -d 1 -f detail_braB_braZ_men_expr.tsv  -k 1  --append-fields 2,3 |sed '1icondition\tbraB\tbraZ' >detail_braB_braZ_mean_heatmap.tsv
+## 11.6 绘制40个条件中braB和braZ的平均基因表达量热图
+```bash
+setwd("D:/WGCNA/expression/raw_expr_heatmap")
+library(pheatmap)
+library(tidyr)
+library(cowplot)
+library(showtext)#用showtext包输入需要的字体
+font_add('Arial','/Library/Fonts/Arial.ttf')
+showtext_auto()
 #读入文件
-data<-read.table("detail_braB_braZ_mean_heatmap.tsv",header=T,row.names=1, sep="\t", quote="")
+data<-read.table("braB_braZ_detail_mean_heatmap.tsv ",header=T,row.names=1, sep="\t", quote="")
 #将数据转换为数据框格式
 data<-as.data.frame(data)
 #pheatmap对数据进行z-score仅用参数scale="row"即对行进行标准化
@@ -2020,8 +2024,6 @@ save_pheatmap_pdf <- function(x, filename, width=7, height=7) {
 }
 save_pheatmap_pdf(x, "braB_braZ_condi.pdf")
 
-
-
-
-
 ```
+
+
