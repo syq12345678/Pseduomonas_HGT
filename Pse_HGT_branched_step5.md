@@ -133,7 +133,7 @@ cat S1.txt   S11.txt  S3.txt  S5.txt  S7.txt  S9.txt S10.txt  S2.txt   S4.txt  S
 
 ##### 6.查看文件夹project里面的内容，共391个菌株泛基因组的相似信息，包含基因名，基因起始位置，终止位置，蛋白family 菌株种的nb_copy 每个基因对应的partition  persistent_neighbors shell_nei cloud_nei
 #目前存在问题：每个菌株里对应基因的名字都不一致
-cat *.tsv | grep -v "gene"|cut -f 1 | sort -n | uniq | wc -l #2384834
+cat *.tsv | grep -v "gene"|cut -f 1 | sort -n | uniq | wc -l #2384834 (平均每个基因组6,099个基因)
 #合并391个菌株的family,共#25001
 cat *.tsv | grep -v "gene"| cut -f 6 | sort -n | uniq | wc -l  #25001
 ```
