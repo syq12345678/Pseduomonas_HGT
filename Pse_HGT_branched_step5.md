@@ -10,7 +10,7 @@
   - [2.1自己在NCBI下载的bacteria representive数据](#21自己在ncbi下载的bacteria-representive数据)
   - [2.2根据王老师的nwr/doc/assembly.md下载数据](#22根据王老师的nwrdocassemblymd下载数据)
   - [2.3提取PAO1的braB和braZ的上下游5k，10k，50k并和nr比对](#23提取pao1的brab和braz的上下游5k10k50k并和nr比对)
-  - [2.4nr的blast结果比对可视化](#24nr的blast结果比对可视化)
+  - [2.4nt的blast结果比对可视化](#24nt的blast结果比对可视化)
   - [2.5选择假单胞菌属的两个clade的10个菌和PAO1的上下游50k比对](#25选择假单胞菌属的两个clade的10个菌和pao1的上下游50k比对)
 - [3.统计二代测序宏基因组样本的抗性基因存在情况以及三代测序宏基因组样本的抗性基因存在情况](#3统计二代测序宏基因组样本的抗性基因存在情况以及三代测序宏基因组样本的抗性基因存在情况)
   - [3.1三代污泥宏基因组中的细菌物种存在情况(使用的是sludge_bin.fa)](#31三代污泥宏基因组中的细菌物种存在情况使用的是sludge_binfa)
@@ -141,12 +141,9 @@ cat *.tsv | grep -v "gene"| cut -f 6 | sort -n | uniq | wc -l  #25001
 ## 1.3分析braB和braZ的泛基因组频率
 ```r
 #提取braB共表达的基因对应的family和braZ共表达的基因对应的famliy
-cd pangenome 
-mkdir braB_braZ
-cp braB_three_Pfam_id.tsv braZ_three_Pfam_id.tsv Pseudom_aeru_PAO1.tsv ./braB_braZ
-cd braB_braZ
-cat Pseudom_aeru_PAO1.tsv | grep -f braB_three_Pfam_id.tsv |cut -f 6 >braB_family.tsv
-cat Pseudom_aeru_PAO1.tsv | grep -f braZ_three_Pfam_id.tsv |cut -f 6 >braZ_family.tsv
+cd pangenome/Pseudom_aeru
+cat ./projection/Pseudom_aeru_PAO1.tsv | grep -f braB_three_Pfam_id.tsv |cut -f 6 >braB_family.tsv
+cat ./projection/Pseudom_aeru_PAO1.tsv | grep -f braZ_three_Pfam_id.tsv |cut -f 6 >braZ_family.tsv
 #提取family对应的泛基因组分类以及在菌株里的平均序列
 cat matrix.csv | tr "," "\t" | cut -f 1,2,6 | sed 's/"//g' >famliy_pan_class.tsv
 cat famliy_pan_class.tsv | grep -f braB_family.tsv  #发现braB都在persistent上
@@ -178,8 +175,8 @@ cat  gene_presence_absence.Rtab | grep -f braB_family.tsv  | perl -MStatistics::
 cat  gene_presence_absence.Rtab | grep -f braZ_family.tsv  | perl -MStatistics::Descriptive -alne '($gene,$exp)=(split/\t/,$_,3)[0,2];@data=(split/\t/,$exp);$stat = Statistics::Descriptive::Full->new();$stat->add_data(@data);$mean = $stat->mean();$mean=sprintf"%.2f",$mean;print"$gene\t$mean";' >braZ_mean_presence.tsv
 
 #将braB和braZ结果更改为柱状图格式
-cat braB_mean_presence.tsv | tsv-join -d 1 -f Pseudom_aeru_PAO1.tsv -k 6 --append-fields 1 --allow-duplicate-keys | tsv-select -f 3,2 | sed '1iname\tnum' >braB_picture.tsv
-cat braZ_mean_presence.tsv | tsv-join -d 1 -f Pseudom_aeru_PAO1.tsv -k 6 --append-fields 1 --allow-duplicate-keys | tsv-select -f 3,2 | sed '1iname\tnum' >braZ_picture.tsv
+cat braB_mean_presence.tsv | tsv-join -d 1 -f ./projection/Pseudom_aeru_PAO1.tsv -k 6 --append-fields 1 --allow-duplicate-keys | tsv-select -f 3,2 | sed '1iname\tnum' >braB_picture.tsv
+cat braZ_mean_presence.tsv | tsv-join -d 1 -f ./projection/Pseudom_aeru_PAO1.tsv -k 6 --append-fields 1 --allow-duplicate-keys | tsv-select -f 3,2 | sed '1iname\tnum' >braZ_picture.tsv
 
 #绘制braB及cor频率分布柱状图
 library(ggplot2)
@@ -192,15 +189,14 @@ library(patchwork)
 #设置柱状图的颜色,调整y轴的范围
 #Default：stat="count" 表示从给定的数据里，统计每个类别出现的次数；此时aes()只需要给定x参数即可；
 #stat="identity"表示直接指定每种类别的频数；此时aes()除了需要给定x参数交代类别，还需要指定y参数表示频数值。
-p<-ggplot(data,aes(x=name,y=num))+geom_bar(stat="identity", position="dodge",fill= "#FC9272",width=0.9)+theme_bw()+theme(panel.border = element_blank(),panel.grid.major = element_blank(),panel.grid.minor = element_blank(),axis.line = element_line(colour = "black"),axis.text.x = element_text(angle = 90,size=10,color='black', hjust = 1, vjust =1))+theme(text=element_text(size=16,family="Arial",face="bold"))+ylim(0,1)
+p<-ggplot(data,aes(x=name,y=num))+geom_bar(stat="identity", position="dodge",fill= "#E60012",width=0.9)+theme_bw()+theme(panel.border = element_blank(),panel.grid.major = element_blank(),panel.grid.minor = element_blank(),axis.line = element_line(colour = "black"),axis.text.x = element_text(angle = 90,size=10,color='black', hjust = 1, vjust =1))+theme(text=element_text(size=16,family="Arial",face="bold"))+ylim(0,1)+geom_hline(aes(yintercept=0.95),size=1,color="black",linetype="dashed")
 ggsave('braB_cor_frequency.pdf', p,dpi = 480, width=8, height=6)   
-
-
 
 #绘制braZ及cor在391个菌株的频率分布图
 data1<-read.table("braZ_picture.tsv",header=T)
-p1<-ggplot(data1,aes(x=name,y=num))+geom_bar(stat="identity", position="dodge",fill= "#6BAED6",width=0.9)+theme_bw()+theme(panel.border = element_blank(),panel.grid.major = element_blank(),panel.grid.minor = element_blank(),axis.line = element_line(colour = "black"),axis.text.x = element_text(angle = 90,size=10,color='black', hjust = 1, vjust =1))+theme(text=element_text(size=16,family="Arial",face="bold"))+ylim(0,1)
-ggsave('braZ_cor_frequency.pdf', p1,dpi = 480, width=8, height=6)   
+p1<-ggplot(data1,aes(x=name,y=num))+geom_bar(stat="identity", position="dodge",fill= "#348BCC",width=0.9)+theme_bw()+theme(panel.border = element_blank(),panel.grid.major = element_blank(),panel.grid.minor = element_blank(),axis.line = element_line(colour = "black"),axis.text.x = element_text(angle = 90,size=10,color='black', hjust = 1, vjust =1))+theme(text=element_text(size=16,family="Arial",face="bold"))+ylim(0,1)+geom_hline(aes(yintercept=0.95),size=1,color="black",linetype="dashed")
+ggsave('braZ_cor_frequency.pdf', p1,dpi = 480, width=8, height=6) 
+
 
 ```
 
@@ -560,7 +556,7 @@ evalue expect value
 bitscore bit score
 ```
 
-## 2.4nr的blast结果比对可视化
+## 2.4nt的blast结果比对可视化
 ```bash
 #####使用spanr查看测序深度然后画图(不太能用)
 #####包含假单胞菌属的其他物种 
@@ -599,6 +595,7 @@ cat whole_braZ_50k.format2.tsv | sed 's/^/cov_&/g' |perl -alne '($one,$two,$thr,
 perl feature_draw.pl 2.gff braB.txt >braB.png
 perl feature_draw.pl 2.gff braZ.txt >braZ.png
 ```
+
 ## 2.5选择假单胞菌属的两个clade的10个菌和PAO1的上下游50k比对
 ```bash
 cd ~/data/Pseudomonas
@@ -685,8 +682,41 @@ gunzip branched-chain/50k/PAO1.gff.gz
 cat branched-chain/50k/PAO1.gff | grep "braB" | tsv-filter --str-in-fld 3:"gene" >branched-chain/50k/PAO1_braB.gff
 cat branched-chain/50k/PAO1.gff | grep "braZ" | tsv-filter --str-in-fld 3:"gene" >branched-chain/50k/PAO1_braZ.gff
 
-perl feature_draw.pl 2.gff  branched-chain/50k/PAO1_braB_50k.txt >braB.png
-perl feature_draw.pl 2.gff  branched-chain/50k/PAO1_braZ_50k.txt >braZ.png
+perl feature_draw.pl 2.gff  branched-chain/50k/PAO1_braB_50k.txt >whole_braB.png
+perl feature_draw.pl 2.gff  branched-chain/50k/PAO1_braZ_50k.txt >whole_braZ.png
+#选择coverage大于5的画图
+cat branched-chain/50k/PAO1_braB_50k.format2.tsv | tsv-filter --ge 1:5 |sed 's/^/cov_&/g' |perl -alne '($one,$two,$thr,$four)=(split/\t/,$_,4)[0,1,2,3];$five=cov5_10;print"$two\t$five\t"."$thr"."-"."$four";' >branched-chain/50k/PAO1_braB_50k_cov5.txt
+cat branched-chain/50k/PAO1_braZ_50k.format2.tsv | tsv-filter --ge 1:5 |sed 's/^/cov_&/g' |perl -alne '($one,$two,$thr,$four)=(split/\t/,$_,4)[0,1,2,3];$five=cov5_10;print"$two\t$five\t"."$thr"."-"."$four";' >branched-chain/50k/PAO1_braZ_50k_cov5.txt
+perl feature_draw.pl 2.gff branched-chain/50k/PAO1_braB_50k_cov5.txt >braB_cov5.png
+perl feature_draw.pl 2.gff branched-chain/50k/PAO1_braZ_50k_cov5.txt >braZ_cov5.png
+
+#####braB
+#统计cov等于1的比例  #5759
+cat branched-chain/50k/PAO1_braB_50k.format2.tsv | tsv-filter --eq 1:1 |perl -alne '($one,$two)=(split/\t/,$_,4)[2,3];$thr=$two-$one+1;print"$thr";' | tsv-summarize --sum 1
+#统计cov等于2的比例  #3500
+cat branched-chain/50k/PAO1_braB_50k.format2.tsv | tsv-filter --eq 1:2 |perl -alne '($one,$two)=(split/\t/,$_,4)[2,3];$thr=$two-$one+1;print"$thr";' | tsv-summarize --sum 1
+#统计cov等于3的比例  #3985
+cat branched-chain/50k/PAO1_braB_50k.format2.tsv | tsv-filter --eq 1:3 |perl -alne '($one,$two)=(split/\t/,$_,4)[2,3];$thr=$two-$one+1;print"$thr";' | tsv-summarize --sum 1
+#统计cov等于4的比例  #4871
+cat branched-chain/50k/PAO1_braB_50k.format2.tsv | tsv-filter --eq 1:4 |perl -alne '($one,$two)=(split/\t/,$_,4)[2,3];$thr=$two-$one+1;print"$thr";' | tsv-summarize --sum 1
+#统计cov大于或等于5的比例  #59836
+cat branched-chain/50k/PAO1_braB_50k.format2.tsv | tsv-filter --ge 1:5 |perl -alne '($one,$two)=(split/\t/,$_,4)[2,3];$thr=$two-$one+1;print"$thr";' | tsv-summarize --sum 1
+#统计braB上下游总长度  #101314
+faops size branched-chain/50k/PAO1_braB_50k.fa
+
+#####braZ
+#统计cov等于1的比例  #9691
+cat branched-chain/50k/PAO1_braZ_50k.format2.tsv | tsv-filter --eq 1:1 |perl -alne '($one,$two)=(split/\t/,$_,4)[2,3];$thr=$two-$one+1;print"$thr";' | tsv-summarize --sum 1
+#统计cov等于2的比例  #9095
+cat branched-chain/50k/PAO1_braZ_50k.format2.tsv | tsv-filter --eq 1:2 |perl -alne '($one,$two)=(split/\t/,$_,4)[2,3];$thr=$two-$one+1;print"$thr";' | tsv-summarize --sum 1
+#统计cov等于3的比例  #3985
+cat branched-chain/50k/PAO1_braZ_50k.format2.tsv | tsv-filter --eq 1:3 |perl -alne '($one,$two)=(split/\t/,$_,4)[2,3];$thr=$two-$one+1;print"$thr";' | tsv-summarize --sum 1
+#统计cov等于4的比例  #7938
+cat branched-chain/50k/PAO1_braZ_50k.format2.tsv | tsv-filter --eq 1:4 |perl -alne '($one,$two)=(split/\t/,$_,4)[2,3];$thr=$two-$one+1;print"$thr";' | tsv-summarize --sum 1
+#统计cov大于或等于5的比例  #41207
+cat branched-chain/50k/PAO1_braZ_50k.format2.tsv | tsv-filter --ge 1:5 |perl -alne '($one,$two)=(split/\t/,$_,4)[2,3];$thr=$two-$one+1;print"$thr";' | tsv-summarize --sum 1
+#统计braB上下游总长度  #101314
+faops size branched-chain/50k/PAO1_braZ_50k.fa
 
 ```
 
