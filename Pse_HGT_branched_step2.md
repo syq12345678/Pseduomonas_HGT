@@ -351,14 +351,14 @@ faops some branched-chain/kaks/aeru/branched-chain.CDS.fa branched-chain/kaks/ae
 ```bash
 cd ~/data/Pseudomonas
 mkdir -p ~/data/Pseudomonas/branched-chain/kaks/aeru/mega
-#计算braB的dn/ds(64668)
+#计算braB的dn/ds(64668) #64303
 sed -i '1d' branched-chain/kaks/aeru/mega/pseudom_auer-braB_dN-dS.tsv
 perl -ne 'chomp;($id,$name)=(split/\t/,$_,2)[0,1];@data=(split/\t/,$name);$num=join"\n",@data;print"$num\n";'  branched-chain/kaks/aeru/mega/pseudom_auer-braB_dN-dS.tsv | sed 's/NA//g' | sed  '/^\s*$/d' | perl -alne '$num=$F[0];$name=braB;print"$num\t$name";' | sed '1idnds\tfrequency' >branched-chain/kaks/aeru/mega/mega_braB_dnds.tsv
-#计算braB的dn(70500)
+#计算braB的dn(70500) #70125
 sed -i '1d' branched-chain/kaks/aeru/mega/pseudom_auer-braB_dN.tsv
 perl -ne 'chomp;($id,$name)=(split/\t/,$_,2)[0,1];@data=(split/\t/,$name);$num=join"\n",@data;print"$num\n";' branched-chain/kaks/aeru/mega/pseudom_auer-braB_dN.tsv  |
 sed 's/NA//g' | sed  '/^\s*$/d' >branched-chain/kaks/aeru/mega/mega_braB_dn.tsv
-#计算braB的ds(70500)
+#计算braB的ds(70500) #70125
 sed -i '1d' branched-chain/kaks/aeru/mega/pseudom_auer-braB_dS.tsv
 perl -ne 'chomp;($id,$name)=(split/\t/,$_,2)[0,1];@data=(split/\t/,$name);$num=join"\n",@data;print"$num\n";' branched-chain/kaks/aeru/mega/pseudom_auer-braB_dS.tsv  |
 sed 's/NA//g' | sed  '/^\s*$/d' >branched-chain/kaks/aeru/mega/mega_braB_ds.tsv
@@ -367,13 +367,13 @@ library(plotrix)
 setwd("~/data/Pseudomonas")
 data<-read.table("branched-chain/kaks/aeru/mega/mega_braB_dn.tsv")
 data1<-data$V1
-mean(data1)  # 0.002244598
-std.error(data1) # 0.00001012913
+mean(data1)  # 0.00224695
+std.error(data1) # 0.00001016217
 #查看braB的ds的平均值和平均值标准误差
 data<-read.table("branched-chain/kaks/aeru/mega/mega_braB_ds.tsv")
 data1<-data$V1
-mean(data1)  # 0.02042794
-std.error(data1) # 0.0002058705
+mean(data1)  # 0.02046081
+std.error(data1) # 0.0002066775
 
 
 #计算braZ的dn/ds(76720)
