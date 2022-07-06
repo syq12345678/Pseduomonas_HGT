@@ -1344,18 +1344,18 @@ three_sd_plus=mean(df$ratio)+data_sd*3
 three_sd_plus    #25692.47
 
 p1<-ggplot(df, aes(x = ratio)) +geom_histogram(aes(y =..density..),breaks = seq(min(df$ratio), max(df$ratio), length =100),colour ="#C6DBEF", fill ="#08519C", size = 0.1,alpha=0.8) + #使用density代替y轴
-stat_function(fun = dnorm, args = list(mean = data_mean, sd = data_sd,color ="black", size = 1))+
-geom_density(color = "black", size = 1)+  #直方图上加密度曲线，也可以用geom_density()
-geom_vline(aes(xintercept=data_mean), color="red", linetype="dashed", size=1)+ #添加均值线和两个标准差线
-geom_vline(aes(xintercept=three_sd_plus), color="red", linetype="dashed", size=1)+
+stat_function(fun = dnorm, args = list(mean = data_mean, sd = data_sd,color ="black", size = 0.001))+
+geom_density(color = "black", size = 0.3)+  #直方图上加密度曲线，也可以用geom_density()
+geom_vline(aes(xintercept=data_mean), color="red", linetype="dashed", size=0.5)+ #添加均值线和两个标准差线
+geom_vline(aes(xintercept=three_sd_plus), color="red", linetype="dashed", size=0.5)+
 annotate(geom="text",fontface="bold",family="Arial",color="black",x=three_sd_plus,y=0.00015,label="25692.47",size=9)+   
  #通过annotate函数添加注释，将geom变量设置为"text"和"rect"分别代表文字与矩形，并且可以调整位置，大小颜色
-annotate(geom="text",fontface="bold",family="Arial",color="black",x=40000,y=0.000220,label="μ+3σ=20070.71+5621.76",size=9)+
+annotate(geom="text",fontface="bold",family="Arial",color="black",x=38000,y=0.000220,label="μ+3σ=20070.71+5621.76",size=9)+
 labs(x="frequency",y = "density")+
 theme_bw()+
 theme(panel.border = element_blank(),panel.grid.major = element_blank(),panel.grid.minor = element_blank(),axis.line = element_line(colour = "black"))+
-theme(axis.text=element_text(size=24,family="Arial",face = "bold"),axis.title=element_text(size=24,family="Arial",face="bold"))
-ggsave(file="braB_density_picture.pdf",plot=p1,width=10,height=8)
+theme(axis.text=element_text(size=30,family="Arial",face = "bold"),axis.title=element_text(size=30,family="Arial",face="bold"))
+ggsave(file="braB_density_picture.pdf",plot=p1,width=11,height=8)
 
 #绘制braZ的正态密度分布直方图
 setwd("D:/WGCNA/rma_WGCNA/condition_three_combine/result")
@@ -1378,18 +1378,18 @@ three_sd_plus1=mean(df1$ratio)+data_sd1*3
 three_sd_plus1  # 25898.77
 
 p2<-ggplot(df1, aes(x = ratio)) +geom_histogram(aes(y =..density..),breaks = seq(min(df1$ratio), max(df1$ratio), length =100),colour ="#C6DBEF", fill ="#08519C", size = 0.1,alpha=0.8) + #使用density代替y轴
-stat_function(fun = dnorm, args = list(mean = data_mean1, sd = data_sd1,color ="black", size = 1))+  #直方图上加密度曲线，也可以用geom_density()
-geom_vline(aes(xintercept=data_mean1), color="red", linetype="dashed", size=1)+ #添加均值线和两个标准差线
-geom_density(color = "black", size = 1)+  #直方图上加密度曲线，也可以用geom_density()
-geom_vline(aes(xintercept=three_sd_plus1), color="red", linetype="dashed", size=1)+
+stat_function(fun = dnorm, args = list(mean = data_mean1, sd = data_sd1,color ="black", size = 0.001))+  #直方图上加密度曲线，也可以用geom_density()
+geom_density(color = "black", size = 0.3)+  #直方图上加密度曲线，也可以用geom_density()
+geom_vline(aes(xintercept=data_mean1), color="red", linetype="dashed", size=0.5)+ #添加均值线和两个标准差线
+geom_vline(aes(xintercept=three_sd_plus1), color="red", linetype="dashed", size=0.5)+
 annotate(geom="text",fontface="bold",family="Arial",color="black",x=three_sd_plus,y=0.00015,label="25692.47",size=9)+   
 #通过annotate函数添加注释，将geom变量设置为"text"和"rect"分别代表文字与矩形，并且可以调整位置，大小颜色
 annotate(geom="text",fontface="bold",family="Arial",color="black",x=40000,y=0.000220,label="μ+3σ=20070.71+5621.76",size=9)+
 labs(x="frequency",y = "density")+
 theme_bw()+
 theme(panel.border = element_blank(),panel.grid.major = element_blank(),panel.grid.minor = element_blank(),axis.line = element_line(colour = "black"))+
-theme(axis.text=element_text(size=24,family="Arial",face = "bold"),axis.title=element_text(size=24,family="Arial",face="bold"))
-ggsave(file="braZ_density_picture.pdf",plot=p2,width=10,height=8)
+theme(axis.text=element_text(size=30,family="Arial",face = "bold"),axis.title=element_text(size=30,family="Arial",face="bold"))
+ggsave(file="braZ_density_picture.pdf",plot=p2,width=12,height=8)
 
 #将两个图合并在一起
 p3<-p1+p2
@@ -1421,6 +1421,18 @@ cat  braZ_two_sigma_neighber_high_fre.tsv | grep "PA" | perl -alne '$_=~/PA(.*?)
 #绘制mean+3个sigma的韦恩图
 cd /mnt/d/WGCNA/venn
 plotr venn braB_three_Pfam_id.tsv braZ_three_Pfam_id.tsv
+library(VennDiagram)
+setwd("D:/WGCNA/venn")
+braB<-read.table("braB_three_Pfam_id.tsv",header=F)
+braZ<-read.table("braZ_three_Pfam_id.tsv",header=F)
+#深红 #E60012  图4
+#深蓝 #348BCC  图4
+library(VennDiagram)
+venn_list <- list(g1 = braB$V1, g2= braZ$V1)
+venn.diagram(venn_list, filename = 'venn2.png', imagetype = 'png', 
+    fill = c('#E60012', '#348BCC'), alpha = 0.8, cat.col = rep('black', 2), 
+    col = 'black', cex = 3, fontfamily = 'Arial', 
+    cat.cex = 1.5, cat.fontfamily = 'Arial')
 
 ```
 
@@ -1496,7 +1508,11 @@ write.table(GO_input, "braB_GO_table.tsv", row.names = FALSE, col.names = TRUE, 
 
 #reorder使纵轴按照go term 和count排序
 library(ggplot2)
+font_add('Arial','/Library/Fonts/Arial.ttf')
+showtext_auto()
+library(patchwork)
 GO_plot<-ggplot(GO_input,aes(x = Count ,y =reorder(Description,Count),shape=ont))+ 
+guides(shape = guide_legend(override.aes = list(size = 10)))+
   geom_point(aes(size=Count,color=p.adjust))+
   scale_colour_gradient(low="blue",high="red")+
   labs(
@@ -1505,12 +1521,24 @@ GO_plot<-ggplot(GO_input,aes(x = Count ,y =reorder(Description,Count),shape=ont)
        x="Gene Count"
       )+
   theme_bw()+
-  theme(
-    axis.text.y = element_text(size = rel(1.8)),
-    axis.title.x = element_text(size=rel(1.8)),
-    axis.title.y = element_blank()
+  theme(panel.grid=element_blank(),
+    legend.text=element_text(size=25,family="Arial",face="bold"),
+    legend.title=element_text(size=30,family="Arial",face="bold"),
+    axis.text=element_text(size=20,family="Arial",face="bold"),
+    axis.title=element_text(size=20,family="Arial",face="bold"),
   )+ scale_size(range=c(5, 10))
-ggsave(file="braB_GO_ggplot.pdf",plot=GO_plot,width=14,height=12)
+ggsave(file="braB_GO_ggplot.pdf",plot=GO_plot,width=16,height=12)
+
+
+
+
+
+ 
+
+
+
+
+
 ```
 
 ## 8.5KEGG富集分析(不能用！！！！！！)
@@ -1984,9 +2012,14 @@ data1<-data1[,-1]
 data1<-as.matrix(data1)
 #载入分类信息
 type<-read.table("braB_braZ_cor_class.tsv",header=T)
+View(type)
 #聚类方法为average,只对基因聚类，分成两个簇,不展示行名,顶部分组信息
-#annotation1 = HeatmapAnnotation(df = data.frame(type = c(rep("braB",21), rep("braZ", 29))))  
-y<-pheatmap(data1,scale="column",show_rownames = T,show_colnames = T,cluster_row = F,cluster_cols = TRUE,border_color = "black",cellwidth = 10,cellheight = 10,clustering_method = "average",cutree_cols =2, annotation_col =type, fontfamily= "Arial",fontface="bold",fontsize=12,color = colorRampPalette(colors = c("#4DAF4A","#FFFFFF","#386CB0"))(100))
+#使用annotation_colors设定注释信息的颜色
+ann_colors = list(
+  type= c(braB_cor = "#E60012",braZ_cor = "#348BCC")
+)
+
+y<-pheatmap(data1,scale="column",show_rownames = T,show_colnames = T,cluster_row = F,cluster_cols = TRUE,border_color = "black",cellwidth = 10,cellheight = 10,clustering_method = "average",cutree_cols =2, annotation_col =type,annotation_colors=ann_colors, fontfamily= "Arial",fontface="bold",fontsize=12,color = colorRampPalette(colors = c("#4DAF4A","#FFFFFF","#984EA3"))(256))
 save_pheatmap_pdf <- function(y, filename, width=7, height=7) {
    stopifnot(!missing(y))
    stopifnot(!missing(filename))
@@ -1996,6 +2029,11 @@ save_pheatmap_pdf <- function(y, filename, width=7, height=7) {
    dev.off()
 }
 save_pheatmap_pdf(y, "braB_braZ_cor_condi.pdf")
+
+#深红 #E60012  图4
+#深蓝 #348BCC  图4
+#绿色 #4DAF4A
+#紫色  984EA3
 ```
 
 ## 11.6 绘制40个条件中braB和braZ的平均基因表达量热图
@@ -2013,7 +2051,7 @@ data<-read.table("braB_braZ_detail_mean_heatmap.tsv ",header=T,row.names=1, sep=
 data<-as.data.frame(data)
 #pheatmap对数据进行z-score仅用参数scale="row"即对行进行标准化
 #热图对行不进行聚类，对列不进行聚类
-x<-pheatmap(data,display_numbers = TRUE,cluster_row = FALSE,cluster_cols = FALSE,border_color = "black",cellwidth = 30,cellheight = 10, fontfamily= "Arial",fontface="bold",fontsize=12,color = colorRampPalette(colors = c("#FF7F00","#FFFFFF","#F781BF"))(100))
+x<-pheatmap(data,display_numbers = TRUE,cluster_row = FALSE,cluster_cols = FALSE,border_color = "black",cellwidth = 30,cellheight = 10, fontfamily= "Arial",fontface="bold",fontsize=12,color = colorRampPalette(colors = c("#FF7F00","#FFFFFF","#F781BF"))(256))
 save_pheatmap_pdf <- function(x, filename, width=7, height=7) {
    stopifnot(!missing(x))
    stopifnot(!missing(filename))
@@ -2023,6 +2061,7 @@ save_pheatmap_pdf <- function(x, filename, width=7, height=7) {
    dev.off()
 }
 save_pheatmap_pdf(x, "braB_braZ_condi.pdf")
+
 
 ```
 
