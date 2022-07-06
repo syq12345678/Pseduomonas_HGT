@@ -449,7 +449,7 @@ cat strains.taxon.tsv | cut -f 4  | nwr append stdin -r class | grep -E "Gammapr
 cat strains.taxon.tsv | cut -f 4  | nwr append stdin -r class | grep  "Gammaproteobacteria" | wc -l
 cat strains.taxon.tsv | cut -f 4  | nwr append stdin -r class | grep "Gammaproteobacteria" | tsv-summarize -g 1 --count | wc -l
 cat strains.taxon.tsv | cut -f 4  | nwr append stdin -r class | grep "Gammaproteobacteria" | nwr append stdin -r family | tsv-summarize -g 3 --count | wc -l
-#统计只有变形菌纲的BCAA拷贝数2134(-6)
+#统计只有变形菌纲的BCAA拷贝数2134(-6)支原体1 芽孢2 金葡3
 cat branched-chain/branched-chain_minevalue.pfam.tsv | cut -f 1 |
 tsv-join -d 1 \
 -f PROTEINS/all.strain.tsv -k 1 \
@@ -817,6 +817,8 @@ brewer.pal(11,"RdBu")  #查看颜色码
 #深蓝 #08519C  
 #浅红 #FCC5C0   braB 
 #浅蓝 #C6DBEF  braZ
+#深红 E60012  图4
+#深蓝 348BCC  图4
 
 #共线性的注意事项
 #将共线性的基因调整到10个以内，铜绿假单胞菌其他菌株都是上下游各5000bp
